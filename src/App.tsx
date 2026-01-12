@@ -22,6 +22,7 @@ import FollowupsPage from "@/pages/FollowupsPage";
 import KnowledgeBasePage from "@/pages/KnowledgeBasePage";
 import SchedulingAIPage from "@/pages/SchedulingAIPage";
 import SettingsPage from "@/pages/SettingsPage";
+import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -195,6 +196,9 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Voice Agent Test - Public route */}
+      <Route path="/voice-agent-test" element={<VoiceAgentTestPage />} />
 
       {/* Redirects */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
