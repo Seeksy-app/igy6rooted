@@ -1,1 +1,4 @@
 project_id = "hogskywqiunvpaseryci"
+
+[functions.integration-proxy]
+verify_jwt = false
