@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Link2, RefreshCw, ExternalLink, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -12,6 +13,30 @@ export default function JobberConnectionPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle OAuth callback results
+  useEffect(() => {
+    const jobberConnected = searchParams.get('jobber_connected');
+    const jobberError = searchParams.get('jobber_error');
+
+    if (jobberConnected === 'true') {
+      toast({
+        title: "Jobber Connected!",
+        description: "Your Jobber account has been successfully connected.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["jobber-connection"] });
+      // Clear the query params
+      setSearchParams({});
+    } else if (jobberError) {
+      toast({
+        variant: "destructive",
+        title: "Connection Failed",
+        description: jobberError,
+      });
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, toast, queryClient]);
 
   const { data: connection, isLoading } = useQuery({
     queryKey: ["jobber-connection", currentOrg?.id],
@@ -45,19 +70,22 @@ export default function JobberConnectionPage() {
   });
 
   const handleConnect = async () => {
-    // In production, this would redirect to the Integration Service OAuth start URL
-    // For now, we'll create a pending connection record
-    if (!connection) {
-      await createConnectionMutation.mutateAsync();
+    if (!currentOrg) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No organization selected",
+      });
+      return;
     }
 
-    toast({
-      title: "Redirecting to Jobber",
-      description: "You'll be redirected to authorize your Jobber account.",
-    });
+    // Build the OAuth start URL
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const redirectUri = encodeURIComponent(window.location.origin + '/jobber-connection');
+    const oauthUrl = `${supabaseUrl}/functions/v1/jobber-oauth-start?org_id=${currentOrg.id}&redirect_uri=${redirectUri}`;
 
-    // Simulated - in production this would be:
-    // window.open(`${INTEGRATION_SERVICE_URL}/jobber/oauth/start?org_id=${currentOrg?.id}&redirect_uri=...`, '_blank');
+    // Redirect to start OAuth flow
+    window.location.href = oauthUrl;
   };
 
   const handleRefresh = async () => {
