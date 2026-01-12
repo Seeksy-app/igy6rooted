@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   ChevronDown,
+  Mic,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
@@ -32,6 +33,7 @@ const navItems = [
   { to: "/booking-logs", icon: FileText, label: "Booking Logs" },
   { to: "/followups", icon: AlertCircle, label: "Follow-ups" },
   { to: "/knowledge-base", icon: HelpCircle, label: "Knowledge Base" },
+  { to: "/voice-agent-test", icon: Mic, label: "Voice Agent Test" },
 ];
 
 export function Sidebar() {
