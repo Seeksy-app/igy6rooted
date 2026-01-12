@@ -109,25 +109,20 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const createOrg = async (name: string): Promise<Org> => {
     if (!user) throw new Error("Must be logged in to create an org");
 
-    // Create org
-    const { data: org, error: orgError } = await supabase
+    // Use the atomic function to create org and add admin in one transaction
+    const { data: newOrgId, error: rpcError } = await supabase
+      .rpc("create_org_with_admin", { org_name: name });
+
+    if (rpcError) throw rpcError;
+
+    // Fetch the newly created org
+    const { data: org, error: fetchError } = await supabase
       .from("orgs")
-      .insert({ name })
-      .select()
+      .select("*")
+      .eq("id", newOrgId)
       .single();
 
-    if (orgError) throw orgError;
-
-    // Add user as admin
-    const { error: memberError } = await supabase
-      .from("team_members")
-      .insert({
-        org_id: org.id,
-        user_id: user.id,
-        role: "admin",
-      });
-
-    if (memberError) throw memberError;
+    if (fetchError) throw fetchError;
 
     await refreshOrgs();
     setCurrentOrg(org);
