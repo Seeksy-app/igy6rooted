@@ -12,6 +12,8 @@ import {
   LogOut,
   ChevronDown,
   Mic,
+  Calendar,
+  ScrollText,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
@@ -19,7 +21,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -33,7 +34,14 @@ const navItems = [
   { to: "/booking-logs", icon: FileText, label: "Booking Logs" },
   { to: "/followups", icon: AlertCircle, label: "Follow-ups" },
   { to: "/knowledge-base", icon: HelpCircle, label: "Knowledge Base" },
-  { to: "/voice-agent-test", icon: Mic, label: "Voice Agent Test" },
+];
+
+const adminItems = [
+  { to: "/admin/integrations/jobber", icon: Link2, label: "Jobber Setup" },
+  { to: "/admin/ai-agent", icon: Bot, label: "AI Agent Config" },
+  { to: "/admin/appointments", icon: Calendar, label: "AI Appointments" },
+  { to: "/admin/logs", icon: ScrollText, label: "Tool Call Logs" },
+  { to: "/voice-agent-test", icon: Mic, label: "Voice Test" },
 ];
 
 export function Sidebar() {
@@ -91,6 +99,22 @@ export function Sidebar() {
             <span>{item.label}</span>
           </NavLink>
         ))}
+        
+        <div className="pt-3 mt-3 border-t border-sidebar-border">
+          <p className="px-3 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Admin</p>
+          {adminItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                cn("nav-item", isActive && "active")
+              }
+            >
+              <item.icon className="h-5 w-5" />
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
       {/* Footer */}

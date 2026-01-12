@@ -14,6 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_appointment_rules: {
+        Row: {
+          business_hours: Json
+          created_at: string
+          default_duration_minutes: number
+          id: string
+          max_days_out: number
+          min_lead_time_minutes: number
+          org_id: string
+          service_type_map: Json
+          timezone: string
+          travel_buffer_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          business_hours?: Json
+          created_at?: string
+          default_duration_minutes?: number
+          id?: string
+          max_days_out?: number
+          min_lead_time_minutes?: number
+          org_id: string
+          service_type_map?: Json
+          timezone?: string
+          travel_buffer_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          business_hours?: Json
+          created_at?: string
+          default_duration_minutes?: number
+          id?: string
+          max_days_out?: number
+          min_lead_time_minutes?: number
+          org_id?: string
+          service_type_map?: Json
+          timezone?: string
+          travel_buffer_minutes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_appointment_rules_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_bookings: {
+        Row: {
+          address: string
+          conversation_id: string | null
+          created_at: string
+          customer_name: string
+          email: string | null
+          id: string
+          jobber_client_id: string | null
+          jobber_job_id: string | null
+          jobber_request_id: string | null
+          jobber_visit_id: string | null
+          notes: string | null
+          org_id: string
+          phone: string
+          service_type: string
+          slot_end: string
+          slot_start: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          conversation_id?: string | null
+          created_at?: string
+          customer_name: string
+          email?: string | null
+          id?: string
+          jobber_client_id?: string | null
+          jobber_job_id?: string | null
+          jobber_request_id?: string | null
+          jobber_visit_id?: string | null
+          notes?: string | null
+          org_id: string
+          phone: string
+          service_type: string
+          slot_end: string
+          slot_start: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          conversation_id?: string | null
+          created_at?: string
+          customer_name?: string
+          email?: string | null
+          id?: string
+          jobber_client_id?: string | null
+          jobber_job_id?: string | null
+          jobber_request_id?: string | null
+          jobber_visit_id?: string | null
+          notes?: string | null
+          org_id?: string
+          phone?: string
+          service_type?: string
+          slot_end?: string
+          slot_start?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_bookings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_tool_call_logs: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          org_id: string
+          request_payload: Json
+          response_payload: Json | null
+          status: string
+          tool_name: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          org_id: string
+          request_payload?: Json
+          response_payload?: Json | null
+          status?: string
+          tool_name: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          org_id?: string
+          request_payload?: Json
+          response_payload?: Json | null
+          status?: string
+          tool_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_tool_call_logs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       availability_rules: {
         Row: {
           allowed_zip_codes: Json
@@ -259,6 +424,53 @@ export type Database = {
           },
           {
             foreignKeyName: "followups_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_jobber_accounts: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          id: string
+          jobber_account_id: string | null
+          org_id: string
+          refresh_token: string | null
+          scopes: string[] | null
+          status: string
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          jobber_account_id?: string | null
+          org_id: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          id?: string
+          jobber_account_id?: string | null
+          org_id?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_jobber_accounts_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "orgs"

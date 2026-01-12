@@ -25,6 +25,12 @@ import SettingsPage from "@/pages/SettingsPage";
 import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import NotFound from "@/pages/NotFound";
 
+// Admin pages
+import JobberIntegrationPage from "@/pages/admin/JobberIntegrationPage";
+import AIAgentPage from "@/pages/admin/AIAgentPage";
+import AppointmentsPage from "@/pages/admin/AppointmentsPage";
+import ToolCallLogsPage from "@/pages/admin/ToolCallLogsPage";
+
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -193,6 +199,40 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin routes */}
+      <Route
+        path="/admin/integrations/jobber"
+        element={
+          <ProtectedRoute>
+            <JobberIntegrationPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/ai-agent"
+        element={
+          <ProtectedRoute>
+            <AIAgentPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/appointments"
+        element={
+          <ProtectedRoute>
+            <AppointmentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/logs"
+        element={
+          <ProtectedRoute>
+            <ToolCallLogsPage />
           </ProtectedRoute>
         }
       />
