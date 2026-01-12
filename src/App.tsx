@@ -12,23 +12,22 @@ import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
 import OnboardingPage from "@/pages/auth/OnboardingPage";
 
-// App pages
-import DashboardPage from "@/pages/DashboardPage";
-import ServicesPage from "@/pages/ServicesPage";
-import AvailabilityPage from "@/pages/AvailabilityPage";
-import JobberConnectionPage from "@/pages/JobberConnectionPage";
-import BookingLogsPage from "@/pages/BookingLogsPage";
-import FollowupsPage from "@/pages/FollowupsPage";
+// AI Platform pages
+import AIControlCenter from "@/pages/AIControlCenter";
+import AIChatPage from "@/pages/AIChatPage";
+import AICallsPage from "@/pages/AICallsPage";
+import AIBookingAssistantPage from "@/pages/AIBookingAssistantPage";
 import KnowledgeBasePage from "@/pages/KnowledgeBasePage";
-import SchedulingAIPage from "@/pages/SchedulingAIPage";
+import IntegrationsPage from "@/pages/IntegrationsPage";
+import MarketingAnalyticsPage from "@/pages/MarketingAnalyticsPage";
+import AIProductivityPage from "@/pages/AIProductivityPage";
+import FollowupsPage from "@/pages/FollowupsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import NotFound from "@/pages/NotFound";
 
 // Admin pages
 import JobberIntegrationPage from "@/pages/admin/JobberIntegrationPage";
-import AIAgentPage from "@/pages/admin/AIAgentPage";
-import AppointmentsPage from "@/pages/admin/AppointmentsPage";
 import ToolCallLogsPage from "@/pages/admin/ToolCallLogsPage";
 
 const queryClient = new QueryClient();
@@ -102,140 +101,25 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/signup"
-        element={
-          <PublicRoute>
-            <SignupPage />
-          </PublicRoute>
-        }
-      />
+      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+      <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+      <Route path="/onboarding" element={<OnboardingRoute><OnboardingPage /></OnboardingRoute>} />
 
-      {/* Onboarding */}
-      <Route
-        path="/onboarding"
-        element={
-          <OnboardingRoute>
-            <OnboardingPage />
-          </OnboardingRoute>
-        }
-      />
-
-      {/* Protected routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/scheduling-ai"
-        element={
-          <ProtectedRoute>
-            <SchedulingAIPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/services"
-        element={
-          <ProtectedRoute>
-            <ServicesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/availability"
-        element={
-          <ProtectedRoute>
-            <AvailabilityPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/jobber"
-        element={
-          <ProtectedRoute>
-            <JobberConnectionPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/booking-logs"
-        element={
-          <ProtectedRoute>
-            <BookingLogsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/followups"
-        element={
-          <ProtectedRoute>
-            <FollowupsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/knowledge-base"
-        element={
-          <ProtectedRoute>
-            <KnowledgeBasePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
+      {/* AI Platform routes */}
+      <Route path="/dashboard" element={<ProtectedRoute><AIControlCenter /></ProtectedRoute>} />
+      <Route path="/ai-chat" element={<ProtectedRoute><AIChatPage /></ProtectedRoute>} />
+      <Route path="/ai-calls" element={<ProtectedRoute><AICallsPage /></ProtectedRoute>} />
+      <Route path="/ai-booking" element={<ProtectedRoute><AIBookingAssistantPage /></ProtectedRoute>} />
+      <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBasePage /></ProtectedRoute>} />
+      <Route path="/integrations" element={<ProtectedRoute><IntegrationsPage /></ProtectedRoute>} />
+      <Route path="/integrations/jobber" element={<ProtectedRoute><JobberIntegrationPage /></ProtectedRoute>} />
+      <Route path="/marketing" element={<ProtectedRoute><MarketingAnalyticsPage /></ProtectedRoute>} />
+      <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
+      <Route path="/followups" element={<ProtectedRoute><FollowupsPage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
       {/* Admin routes */}
-      <Route
-        path="/admin/integrations/jobber"
-        element={
-          <ProtectedRoute>
-            <JobberIntegrationPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/ai-agent"
-        element={
-          <ProtectedRoute>
-            <AIAgentPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/appointments"
-        element={
-          <ProtectedRoute>
-            <AppointmentsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/logs"
-        element={
-          <ProtectedRoute>
-            <ToolCallLogsPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/admin/logs" element={<ProtectedRoute><ToolCallLogsPage /></ProtectedRoute>} />
 
       {/* Voice Agent Test - Public route */}
       <Route path="/voice-agent-test" element={<VoiceAgentTestPage />} />

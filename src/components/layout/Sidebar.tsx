@@ -1,18 +1,16 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
   Bot,
-  Wrench,
-  Clock,
+  MessageSquare,
+  Phone,
+  Calendar,
+  BookOpen,
   Link2,
-  FileText,
-  AlertCircle,
-  HelpCircle,
+  BarChart3,
+  TrendingUp,
   Settings,
   LogOut,
   ChevronDown,
-  Mic,
-  Calendar,
   ScrollText,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,22 +24,19 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/scheduling-ai", icon: Bot, label: "Scheduling AI" },
-  { to: "/services", icon: Wrench, label: "Services" },
-  { to: "/availability", icon: Clock, label: "Availability" },
-  { to: "/jobber", icon: Link2, label: "Jobber Connection" },
-  { to: "/booking-logs", icon: FileText, label: "Booking Logs" },
-  { to: "/followups", icon: AlertCircle, label: "Follow-ups" },
-  { to: "/knowledge-base", icon: HelpCircle, label: "Knowledge Base" },
+  { to: "/dashboard", icon: Bot, label: "AI Control Center" },
+  { to: "/ai-chat", icon: MessageSquare, label: "AI Chat" },
+  { to: "/ai-calls", icon: Phone, label: "AI Calls" },
+  { to: "/ai-booking", icon: Calendar, label: "Booking Assistant" },
+  { to: "/knowledge-base", icon: BookOpen, label: "Knowledge Base" },
+  { to: "/integrations", icon: Link2, label: "Integrations" },
+  { to: "/marketing", icon: BarChart3, label: "Marketing Analytics" },
+  { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
 ];
 
 const adminItems = [
-  { to: "/admin/integrations/jobber", icon: Link2, label: "Jobber Setup" },
-  { to: "/admin/ai-agent", icon: Bot, label: "AI Agent Config" },
-  { to: "/admin/appointments", icon: Calendar, label: "AI Appointments" },
   { to: "/admin/logs", icon: ScrollText, label: "Tool Call Logs" },
-  { to: "/voice-agent-test", icon: Mic, label: "Voice Test" },
+  { to: "/followups", icon: Calendar, label: "Follow-ups" },
 ];
 
 export function Sidebar() {
@@ -54,11 +49,11 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-          <span className="text-lg font-bold text-primary-foreground">R</span>
+          <Bot className="h-5 w-5 text-primary-foreground" />
         </div>
         <div>
           <h1 className="font-semibold text-sidebar-accent-foreground">IGY6 Rooted</h1>
-          <p className="text-xs text-sidebar-foreground">AI Scheduling</p>
+          <p className="text-xs text-sidebar-foreground">AI Platform</p>
         </div>
       </div>
 
