@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Bot, Mic, CheckCircle2, XCircle, Loader2, Settings, Phone, Play, TestTube } from "lucide-react";
+import { Bot, Mic, CheckCircle2, XCircle, Loader2, Settings, Phone, Play, TestTube, Copy, Code } from "lucide-react";
 
 interface AgentConfig {
   greeting: string;
@@ -21,9 +21,9 @@ interface AgentConfig {
 }
 
 interface EndpointStatus {
-  availability: boolean;
-  book: boolean;
-  health: boolean;
+  availability: "untested" | "ok" | "error";
+  book: "untested" | "ok" | "error";
+  health: "untested" | "ok" | "error";
 }
 
 export default function AIAgentPage() {
@@ -32,9 +32,9 @@ export default function AIAgentPage() {
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState<string | null>(null);
   const [endpointStatus, setEndpointStatus] = useState<EndpointStatus>({
-    availability: false,
-    book: false,
-    health: false,
+    availability: "untested",
+    book: "untested",
+    health: "untested",
   });
 
   const [config, setConfig] = useState<AgentConfig>({
@@ -46,25 +46,35 @@ export default function AIAgentPage() {
     fallbackBehavior: "request",
   });
 
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const toolsBaseUrl = `${supabaseUrl}/functions/v1/jobber-api`;
+
   const testEndpoint = async (endpoint: string) => {
+    if (!currentOrg) return;
+    
     setTesting(endpoint);
     try {
-      const { data, error } = await supabase.functions.invoke("integration-proxy", {
-        body: { 
-          action: "health",
-          orgId: currentOrg?.id 
-        },
-      });
+      const response = await fetch(`${toolsBaseUrl}/health?org_id=${currentOrg.id}`);
+      const data = await response.json();
 
-      if (error) throw error;
-
-      setEndpointStatus((prev) => ({ ...prev, [endpoint]: true }));
-      toast({
-        title: "Endpoint OK",
-        description: `${endpoint} endpoint is responding correctly.`,
-      });
+      if (response.ok && data.jobber_connected) {
+        setEndpointStatus((prev) => ({ ...prev, [endpoint]: "ok" }));
+        toast({
+          title: "Endpoint OK",
+          description: `${endpoint} endpoint is responding and Jobber is connected.`,
+        });
+      } else if (response.ok) {
+        setEndpointStatus((prev) => ({ ...prev, [endpoint]: "error" }));
+        toast({
+          variant: "destructive",
+          title: "Jobber Not Connected",
+          description: "Please connect your Jobber account first.",
+        });
+      } else {
+        throw new Error(data.error || "Unknown error");
+      }
     } catch (error) {
-      setEndpointStatus((prev) => ({ ...prev, [endpoint]: false }));
+      setEndpointStatus((prev) => ({ ...prev, [endpoint]: "error" }));
       toast({
         variant: "destructive",
         title: "Endpoint Error",
@@ -73,6 +83,14 @@ export default function AIAgentPage() {
     } finally {
       setTesting(null);
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied",
+      description: "URL copied to clipboard",
+    });
   };
 
   const handleSaveConfig = async () => {
@@ -206,6 +224,56 @@ export default function AIAgentPage() {
         </CardContent>
       </Card>
 
+      {/* Tool Endpoints for ElevenLabs */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Code className="h-5 w-5" />
+            ElevenLabs Tool Endpoints
+          </CardTitle>
+          <CardDescription>
+            Configure these URLs as tools in your ElevenLabs agent
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[
+            { name: "get_availability", method: "POST", path: "/availability", description: "Get available appointment slots" },
+            { name: "book_appointment", method: "POST", path: "/book", description: "Book an appointment" },
+            { name: "health_check", method: "GET", path: "/health", description: "Check Jobber connection status" },
+          ].map((tool) => (
+            <div key={tool.name} className="p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{tool.method}</Badge>
+                  <span className="font-mono font-medium">{tool.name}</span>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={() => copyToClipboard(`${toolsBaseUrl}${tool.path}`)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">{tool.description}</p>
+              <code className="text-xs bg-background px-2 py-1 rounded block overflow-x-auto">
+                {toolsBaseUrl}{tool.path}
+              </code>
+            </div>
+          ))}
+          
+          <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
+            <p className="text-sm font-medium mb-2">Required Headers for Tool Calls:</p>
+            <ul className="text-xs text-muted-foreground space-y-1 font-mono">
+              <li>x-org-id: {currentOrg?.id || "<org_id>"}</li>
+              <li>x-conversation-id: {"<conversation_id>"}</li>
+              <li>x-igy6-timestamp: {"<unix_timestamp>"}</li>
+              <li>x-igy6-signature: {"<hmac_sha256_signature>"}</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Endpoint Status */}
       <Card>
         <CardHeader>
@@ -219,23 +287,25 @@ export default function AIAgentPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {[
-            { key: "health", label: "Health Check", path: "/api/jobber/health" },
-            { key: "availability", label: "Availability", path: "/api/jobber/availability" },
-            { key: "book", label: "Book Appointment", path: "/api/jobber/book" },
+            { key: "health", label: "Health Check", path: "/health" },
+            { key: "availability", label: "Availability", path: "/availability" },
+            { key: "book", label: "Book Appointment", path: "/book" },
           ].map((endpoint) => (
             <div
               key={endpoint.key}
               className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
             >
               <div className="flex items-center gap-3">
-                {endpointStatus[endpoint.key as keyof EndpointStatus] ? (
+                {endpointStatus[endpoint.key as keyof EndpointStatus] === "ok" ? (
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
+                ) : endpointStatus[endpoint.key as keyof EndpointStatus] === "error" ? (
+                  <XCircle className="h-5 w-5 text-destructive" />
                 ) : (
-                  <XCircle className="h-5 w-5 text-muted-foreground" />
+                  <div className="h-5 w-5 rounded-full border-2 border-muted-foreground" />
                 )}
                 <div>
                   <p className="font-medium">{endpoint.label}</p>
-                  <p className="text-xs text-muted-foreground">{endpoint.path}</p>
+                  <p className="text-xs text-muted-foreground font-mono">{toolsBaseUrl}{endpoint.path}</p>
                 </div>
               </div>
               <Button
