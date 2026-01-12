@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.jobber-refresh-token]
 verify_jwt = false
+
+[functions.jobber-api]
+verify_jwt = false
