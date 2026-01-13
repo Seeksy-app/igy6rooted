@@ -94,12 +94,27 @@ export default function IntegrationsPage() {
     
     try {
       if (integrationId === "jobber" && jobberConnection?.status === "connected") {
-        // Test Jobber connection via edge function
-        const { error } = await supabase.functions.invoke("jobber-api", {
-          body: { action: "test", org_id: currentOrg?.id }
-        });
+        // Test Jobber connection via health endpoint
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jobber-api/health?org_id=${currentOrg?.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            }
+          }
+        );
         
-        if (error) throw error;
+        if (!response.ok) {
+          throw new Error(`Edge Function returned a non-2xx status code`);
+        }
+        
+        const data = await response.json();
+        if (!data.jobber_connected) {
+          throw new Error("Jobber connection is not active");
+        }
+        
         toast({ title: "Connection OK", description: "Jobber API is responding." });
       } else if (integrationId === "elevenlabs") {
         // Test ElevenLabs by fetching a token
