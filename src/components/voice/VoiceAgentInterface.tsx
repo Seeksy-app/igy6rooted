@@ -8,7 +8,7 @@ import { Mic, MicOff, Phone, PhoneOff, Volume2, VolumeX, Loader2 } from "lucide-
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-
+import { useOrg } from "@/contexts/OrgContext";
 interface TranscriptEntry {
   id: string;
   role: "user" | "agent";
@@ -24,7 +24,7 @@ export function VoiceAgentInterface() {
   const [currentAgentText, setCurrentAgentText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
+  const { currentOrg } = useOrg();
   const conversation = useConversation({
     onConnect: () => {
       console.log("Connected to ElevenLabs agent");
@@ -103,14 +103,24 @@ export function VoiceAgentInterface() {
   }, [transcripts, currentUserText, currentAgentText]);
 
   const startConversation = useCallback(async () => {
+    if (!currentOrg?.id) {
+      toast({
+        variant: "destructive",
+        title: "No Organization",
+        description: "Please select an organization first.",
+      });
+      return;
+    }
+
     setIsConnecting(true);
     try {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Get token from edge function
+      // Get token from edge function with org_id
       const { data, error } = await supabase.functions.invoke(
-        "elevenlabs-conversation-token"
+        "elevenlabs-conversation-token",
+        { body: { org_id: currentOrg.id } }
       );
 
       if (error) {
@@ -121,10 +131,19 @@ export function VoiceAgentInterface() {
         throw new Error("No token received from server");
       }
 
-      // Start the conversation with WebRTC
+      console.log("Starting conversation with org_id:", currentOrg.id);
+
+      // Start the conversation with WebRTC and dynamic variables for the agent
       await conversation.startSession({
         conversationToken: data.token,
         connectionType: "webrtc",
+        overrides: {
+          agent: {
+            prompt: {
+              prompt: `IMPORTANT: For all tool calls, you MUST include org_id: "${currentOrg.id}" in the request body. This is required for the booking system to work correctly.`,
+            },
+          },
+        },
       });
     } catch (error: any) {
       console.error("Failed to start conversation:", error);
@@ -136,7 +155,7 @@ export function VoiceAgentInterface() {
     } finally {
       setIsConnecting(false);
     }
-  }, [conversation, toast]);
+  }, [conversation, toast, currentOrg]);
 
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
