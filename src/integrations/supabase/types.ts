@@ -478,6 +478,51 @@ export type Database = {
           },
         ]
       }
+      competitor_analyses: {
+        Row: {
+          competitor_name: string
+          created_at: string
+          extracted_pricing: string | null
+          extracted_services: Json | null
+          extracted_unique_selling_points: Json | null
+          id: string
+          last_scraped_at: string | null
+          notes: string | null
+          org_id: string
+          scraped_content: string | null
+          updated_at: string
+          website_url: string
+        }
+        Insert: {
+          competitor_name: string
+          created_at?: string
+          extracted_pricing?: string | null
+          extracted_services?: Json | null
+          extracted_unique_selling_points?: Json | null
+          id?: string
+          last_scraped_at?: string | null
+          notes?: string | null
+          org_id: string
+          scraped_content?: string | null
+          updated_at?: string
+          website_url: string
+        }
+        Update: {
+          competitor_name?: string
+          created_at?: string
+          extracted_pricing?: string | null
+          extracted_services?: Json | null
+          extracted_unique_selling_points?: Json | null
+          id?: string
+          last_scraped_at?: string | null
+          notes?: string | null
+          org_id?: string
+          scraped_content?: string | null
+          updated_at?: string
+          website_url?: string
+        }
+        Relationships: []
+      }
       faq_kb: {
         Row: {
           active: boolean

@@ -54,7 +54,12 @@ import {
   MousePointerClick,
   Eye,
   RefreshCw,
+  Search,
+  Globe,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   BarChart,
   Bar,
@@ -128,6 +133,21 @@ interface MarketingLead {
   created_at: string;
 }
 
+interface CompetitorAnalysis {
+  id: string;
+  org_id: string;
+  competitor_name: string;
+  website_url: string;
+  scraped_content: string | null;
+  extracted_services: string[];
+  extracted_pricing: string | null;
+  extracted_unique_selling_points: string[];
+  notes: string | null;
+  last_scraped_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const priorityColors: Record<string, string> = {
   high: "text-green-600 bg-green-100",
   medium: "text-yellow-600 bg-yellow-100",
@@ -167,8 +187,10 @@ export default function GTMPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isZoneDialogOpen, setIsZoneDialogOpen] = useState(false);
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
+  const [isCompetitorDialogOpen, setIsCompetitorDialogOpen] = useState(false);
   const [editingZone, setEditingZone] = useState<MarketZone | null>(null);
   const [editingCampaign, setEditingCampaign] = useState<MarketingCampaign | null>(null);
+  const [editingCompetitor, setEditingCompetitor] = useState<CompetitorAnalysis | null>(null);
 
   // Zone form state
   const [zoneName, setZoneName] = useState("");
@@ -187,6 +209,12 @@ export default function GTMPage() {
   const [campaignBudget, setCampaignBudget] = useState("");
   const [campaignStatus, setCampaignStatus] = useState("active");
   const [campaignNotes, setCampaignNotes] = useState("");
+
+  // Competitor form state
+  const [competitorName, setCompetitorName] = useState("");
+  const [competitorUrl, setCompetitorUrl] = useState("");
+  const [competitorNotes, setCompetitorNotes] = useState("");
+  const [scrapingCompetitorId, setScrapingCompetitorId] = useState<string | null>(null);
 
   // Fetch market zones
   const { data: zones = [], isLoading: zonesLoading } = useQuery({
@@ -248,6 +276,22 @@ export default function GTMPage() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as MarketingLead[];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Fetch competitor analyses
+  const { data: competitors = [], isLoading: competitorsLoading } = useQuery({
+    queryKey: ["competitor-analyses", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data, error } = await supabase
+        .from("competitor_analyses")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as CompetitorAnalysis[];
     },
     enabled: !!currentOrg,
   });
@@ -392,6 +436,119 @@ export default function GTMPage() {
     },
   });
 
+  // Competitor mutations
+  const saveCompetitorMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentOrg) throw new Error("No organization");
+      const payload = {
+        org_id: currentOrg.id,
+        competitor_name: competitorName,
+        website_url: competitorUrl,
+        notes: competitorNotes || null,
+      };
+      if (editingCompetitor) {
+        const { error } = await supabase.from("competitor_analyses").update(payload).eq("id", editingCompetitor.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("competitor_analyses").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["competitor-analyses"] });
+      toast({ title: editingCompetitor ? "Competitor updated" : "Competitor added" });
+      resetCompetitorForm();
+      setIsCompetitorDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
+  });
+
+  const deleteCompetitorMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("competitor_analyses").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["competitor-analyses"] });
+      toast({ title: "Competitor removed" });
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
+  });
+
+  const scrapeCompetitorMutation = useMutation({
+    mutationFn: async (competitor: CompetitorAnalysis) => {
+      setScrapingCompetitorId(competitor.id);
+      const { data, error } = await supabase.functions.invoke("firecrawl-scrape", {
+        body: { url: competitor.website_url, options: { formats: ["markdown", "links"] } },
+      });
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || "Scrape failed");
+      
+      // Extract content from response
+      const scrapedContent = data.data?.markdown || data.markdown || "";
+      const links = data.data?.links || data.links || [];
+      
+      // Simple extraction of services (look for service-related keywords)
+      const serviceKeywords = ["services", "what we do", "our services", "offerings"];
+      const services: string[] = [];
+      const lines = scrapedContent.split("\n");
+      let inServicesSection = false;
+      for (const line of lines) {
+        const lowerLine = line.toLowerCase();
+        if (serviceKeywords.some(kw => lowerLine.includes(kw))) {
+          inServicesSection = true;
+          continue;
+        }
+        if (inServicesSection && line.startsWith("- ")) {
+          services.push(line.substring(2).trim());
+          if (services.length >= 10) break;
+        }
+        if (inServicesSection && line.startsWith("# ")) {
+          inServicesSection = false;
+        }
+      }
+      
+      // Extract pricing mentions
+      const pricingMatch = scrapedContent.match(/\$[\d,]+(?:\.\d{2})?(?:\s*[-–]\s*\$[\d,]+(?:\.\d{2})?)?|\bfree\b|\bpricing\b/gi);
+      const pricingInfo = pricingMatch ? pricingMatch.slice(0, 5).join(", ") : null;
+      
+      // Extract unique selling points (look for headlines and bold text)
+      const usps = lines
+        .filter(l => l.startsWith("## ") || l.startsWith("### ") || l.includes("**"))
+        .slice(0, 5)
+        .map(l => l.replace(/[#*]/g, "").trim())
+        .filter(l => l.length > 5 && l.length < 100);
+      
+      // Update the competitor record
+      const { error: updateError } = await supabase
+        .from("competitor_analyses")
+        .update({
+          scraped_content: scrapedContent.substring(0, 50000), // Limit content size
+          extracted_services: services,
+          extracted_pricing: pricingInfo,
+          extracted_unique_selling_points: usps,
+          last_scraped_at: new Date().toISOString(),
+        })
+        .eq("id", competitor.id);
+      
+      if (updateError) throw updateError;
+      return { services, pricingInfo, usps };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["competitor-analyses"] });
+      toast({ title: "Competitor website scraped", description: "Analysis complete!" });
+      setScrapingCompetitorId(null);
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Scraping failed", description: error.message });
+      setScrapingCompetitorId(null);
+    },
+  });
+
   const resetZoneForm = () => {
     setZoneName("");
     setZoneZips([]);
@@ -412,6 +569,21 @@ export default function GTMPage() {
     setCampaignStatus("active");
     setCampaignNotes("");
     setEditingCampaign(null);
+  };
+
+  const resetCompetitorForm = () => {
+    setCompetitorName("");
+    setCompetitorUrl("");
+    setCompetitorNotes("");
+    setEditingCompetitor(null);
+  };
+
+  const openEditCompetitorDialog = (competitor: CompetitorAnalysis) => {
+    setEditingCompetitor(competitor);
+    setCompetitorName(competitor.competitor_name);
+    setCompetitorUrl(competitor.website_url);
+    setCompetitorNotes(competitor.notes || "");
+    setIsCompetitorDialogOpen(true);
   };
 
   const openEditZoneDialog = (zone: MarketZone) => {
@@ -502,23 +674,139 @@ export default function GTMPage() {
 
       {/* Tab Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start gap-0 rounded-lg border bg-muted/50 p-1">
-          <TabsTrigger value="overview" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Market Overview
+        <TabsList className="w-full justify-start gap-0 rounded-lg border bg-muted/50 p-1 flex-wrap">
+          <TabsTrigger value="overview" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            Overview
           </TabsTrigger>
-          <TabsTrigger value="campaigns" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+          <TabsTrigger value="competitors" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            Competitors
+          </TabsTrigger>
+          <TabsTrigger value="campaigns" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Campaigns
           </TabsTrigger>
-          <TabsTrigger value="channels" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Channel Performance
+          <TabsTrigger value="channels" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            Channels
           </TabsTrigger>
-          <TabsTrigger value="zones" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Market Zones
+          <TabsTrigger value="zones" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            Zones
           </TabsTrigger>
-          <TabsTrigger value="calculator" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            ROI Calculator
+          <TabsTrigger value="calculator" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            ROI
           </TabsTrigger>
         </TabsList>
+
+        {/* Competitors Tab */}
+        <TabsContent value="competitors" className="mt-6 space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Competitor Analysis
+                </CardTitle>
+                <CardDescription>Scrape competitor websites to analyze their marketing strategies</CardDescription>
+              </div>
+              {isAdmin && (
+                <Dialog open={isCompetitorDialogOpen} onOpenChange={(open) => {
+                  setIsCompetitorDialogOpen(open);
+                  if (!open) resetCompetitorForm();
+                }}>
+                  <DialogTrigger asChild>
+                    <Button><Plus className="mr-2 h-4 w-4" />Add Competitor</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{editingCompetitor ? "Edit" : "Add"} Competitor</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Competitor Name</Label>
+                        <Input value={competitorName} onChange={(e) => setCompetitorName(e.target.value)} placeholder="e.g., ABC Services" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Website URL</Label>
+                        <Input value={competitorUrl} onChange={(e) => setCompetitorUrl(e.target.value)} placeholder="https://competitor.com" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Notes</Label>
+                        <Textarea value={competitorNotes} onChange={(e) => setCompetitorNotes(e.target.value)} placeholder="Notes about this competitor..." rows={2} />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsCompetitorDialogOpen(false)}>Cancel</Button>
+                      <Button onClick={() => saveCompetitorMutation.mutate()} disabled={saveCompetitorMutation.isPending}>
+                        {saveCompetitorMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {editingCompetitor ? "Update" : "Add"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </CardHeader>
+            <CardContent>
+              {competitorsLoading ? (
+                <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+              ) : competitors.length === 0 ? (
+                <div className="text-center py-12">
+                  <Globe className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-lg font-medium">No competitors tracked</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">Add competitors to scrape and analyze their websites.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {competitors.map((c) => (
+                    <Card key={c.id} className="border">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-5 w-5 text-primary" />
+                            <CardTitle className="text-lg">{c.competitor_name}</CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => scrapeCompetitorMutation.mutate(c)} disabled={scrapingCompetitorId === c.id}>
+                              {scrapingCompetitorId === c.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                              {c.last_scraped_at ? "Re-scrape" : "Scrape"}
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => openEditCompetitorDialog(c)}><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => confirm("Delete?") && deleteCompetitorMutation.mutate(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                          </div>
+                        </div>
+                        <a href={c.website_url} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1">
+                          {c.website_url} <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </CardHeader>
+                      <CardContent>
+                        {c.last_scraped_at ? (
+                          <div className="grid gap-4 md:grid-cols-3">
+                            <div>
+                              <h4 className="font-medium mb-2 flex items-center gap-1"><Sparkles className="h-4 w-4" /> Services</h4>
+                              {(c.extracted_services as string[])?.length > 0 ? (
+                                <ul className="text-sm space-y-1">{(c.extracted_services as string[]).map((s, i) => <li key={i}>• {s}</li>)}</ul>
+                              ) : <p className="text-sm text-muted-foreground">No services extracted</p>}
+                            </div>
+                            <div>
+                              <h4 className="font-medium mb-2">Pricing</h4>
+                              <p className="text-sm">{c.extracted_pricing || "No pricing found"}</p>
+                            </div>
+                            <div>
+                              <h4 className="font-medium mb-2">Key Messages</h4>
+                              {(c.extracted_unique_selling_points as string[])?.length > 0 ? (
+                                <ul className="text-sm space-y-1">{(c.extracted_unique_selling_points as string[]).slice(0, 3).map((u, i) => <li key={i}>• {u}</li>)}</ul>
+                              ) : <p className="text-sm text-muted-foreground">No USPs extracted</p>}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Click "Scrape" to analyze this competitor's website</p>
+                        )}
+                        {c.last_scraped_at && <p className="text-xs text-muted-foreground mt-4">Last scraped: {new Date(c.last_scraped_at).toLocaleDateString()}</p>}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Market Overview Tab */}
         <TabsContent value="overview" className="mt-6 space-y-6">
