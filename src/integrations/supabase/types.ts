@@ -570,6 +570,56 @@ export type Database = {
           },
         ]
       }
+      gtm_market_zones: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          lead_score_multiplier: number
+          name: string
+          notes: string | null
+          org_id: string
+          priority: number
+          target_monthly_leads: number | null
+          updated_at: string
+          zip_codes: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lead_score_multiplier?: number
+          name: string
+          notes?: string | null
+          org_id: string
+          priority?: number
+          target_monthly_leads?: number | null
+          updated_at?: string
+          zip_codes?: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lead_score_multiplier?: number
+          name?: string
+          notes?: string | null
+          org_id?: string
+          priority?: number
+          target_monthly_leads?: number | null
+          updated_at?: string
+          zip_codes?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gtm_market_zones_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_jobber_accounts: {
         Row: {
           access_token: string | null
