@@ -33,6 +33,10 @@ import NotFound from "@/pages/NotFound";
 import JobberIntegrationPage from "@/pages/admin/JobberIntegrationPage";
 import ToolCallLogsPage from "@/pages/admin/ToolCallLogsPage";
 
+// OAuth callback pages
+import GoogleAdsCallbackPage from "@/pages/integrations/GoogleAdsCallbackPage";
+import MetaAdsCallbackPage from "@/pages/integrations/MetaAdsCallbackPage";
+
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -117,6 +121,8 @@ function AppRoutes() {
       <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBasePage /></ProtectedRoute>} />
       <Route path="/integrations" element={<ProtectedRoute><IntegrationsPage /></ProtectedRoute>} />
       <Route path="/integrations/jobber" element={<ProtectedRoute><JobberIntegrationPage /></ProtectedRoute>} />
+      <Route path="/integrations/google-ads/callback" element={<GoogleAdsCallbackPage />} />
+      <Route path="/integrations/meta-ads/callback" element={<MetaAdsCallbackPage />} />
       <Route path="/marketing" element={<ProtectedRoute><MarketingAnalyticsPage /></ProtectedRoute>} />
       <Route path="/meta-ads-guide" element={<ProtectedRoute><MetaAdsGuidePage /></ProtectedRoute>} />
       <Route path="/google-ads-guide" element={<ProtectedRoute><GoogleAdsGuidePage /></ProtectedRoute>} />

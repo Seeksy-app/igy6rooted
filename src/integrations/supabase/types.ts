@@ -665,6 +665,65 @@ export type Database = {
           },
         ]
       }
+      integration_ad_accounts: {
+        Row: {
+          access_token: string | null
+          account_id: string | null
+          account_name: string | null
+          connected_at: string | null
+          created_at: string
+          id: string
+          last_error: string | null
+          org_id: string
+          provider: string
+          refresh_token: string | null
+          scopes: string[] | null
+          status: string
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_id?: string | null
+          account_name?: string | null
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          org_id: string
+          provider: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          account_id?: string | null
+          account_name?: string | null
+          connected_at?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          org_id?: string
+          provider?: string
+          refresh_token?: string | null
+          scopes?: string[] | null
+          status?: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_ad_accounts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_jobber_accounts: {
         Row: {
           access_token: string | null
