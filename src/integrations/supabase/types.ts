@@ -14,6 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_activity_events: {
+        Row: {
+          booking_id: string | null
+          conversation_id: string | null
+          created_at: string
+          description: string
+          event_source: string
+          event_type: string
+          id: string
+          metadata: Json
+          org_id: string
+          outcome: string
+        }
+        Insert: {
+          booking_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          description: string
+          event_source: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          org_id: string
+          outcome: string
+        }
+        Update: {
+          booking_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          description?: string
+          event_source?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          org_id?: string
+          outcome?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_activity_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_content: {
+        Row: {
+          agent_system_prompt: string | null
+          business_hours_text: string | null
+          business_name: string
+          business_phone: string | null
+          closing_script: string | null
+          created_at: string
+          emergency_policy: string | null
+          escalation_callback_promise: string | null
+          escalation_transfer_rules: string | null
+          escalation_voicemail_behavior: string | null
+          greeting_script: string | null
+          id: string
+          intake_questions: Json
+          last_published_at: string | null
+          org_id: string
+          pricing_guidance: string | null
+          published_version: number
+          scheduling_blackout_dates: string | null
+          scheduling_intake_questions: string | null
+          scheduling_job_duration_defaults: string | null
+          scheduling_lead_time: string | null
+          scheduling_required_fields: string | null
+          service_area: string | null
+          services_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_system_prompt?: string | null
+          business_hours_text?: string | null
+          business_name?: string
+          business_phone?: string | null
+          closing_script?: string | null
+          created_at?: string
+          emergency_policy?: string | null
+          escalation_callback_promise?: string | null
+          escalation_transfer_rules?: string | null
+          escalation_voicemail_behavior?: string | null
+          greeting_script?: string | null
+          id?: string
+          intake_questions?: Json
+          last_published_at?: string | null
+          org_id: string
+          pricing_guidance?: string | null
+          published_version?: number
+          scheduling_blackout_dates?: string | null
+          scheduling_intake_questions?: string | null
+          scheduling_job_duration_defaults?: string | null
+          scheduling_lead_time?: string | null
+          scheduling_required_fields?: string | null
+          service_area?: string | null
+          services_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_system_prompt?: string | null
+          business_hours_text?: string | null
+          business_name?: string
+          business_phone?: string | null
+          closing_script?: string | null
+          created_at?: string
+          emergency_policy?: string | null
+          escalation_callback_promise?: string | null
+          escalation_transfer_rules?: string | null
+          escalation_voicemail_behavior?: string | null
+          greeting_script?: string | null
+          id?: string
+          intake_questions?: Json
+          last_published_at?: string | null
+          org_id?: string
+          pricing_guidance?: string | null
+          published_version?: number
+          scheduling_blackout_dates?: string | null
+          scheduling_intake_questions?: string | null
+          scheduling_job_duration_defaults?: string | null
+          scheduling_lead_time?: string | null
+          scheduling_required_fields?: string | null
+          service_area?: string | null
+          services_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_content_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_appointment_rules: {
         Row: {
           business_hours: Json

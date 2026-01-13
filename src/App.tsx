@@ -17,11 +17,11 @@ import AIControlCenter from "@/pages/AIControlCenter";
 import AIChatPage from "@/pages/AIChatPage";
 import AICallsPage from "@/pages/AICallsPage";
 import AIBookingAssistantPage from "@/pages/AIBookingAssistantPage";
+import AIVoiceContentPage from "@/pages/AIVoiceContentPage";
 import KnowledgeBasePage from "@/pages/KnowledgeBasePage";
 import IntegrationsPage from "@/pages/IntegrationsPage";
 import MarketingAnalyticsPage from "@/pages/MarketingAnalyticsPage";
 import AIProductivityPage from "@/pages/AIProductivityPage";
-import FollowupsPage from "@/pages/FollowupsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import NotFound from "@/pages/NotFound";
@@ -110,12 +110,12 @@ function AppRoutes() {
       <Route path="/ai-chat" element={<ProtectedRoute><AIChatPage /></ProtectedRoute>} />
       <Route path="/ai-calls" element={<ProtectedRoute><AICallsPage /></ProtectedRoute>} />
       <Route path="/ai-booking" element={<ProtectedRoute><AIBookingAssistantPage /></ProtectedRoute>} />
+      <Route path="/ai-voice-content" element={<ProtectedRoute><AIVoiceContentPage /></ProtectedRoute>} />
       <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBasePage /></ProtectedRoute>} />
       <Route path="/integrations" element={<ProtectedRoute><IntegrationsPage /></ProtectedRoute>} />
       <Route path="/integrations/jobber" element={<ProtectedRoute><JobberIntegrationPage /></ProtectedRoute>} />
       <Route path="/marketing" element={<ProtectedRoute><MarketingAnalyticsPage /></ProtectedRoute>} />
       <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
-      <Route path="/followups" element={<ProtectedRoute><FollowupsPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
       {/* Admin routes */}

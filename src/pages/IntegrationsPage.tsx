@@ -8,14 +8,22 @@ import {
   ExternalLink,
   Settings,
   Plus,
-  Loader2
+  Loader2,
+  Shield,
+  Clock,
+  TestTube
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useOrg } from "@/contexts/OrgContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Integration {
   id: string;
@@ -25,60 +33,105 @@ interface Integration {
   status: "connected" | "pending" | "disconnected" | "coming_soon";
   icon: string;
   configPath?: string;
+  lastSync?: string;
+  scopes?: string[];
 }
 
 export default function IntegrationsPage() {
-  const { currentOrg } = useOrg();
-  const [loading, setLoading] = useState(true);
-  const [jobberStatus, setJobberStatus] = useState<"connected" | "pending" | "disconnected">("disconnected");
+  const { currentOrg, userRole } = useOrg();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const isAdmin = userRole === "admin";
+  
+  const [elevenLabsDialogOpen, setElevenLabsDialogOpen] = useState(false);
+  const [elevenLabsKey, setElevenLabsKey] = useState("");
+  const [elevenLabsAgentId, setElevenLabsAgentId] = useState("");
+  const [testing, setTesting] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (currentOrg) {
-      checkIntegrationStatus();
-    }
-  }, [currentOrg]);
-
-  const checkIntegrationStatus = async () => {
-    if (!currentOrg) return;
-    setLoading(true);
-    try {
-      // Check Jobber connection
-      const { data: jobberData } = await supabase
+  // Fetch Jobber connection status
+  const { data: jobberConnection, isLoading: loadingJobber } = useQuery({
+    queryKey: ["jobber-connection", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return null;
+      const { data } = await supabase
         .from("integration_jobber_accounts")
-        .select("status")
+        .select("*")
         .eq("org_id", currentOrg.id)
-        .single();
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!currentOrg
+  });
 
-      if (jobberData?.status === "connected") {
-        setJobberStatus("connected");
-      } else if (jobberData) {
-        setJobberStatus("pending");
+  const handleConnectJobber = async () => {
+    // Redirect to Jobber OAuth
+    const clientId = import.meta.env.VITE_JOBBER_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/integrations/jobber/callback`;
+    const scopes = "read_clients read_jobs read_schedules write_jobs write_clients";
+    
+    if (!clientId) {
+      toast({
+        variant: "destructive",
+        title: "Configuration Error",
+        description: "Jobber OAuth is not configured. Contact support.",
+      });
+      return;
+    }
+
+    const authUrl = `https://api.getjobber.com/api/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scopes)}&state=${currentOrg?.id}`;
+    window.location.href = authUrl;
+  };
+
+  const testConnection = async (integrationId: string) => {
+    setTesting(integrationId);
+    
+    try {
+      if (integrationId === "jobber" && jobberConnection?.status === "connected") {
+        // Test Jobber connection via edge function
+        const { error } = await supabase.functions.invoke("jobber-api", {
+          body: { action: "test", org_id: currentOrg?.id }
+        });
+        
+        if (error) throw error;
+        toast({ title: "Connection OK", description: "Jobber API is responding." });
+      } else if (integrationId === "elevenlabs") {
+        // Test ElevenLabs by fetching a token
+        const { data, error } = await supabase.functions.invoke("elevenlabs-conversation-token");
+        if (error || !data?.token) throw new Error("Failed to get token");
+        toast({ title: "Connection OK", description: "ElevenLabs API is responding." });
       }
     } catch (error) {
-      console.error("Error checking integrations:", error);
+      toast({
+        variant: "destructive",
+        title: "Connection Failed",
+        description: (error as Error).message
+      });
     } finally {
-      setLoading(false);
+      setTesting(null);
     }
   };
+
+  const loading = loadingJobber;
 
   const integrations: Integration[] = [
     {
       id: "jobber",
       name: "Jobber",
-      description: "Field service management • Scheduling, jobs, and client management",
-      category: "Core",
-      status: jobberStatus,
+      description: "Field service management • Scheduling, jobs, and client data",
+      category: "Core Integration",
+      status: jobberConnection?.status === "connected" ? "connected" : jobberConnection ? "pending" : "disconnected",
       icon: "📋",
-      configPath: "/integrations/jobber"
+      configPath: "/integrations/jobber",
+      lastSync: jobberConnection?.updated_at,
+      scopes: ["read_clients", "read_jobs", "write_jobs"]
     },
     {
       id: "elevenlabs",
       name: "ElevenLabs",
       description: "Conversational AI voice • Powers inbound call handling",
-      category: "AI",
-      status: "connected", // Assume connected if API key is set
+      category: "AI Integration",
+      status: "connected", // Managed via platform secrets
       icon: "🎙️",
-      configPath: "/settings"
     },
     {
       id: "google-analytics",
@@ -174,14 +227,29 @@ export default function IntegrationsPage() {
             <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
           </div>
           <p className="text-muted-foreground">
-            Connect external services & APIs to power your AI platform
+            Connect and manage external services • All credentials stored securely
           </p>
         </div>
-        <Button onClick={checkIntegrationStatus} variant="outline">
+        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["jobber-connection"] })} variant="outline">
           <RefreshCw className="mr-2 h-4 w-4" />
           Refresh Status
         </Button>
       </div>
+
+      {/* Security Notice */}
+      <Card className="bg-muted/30 border-muted">
+        <CardContent className="py-4">
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Your credentials are secure</p>
+              <p className="text-sm text-muted-foreground">
+                API keys and OAuth tokens are encrypted at rest and never exposed in the UI after saving.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Integration Categories */}
       {Object.entries(groupedIntegrations).map(([category, categoryIntegrations]) => (
@@ -207,35 +275,75 @@ export default function IntegrationsPage() {
                     {getStatusBadge(integration.status)}
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
                     {integration.description}
                   </p>
-                  {integration.status !== "coming_soon" && integration.configPath && (
-                    <Button 
-                      variant={integration.status === "connected" ? "outline" : "default"} 
-                      className="w-full" 
-                      asChild
-                    >
-                      <Link to={integration.configPath}>
-                        {integration.status === "connected" ? (
-                          <>
-                            <Settings className="mr-2 h-4 w-4" />
-                            Configure
-                          </>
+                  
+                  {integration.lastSync && integration.status === "connected" && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      Last sync: {new Date(integration.lastSync).toLocaleString()}
+                    </div>
+                  )}
+                  
+                  {integration.status === "connected" && isAdmin && (
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => testConnection(integration.id)}
+                        disabled={testing === integration.id}
+                      >
+                        {testing === integration.id ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         ) : (
-                          <>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Connect
-                          </>
+                          <TestTube className="h-4 w-4 mr-1" />
                         )}
+                        Test
+                      </Button>
+                      {integration.configPath && (
+                        <Button variant="outline" size="sm" className="flex-1" asChild>
+                          <Link to={integration.configPath}>
+                            <Settings className="h-4 w-4 mr-1" />
+                            Configure
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  
+                  {integration.status === "disconnected" && isAdmin && (
+                    <>
+                      {integration.id === "jobber" && (
+                        <Button className="w-full" onClick={handleConnectJobber}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Connect Jobber
+                        </Button>
+                      )}
+                    </>
+                  )}
+                  
+                  {integration.status === "pending" && isAdmin && integration.configPath && (
+                    <Button className="w-full" asChild>
+                      <Link to={integration.configPath}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Complete Setup
                       </Link>
                     </Button>
                   )}
+                  
                   {integration.status === "coming_soon" && (
                     <Button variant="outline" className="w-full" disabled>
                       Coming Soon
                     </Button>
+                  )}
+                  
+                  {!isAdmin && integration.status !== "coming_soon" && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      Admin access required to manage
+                    </p>
                   )}
                 </CardContent>
               </Card>

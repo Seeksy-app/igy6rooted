@@ -10,7 +10,8 @@ import {
   ArrowRight,
   Zap,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Inbox
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
@@ -18,32 +19,84 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useOrg } from "@/contexts/OrgContext";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AIControlCenter() {
   const { currentOrg } = useOrg();
 
-  // Mock data - will be replaced with real queries
-  const aiMetrics = {
-    callsHandled: 156,
-    chatsHandled: 89,
-    bookingsAssisted: 42,
-    leadsQualified: 67,
-    timeSavedHours: 23,
-    conversionRate: 68,
-    costSavings: 1250,
-    avgResponseTime: 1.2,
-  };
+  // Fetch real metrics from ai_activity_events
+  const { data: metrics } = useQuery({
+    queryKey: ["ai-metrics", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return null;
+      
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      const { data: events, error } = await supabase
+        .from("ai_activity_events")
+        .select("event_type, outcome")
+        .eq("org_id", currentOrg.id)
+        .gte("created_at", weekAgo.toISOString());
+      
+      if (error) throw error;
+      
+      const callsHandled = events?.filter(e => e.event_type === "call").length || 0;
+      const chatsHandled = events?.filter(e => e.event_type === "chat").length || 0;
+      const bookingsAssisted = events?.filter(e => e.event_type === "booking" && e.outcome === "success").length || 0;
+      const leadsQualified = events?.filter(e => e.outcome === "qualified").length || 0;
+      
+      return {
+        callsHandled,
+        chatsHandled,
+        bookingsAssisted,
+        leadsQualified,
+        timeSavedHours: Math.round((callsHandled * 5 + chatsHandled * 3) / 60), // Estimate: 5 min per call, 3 min per chat
+        conversionRate: bookingsAssisted > 0 && leadsQualified > 0 ? Math.round((bookingsAssisted / leadsQualified) * 100) : 0,
+        costSavings: Math.round((callsHandled * 5 + chatsHandled * 2)), // Estimate: $5 per call, $2 per chat
+        avgResponseTime: 0, // Would need actual timing data
+      };
+    },
+    enabled: !!currentOrg
+  });
 
-  const recentActivity = [
-    { id: "1", type: "call", description: "Inbound call qualified → Booking assisted", outcome: "success", time: "2 min ago", source: "Voice AI" },
-    { id: "2", type: "chat", description: "Lead qualified via web chat", outcome: "qualified", time: "8 min ago", source: "Chat AI" },
-    { id: "3", type: "call", description: "Customer inquiry → FAQ resolved", outcome: "resolved", time: "15 min ago", source: "Voice AI" },
-    { id: "4", type: "booking", description: "Appointment scheduled via Jobber API", outcome: "success", time: "23 min ago", source: "Booking Assistant" },
-    { id: "5", type: "chat", description: "Complex inquiry → Escalated to human", outcome: "escalated", time: "45 min ago", source: "Chat AI" },
-  ];
+  // Fetch recent activity
+  const { data: recentActivity = [] } = useQuery({
+    queryKey: ["ai-recent-activity", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      
+      const { data, error } = await supabase
+        .from("ai_activity_events")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentOrg
+  });
+
+  // Fetch integration status
+  const { data: jobberConnection } = useQuery({
+    queryKey: ["jobber-status", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return null;
+      const { data } = await supabase
+        .from("integration_jobber_accounts")
+        .select("status")
+        .eq("org_id", currentOrg.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!currentOrg
+  });
 
   const integrationStatus = [
-    { name: "Jobber", status: "connected", label: "Synced" },
+    { name: "Jobber", status: jobberConnection?.status === "connected" ? "connected" : "pending", label: jobberConnection?.status === "connected" ? "Synced" : "Setup Required" },
     { name: "ElevenLabs", status: "connected", label: "Active" },
     { name: "Google Analytics", status: "pending", label: "Setup Required" },
   ];
@@ -74,6 +127,30 @@ export default function AIControlCenter() {
     }
   };
 
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins} min ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${Math.floor(diffHours / 24)}d ago`;
+  };
+
+  const aiMetrics = metrics || {
+    callsHandled: 0,
+    chatsHandled: 0,
+    bookingsAssisted: 0,
+    leadsQualified: 0,
+    timeSavedHours: 0,
+    conversionRate: 0,
+    costSavings: 0,
+    avgResponseTime: 0,
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -85,7 +162,7 @@ export default function AIControlCenter() {
           <h1 className="text-3xl font-bold tracking-tight">AI Control Center</h1>
         </div>
         <p className="text-muted-foreground">
-          Monitor and manage your AI assistants for {currentOrg?.name || "your organization"}
+          Monitor and manage your AI assistants • Powered by ElevenLabs + Jobber API
         </p>
       </div>
 
@@ -95,13 +172,11 @@ export default function AIControlCenter() {
           title="Calls Handled by AI"
           value={aiMetrics.callsHandled}
           icon={Phone}
-          trend={{ value: 18, label: "vs last week" }}
         />
         <StatCard
           title="Chats Handled"
           value={aiMetrics.chatsHandled}
           icon={MessageSquare}
-          trend={{ value: 24, label: "vs last week" }}
         />
         <StatCard
           title="Bookings Assisted"
@@ -114,7 +189,6 @@ export default function AIControlCenter() {
           title="Leads Qualified"
           value={aiMetrics.leadsQualified}
           icon={Users}
-          trend={{ value: 12, label: "vs last week" }}
         />
       </div>
 
@@ -170,7 +244,7 @@ export default function AIControlCenter() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Avg Response Time</p>
-                <p className="text-2xl font-bold">{aiMetrics.avgResponseTime}s</p>
+                <p className="text-2xl font-bold">{aiMetrics.avgResponseTime > 0 ? `${aiMetrics.avgResponseTime}s` : "—"}</p>
                 <p className="text-xs text-muted-foreground">First response</p>
               </div>
             </div>
@@ -194,37 +268,45 @@ export default function AIControlCenter() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      activity.type === "call" ? "bg-primary/15" : 
-                      activity.type === "chat" ? "bg-accent/15" : "bg-success/15"
-                    }`}>
-                      {activity.type === "call" ? (
-                        <Phone className="h-4 w-4 text-primary" />
-                      ) : activity.type === "chat" ? (
-                        <MessageSquare className="h-4 w-4 text-accent" />
-                      ) : (
-                        <Calendar className="h-4 w-4 text-success" />
-                      )}
+            {recentActivity.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Inbox className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground font-medium">No activity yet</p>
+                <p className="text-sm text-muted-foreground">AI activity will appear here as calls and chats are handled</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${
+                        activity.event_type === "call" ? "bg-primary/15" : 
+                        activity.event_type === "chat" ? "bg-accent/15" : "bg-success/15"
+                      }`}>
+                        {activity.event_type === "call" ? (
+                          <Phone className="h-4 w-4 text-primary" />
+                        ) : activity.event_type === "chat" ? (
+                          <MessageSquare className="h-4 w-4 text-accent" />
+                        ) : (
+                          <Calendar className="h-4 w-4 text-success" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground">{activity.event_source}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{activity.description}</p>
-                      <p className="text-xs text-muted-foreground">{activity.source}</p>
+                    <div className="flex items-center gap-3">
+                      {getOutcomeBadge(activity.outcome)}
+                      <span className="text-xs text-muted-foreground">{formatTimeAgo(activity.created_at)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {getOutcomeBadge(activity.outcome)}
-                    <span className="text-xs text-muted-foreground">{activity.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 

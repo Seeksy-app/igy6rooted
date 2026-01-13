@@ -10,17 +10,11 @@ import {
   TrendingUp,
   Settings,
   LogOut,
-  ChevronDown,
   ScrollText,
+  Mic,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -28,6 +22,7 @@ const navItems = [
   { to: "/ai-chat", icon: MessageSquare, label: "AI Chat" },
   { to: "/ai-calls", icon: Phone, label: "AI Calls" },
   { to: "/ai-booking", icon: Calendar, label: "Booking Assistant" },
+  { to: "/ai-voice-content", icon: Mic, label: "AI Voice Content" },
   { to: "/knowledge-base", icon: BookOpen, label: "Knowledge Base" },
   { to: "/integrations", icon: Link2, label: "Integrations" },
   { to: "/marketing", icon: BarChart3, label: "Marketing Analytics" },
@@ -36,13 +31,12 @@ const navItems = [
 
 const adminItems = [
   { to: "/admin/logs", icon: ScrollText, label: "Tool Call Logs" },
-  { to: "/followups", icon: Calendar, label: "Follow-ups" },
 ];
 
 export function Sidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { currentOrg, orgs, setCurrentOrg } = useOrg();
+  const { currentOrg } = useOrg();
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar">
@@ -57,27 +51,13 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Org Selector */}
+      {/* Company Display */}
       <div className="border-b border-sidebar-border p-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex w-full items-center justify-between rounded-lg bg-sidebar-accent px-3 py-2 text-sm transition-colors hover:bg-sidebar-accent/80">
-            <span className="truncate font-medium text-sidebar-accent-foreground">
-              {currentOrg?.name || "Select Organization"}
-            </span>
-            <ChevronDown className="h-4 w-4 text-sidebar-foreground" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            {orgs.map((org) => (
-              <DropdownMenuItem
-                key={org.id}
-                onClick={() => setCurrentOrg(org)}
-                className={cn(currentOrg?.id === org.id && "bg-accent")}
-              >
-                {org.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent px-3 py-2">
+          <span className="truncate text-sm font-medium text-sidebar-accent-foreground">
+            {currentOrg?.name || "IGY6 Rooted"}
+          </span>
+        </div>
       </div>
 
       {/* Navigation */}
