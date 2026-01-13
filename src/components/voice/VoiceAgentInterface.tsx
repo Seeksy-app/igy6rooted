@@ -133,16 +133,12 @@ export function VoiceAgentInterface() {
 
       console.log("Starting conversation with org_id:", currentOrg.id);
 
-      // Start the conversation with WebRTC and dynamic variables for the agent
+      // Start the conversation with WebRTC and pass org_id as dynamic variable
       await conversation.startSession({
         conversationToken: data.token,
         connectionType: "webrtc",
-        overrides: {
-          agent: {
-            prompt: {
-              prompt: `IMPORTANT: For all tool calls, you MUST include org_id: "${currentOrg.id}" in the request body. This is required for the booking system to work correctly.`,
-            },
-          },
+        dynamicVariables: {
+          org_id: currentOrg.id,
         },
       });
     } catch (error: any) {
