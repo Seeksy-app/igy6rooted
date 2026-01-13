@@ -2,81 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
-/* IGY6 Rooted Design System - Dark Enterprise SaaS */
+/* IGY6 Rooted Design System - Light Enterprise SaaS */
 
 @layer base {
   :root {
-    /* Core backgrounds - deep slate */
-    --background: 222 47% 6%;
-    --foreground: 210 20% 95%;
+    /* Core backgrounds - clean white */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
-    /* Cards - slightly elevated */
-    --card: 222 45% 8%;
-    --card-foreground: 210 20% 95%;
+    /* Cards - subtle off-white */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
     /* Popovers */
-    --popover: 222 45% 10%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
     /* Primary - teal/cyan for trust and tech */
-    --primary: 173 80% 45%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 173 80% 40%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary - muted slate */
-    --secondary: 220 25% 15%;
-    --secondary-foreground: 210 20% 85%;
+    /* Secondary - light gray */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
 
     /* Muted surfaces */
-    --muted: 220 20% 12%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    /* Accent - bright teal glow */
+    /* Accent - teal */
     --accent: 173 80% 40%;
-    --accent-foreground: 210 20% 98%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Destructive - warm red */
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive - red */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
     /* Success */
-    --success: 142 70% 45%;
-    --success-foreground: 222 47% 6%;
+    --success: 142 70% 40%;
+    --success-foreground: 0 0% 100%;
 
     /* Warning - amber */
-    --warning: 38 92% 55%;
-    --warning-foreground: 222 47% 6%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 11%;
 
     /* Borders and inputs */
-    --border: 220 20% 18%;
-    --input: 220 20% 14%;
-    --ring: 173 80% 45%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 173 80% 40%;
 
     --radius: 0.75rem;
 
-    /* Sidebar - darker variant */
-    --sidebar-background: 222 50% 5%;
-    --sidebar-foreground: 210 15% 70%;
-    --sidebar-primary: 173 80% 45%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 220 25% 12%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 220 20% 12%;
-    --sidebar-ring: 173 80% 45%;
+    /* Sidebar - light variant */
+    --sidebar-background: 220 14% 97%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 173 80% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 93%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 173 80% 40%;
 
     /* Custom gradients and effects */
-    --gradient-primary: linear-gradient(135deg, hsl(173 80% 45%), hsl(180 70% 35%));
-    --gradient-dark: linear-gradient(180deg, hsl(222 47% 8%), hsl(222 47% 4%));
-    --gradient-glow: radial-gradient(ellipse at center, hsl(173 80% 45% / 0.15), transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(173 80% 40%), hsl(180 70% 35%));
+    --gradient-dark: linear-gradient(180deg, hsl(220 14% 96%), hsl(220 14% 98%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(173 80% 40% / 0.1), transparent 70%);
     
     /* Shadows */
-    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.4);
-    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.5);
-    --shadow-lg: 0 10px 30px hsl(0 0% 0% / 0.6);
-    --shadow-glow: 0 0 30px hsl(173 80% 45% / 0.2);
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.08);
+    --shadow-lg: 0 10px 30px hsl(0 0% 0% / 0.1);
+    --shadow-glow: 0 0 30px hsl(173 80% 40% / 0.15);
   }
 
   .dark {
-    /* Already dark by default */
+    /* Dark mode overrides if needed in future */
   }
 }
 
