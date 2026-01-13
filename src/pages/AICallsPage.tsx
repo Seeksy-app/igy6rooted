@@ -27,54 +27,26 @@ export default function AICallsPage() {
   const { currentOrg } = useOrg();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Mock data
+  // Real data - starts at zero until voice agent handles calls
   const callMetrics = {
-    totalCalls: 156,
-    qualified: 89,
-    bookingsAssisted: 42,
-    escalated: 18,
-    avgDuration: "3:45",
-    successRate: 73,
+    totalCalls: 0,
+    qualified: 0,
+    bookingsAssisted: 0,
+    escalated: 0,
+    avgDuration: "0:00",
+    successRate: 0,
   };
 
-  const recentCalls = [
-    { 
-      id: "1", 
-      caller: "+1 (555) 123-4567", 
-      outcome: "booked",
-      duration: "4:23",
-      time: "15 min ago",
-      transcript: "Customer inquired about lawn mowing services...",
-      sentiment: "positive"
-    },
-    { 
-      id: "2", 
-      caller: "+1 (555) 987-6543", 
-      outcome: "qualified",
-      duration: "2:45",
-      time: "32 min ago",
-      transcript: "Potential client asking about hedge trimming...",
-      sentiment: "positive"
-    },
-    { 
-      id: "3", 
-      caller: "+1 (555) 456-7890", 
-      outcome: "escalated",
-      duration: "5:12",
-      time: "1h ago",
-      transcript: "Complex commercial inquiry requiring human...",
-      sentiment: "neutral"
-    },
-    { 
-      id: "4", 
-      caller: "+1 (555) 321-0987", 
-      outcome: "resolved",
-      duration: "1:58",
-      time: "2h ago",
-      transcript: "FAQ about service areas, answered from KB...",
-      sentiment: "positive"
-    },
-  ];
+  // Empty array - will be populated from database when calls are recorded
+  const recentCalls: Array<{
+    id: string;
+    caller: string;
+    outcome: string;
+    duration: string;
+    time: string;
+    transcript: string;
+    sentiment: string;
+  }> = [];
 
   const getOutcomeBadge = (outcome: string) => {
     switch (outcome) {
@@ -129,7 +101,6 @@ export default function AICallsPage() {
           value={callMetrics.totalCalls}
           subtitle="This week"
           icon={Phone}
-          trend={{ value: 23, label: "vs last week" }}
         />
         <StatCard
           title="Leads Qualified"
@@ -234,41 +205,51 @@ export default function AICallsPage() {
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[400px]">
-              <div className="space-y-3">
-                {recentCalls.map((call) => (
-                  <div
-                    key={call.id}
-                    className="rounded-lg bg-muted/50 p-4 hover:bg-muted/70 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
-                          <Phone className="h-5 w-5" />
+              {recentCalls.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                  <Phone className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                  <p className="text-muted-foreground font-medium">No calls yet</p>
+                  <p className="text-sm text-muted-foreground/70">
+                    Voice agent calls will appear here
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentCalls.map((call) => (
+                    <div
+                      key={call.id}
+                      className="rounded-lg bg-muted/50 p-4 hover:bg-muted/70 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
+                            <Phone className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{call.caller}</p>
+                            <p className="text-xs text-muted-foreground">Duration: {call.duration}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{call.caller}</p>
-                          <p className="text-xs text-muted-foreground">Duration: {call.duration}</p>
+                        <div className="flex items-center gap-2">
+                          {getOutcomeBadge(call.outcome)}
+                          <span className="text-xs text-muted-foreground">{call.time}</span>
                         </div>
                       </div>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-1">{call.transcript}</p>
                       <div className="flex items-center gap-2">
-                        {getOutcomeBadge(call.outcome)}
-                        <span className="text-xs text-muted-foreground">{call.time}</span>
+                        <Button variant="ghost" size="sm">
+                          <Play className="mr-1 h-3 w-3" />
+                          Play
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <FileText className="mr-1 h-3 w-3" />
+                          Transcript
+                        </Button>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-1">{call.transcript}</p>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Play className="mr-1 h-3 w-3" />
-                        Play
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <FileText className="mr-1 h-3 w-3" />
-                        Transcript
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </ScrollArea>
           </CardContent>
         </Card>
@@ -283,23 +264,23 @@ export default function AICallsPage() {
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div className="rounded-lg bg-success/10 border border-success/20 p-4 text-center">
-              <p className="text-3xl font-bold text-success">27%</p>
+              <p className="text-3xl font-bold text-success">0%</p>
               <p className="text-sm text-muted-foreground">Booking Assisted</p>
             </div>
             <div className="rounded-lg bg-primary/10 border border-primary/20 p-4 text-center">
-              <p className="text-3xl font-bold text-primary">30%</p>
+              <p className="text-3xl font-bold text-primary">0%</p>
               <p className="text-sm text-muted-foreground">Lead Qualified</p>
             </div>
             <div className="rounded-lg bg-muted border border-border p-4 text-center">
-              <p className="text-3xl font-bold">25%</p>
+              <p className="text-3xl font-bold">0%</p>
               <p className="text-sm text-muted-foreground">FAQ Resolved</p>
             </div>
             <div className="rounded-lg bg-warning/10 border border-warning/20 p-4 text-center">
-              <p className="text-3xl font-bold text-warning">12%</p>
+              <p className="text-3xl font-bold text-warning">0%</p>
               <p className="text-sm text-muted-foreground">Escalated</p>
             </div>
             <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-center">
-              <p className="text-3xl font-bold text-destructive">6%</p>
+              <p className="text-3xl font-bold text-destructive">0%</p>
               <p className="text-sm text-muted-foreground">Dropped</p>
             </div>
           </div>
