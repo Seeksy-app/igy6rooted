@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -25,7 +27,15 @@ import {
   ShoppingBag,
   Users,
   MousePointer,
+  Save,
+  Loader2,
+  FolderOpen,
+  Trash2,
 } from "lucide-react";
+import { useOrg } from "@/contexts/OrgContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChecklistItem {
   id: string;
@@ -46,6 +56,15 @@ interface AdType {
   description: string;
   icon: React.ReactNode;
   checklist: ChecklistSection[];
+}
+
+interface SavedCampaign {
+  id: string;
+  name: string;
+  ad_type: string;
+  checked_items: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 const adTypes: AdType[] = [
@@ -380,8 +399,101 @@ const adTypes: AdType[] = [
 ];
 
 export default function MetaAdsGuidePage() {
+  const { currentOrg } = useOrg();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const [selectedAdType, setSelectedAdType] = useState<string>("");
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const [campaignName, setCampaignName] = useState<string>("");
+  const [currentCampaignId, setCurrentCampaignId] = useState<string | null>(null);
+
+  // Fetch saved campaigns
+  const { data: savedCampaigns = [] } = useQuery({
+    queryKey: ["meta-ad-campaigns", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data, error } = await supabase
+        .from("meta_ad_campaigns")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return (data || []) as SavedCampaign[];
+    },
+    enabled: !!currentOrg
+  });
+
+  // Save campaign mutation
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentOrg || !selectedAdType || !campaignName.trim()) {
+        throw new Error("Please enter a campaign name");
+      }
+      
+      const payload = {
+        org_id: currentOrg.id,
+        name: campaignName.trim(),
+        ad_type: selectedAdType,
+        checked_items: Array.from(checkedItems),
+      };
+
+      if (currentCampaignId) {
+        const { error } = await supabase
+          .from("meta_ad_campaigns")
+          .update(payload)
+          .eq("id", currentCampaignId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("meta_ad_campaigns")
+          .insert(payload)
+          .select()
+          .single();
+        if (error) throw error;
+        setCurrentCampaignId(data.id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["meta-ad-campaigns"] });
+      toast({ title: "Saved", description: "Campaign saved successfully" });
+    },
+    onError: (error) => {
+      toast({ variant: "destructive", title: "Error", description: (error as Error).message });
+    }
+  });
+
+  // Delete campaign mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("meta_ad_campaigns")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["meta-ad-campaigns"] });
+      if (currentCampaignId) {
+        resetForm();
+      }
+      toast({ title: "Deleted", description: "Campaign deleted" });
+    }
+  });
+
+  const loadCampaign = (campaign: SavedCampaign) => {
+    setCurrentCampaignId(campaign.id);
+    setCampaignName(campaign.name);
+    setSelectedAdType(campaign.ad_type);
+    setCheckedItems(new Set(campaign.checked_items || []));
+  };
+
+  const resetForm = () => {
+    setCurrentCampaignId(null);
+    setCampaignName("");
+    setSelectedAdType("");
+    setCheckedItems(new Set());
+  };
 
   const selectedAd = adTypes.find((ad) => ad.id === selectedAdType);
 
@@ -423,45 +535,123 @@ export default function MetaAdsGuidePage() {
         </p>
       </div>
 
+      {/* Saved Campaigns */}
+      {savedCampaigns.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FolderOpen className="h-5 w-5 text-primary" />
+              Saved Campaigns
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {savedCampaigns.map((campaign) => (
+                <div
+                  key={campaign.id}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                    currentCampaignId === campaign.id
+                      ? "border-primary bg-primary/10"
+                      : "border-border hover:bg-muted/50"
+                  }`}
+                  onClick={() => loadCampaign(campaign)}
+                >
+                  <span className="text-sm font-medium">{campaign.name}</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {adTypes.find(t => t.id === campaign.ad_type)?.name || campaign.ad_type}
+                  </Badge>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteMutation.mutate(campaign.id);
+                    }}
+                    className="ml-1 p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Ad Type Selector */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Plus className="h-5 w-5 text-primary" />
-            New Meta Ad Campaign
+            {currentCampaignId ? "Edit Campaign" : "New Meta Ad Campaign"}
           </CardTitle>
           <CardDescription>
-            Choose the type of Meta ad you want to create
+            {currentCampaignId ? "Update your campaign settings" : "Choose the type of Meta ad you want to create"}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {/* Campaign Name */}
+          <div className="space-y-2">
+            <Label htmlFor="campaign-name">Campaign Name</Label>
+            <Input
+              id="campaign-name"
+              value={campaignName}
+              onChange={(e) => setCampaignName(e.target.value)}
+              placeholder="e.g., Spring Lead Gen, Summer Promo..."
+              className="max-w-md"
+            />
+          </div>
+
+          {/* Ad Type Selection */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Select value={selectedAdType} onValueChange={setSelectedAdType}>
-              <SelectTrigger className="w-full sm:w-[300px] bg-background">
-                <SelectValue placeholder="Select ad type..." />
-              </SelectTrigger>
-              <SelectContent className="bg-background border border-border shadow-lg z-50">
-                {adTypes.map((adType) => (
-                  <SelectItem key={adType.id} value={adType.id}>
-                    <div className="flex items-center gap-2">
-                      {adType.icon}
-                      <span>{adType.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label>Ad Type</Label>
+              <Select value={selectedAdType} onValueChange={setSelectedAdType}>
+                <SelectTrigger className="w-full sm:w-[300px] bg-background">
+                  <SelectValue placeholder="Select ad type..." />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border shadow-lg z-50">
+                  {adTypes.map((adType) => (
+                    <SelectItem key={adType.id} value={adType.id}>
+                      <div className="flex items-center gap-2">
+                        {adType.icon}
+                        <span>{adType.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          {selectedAd && (
+            <p className="text-sm text-muted-foreground">
+              {selectedAd.description}
+            </p>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button 
+              onClick={() => saveMutation.mutate()}
+              disabled={!selectedAdType || !campaignName.trim() || saveMutation.isPending}
+            >
+              {saveMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              {currentCampaignId ? "Update Campaign" : "Save Campaign"}
+            </Button>
             {selectedAdType && (
               <Button variant="outline" onClick={resetChecklist}>
                 Reset Checklist
               </Button>
             )}
+            {currentCampaignId && (
+              <Button variant="ghost" onClick={resetForm}>
+                Start New Campaign
+              </Button>
+            )}
           </div>
-          {selectedAd && (
-            <p className="text-sm text-muted-foreground mt-3">
-              {selectedAd.description}
-            </p>
-          )}
         </CardContent>
       </Card>
 
