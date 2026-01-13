@@ -25,56 +25,25 @@ export default function AIChatPage() {
   const { currentOrg } = useOrg();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Mock data
+  // Real data - starts at zero until chat sessions occur
   const chatMetrics = {
-    totalChats: 89,
-    leadsQualified: 34,
-    questionsAnswered: 156,
-    avgResponseTime: 0.8,
+    totalChats: 0,
+    leadsQualified: 0,
+    questionsAnswered: 0,
+    avgResponseTime: 0,
   };
 
-  const recentChats = [
-    { 
-      id: "1", 
-      visitor: "John D.", 
-      intent: "Service inquiry", 
-      outcome: "qualified",
-      messages: 8,
-      duration: "4m 23s",
-      time: "10 min ago",
-      summary: "Asked about lawn mowing services, qualified for residential package"
-    },
-    { 
-      id: "2", 
-      visitor: "Sarah M.", 
-      intent: "Pricing question", 
-      outcome: "answered",
-      messages: 4,
-      duration: "1m 45s",
-      time: "25 min ago",
-      summary: "FAQ about pricing, resolved from knowledge base"
-    },
-    { 
-      id: "3", 
-      visitor: "Mike R.", 
-      intent: "Booking request", 
-      outcome: "booking_assisted",
-      messages: 12,
-      duration: "6m 12s",
-      time: "1h ago",
-      summary: "Wanted to schedule hedge trimming, transferred to booking assistant"
-    },
-    { 
-      id: "4", 
-      visitor: "Anonymous", 
-      intent: "Complex inquiry", 
-      outcome: "escalated",
-      messages: 6,
-      duration: "3m 05s",
-      time: "2h ago",
-      summary: "Commercial property question, escalated to human agent"
-    },
-  ];
+  // Empty array - will be populated from database when chats are recorded
+  const recentChats: Array<{
+    id: string;
+    visitor: string;
+    intent: string;
+    outcome: string;
+    messages: number;
+    duration: string;
+    time: string;
+    summary: string;
+  }> = [];
 
   const getOutcomeBadge = (outcome: string) => {
     switch (outcome) {
@@ -113,7 +82,6 @@ export default function AIChatPage() {
           value={chatMetrics.totalChats}
           subtitle="This week"
           icon={MessageSquare}
-          trend={{ value: 15, label: "vs last week" }}
         />
         <StatCard
           title="Leads Qualified"
@@ -193,36 +161,46 @@ export default function AIChatPage() {
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[400px]">
-              <div className="space-y-3">
-                {recentChats.map((chat) => (
-                  <div
-                    key={chat.id}
-                    className="rounded-lg bg-muted/50 p-4 hover:bg-muted/70 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-medium text-primary">
-                          <User className="h-4 w-4" />
+              {recentChats.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground/30 mb-4" />
+                  <p className="text-muted-foreground font-medium">No chat sessions yet</p>
+                  <p className="text-sm text-muted-foreground/70">
+                    AI chat conversations will appear here
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentChats.map((chat) => (
+                    <div
+                      key={chat.id}
+                      className="rounded-lg bg-muted/50 p-4 hover:bg-muted/70 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-sm font-medium text-primary">
+                            <User className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{chat.visitor}</p>
+                            <p className="text-xs text-muted-foreground">{chat.intent}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{chat.visitor}</p>
-                          <p className="text-xs text-muted-foreground">{chat.intent}</p>
+                        <div className="flex items-center gap-2">
+                          {getOutcomeBadge(chat.outcome)}
+                          <span className="text-xs text-muted-foreground">{chat.time}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {getOutcomeBadge(chat.outcome)}
-                        <span className="text-xs text-muted-foreground">{chat.time}</span>
+                      <p className="text-sm text-muted-foreground mb-2">{chat.summary}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{chat.messages} messages</span>
+                        <span>•</span>
+                        <span>{chat.duration}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">{chat.summary}</p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>{chat.messages} messages</span>
-                      <span>•</span>
-                      <span>{chat.duration}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </ScrollArea>
           </CardContent>
         </Card>
@@ -237,19 +215,19 @@ export default function AIChatPage() {
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-lg bg-muted/50 p-4 text-center">
-              <p className="text-3xl font-bold text-success">92%</p>
+              <p className="text-3xl font-bold text-success">0%</p>
               <p className="text-sm text-muted-foreground">Intent Accuracy</p>
             </div>
             <div className="rounded-lg bg-muted/50 p-4 text-center">
-              <p className="text-3xl font-bold text-primary">78%</p>
+              <p className="text-3xl font-bold text-primary">0%</p>
               <p className="text-sm text-muted-foreground">Self-Service Resolution</p>
             </div>
             <div className="rounded-lg bg-muted/50 p-4 text-center">
-              <p className="text-3xl font-bold text-warning">12%</p>
+              <p className="text-3xl font-bold text-warning">0%</p>
               <p className="text-sm text-muted-foreground">Escalation Rate</p>
             </div>
             <div className="rounded-lg bg-muted/50 p-4 text-center">
-              <p className="text-3xl font-bold">4.6/5</p>
+              <p className="text-3xl font-bold">0/5</p>
               <p className="text-sm text-muted-foreground">Visitor Satisfaction</p>
             </div>
           </div>
