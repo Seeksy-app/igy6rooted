@@ -2,13 +2,21 @@
 
 This document describes how to configure the ElevenLabs Conversational AI agent to use the Jobber scheduling tools.
 
+## ⚠️ CRITICAL: org_id Requirement
+
+**The `org_id` parameter is REQUIRED for all tool calls.** Without it, bookings will fail silently.
+
+The org_id is injected into the agent's prompt when a conversation starts. The agent must extract and include this value in every tool call.
+
+---
+
 ## Base Configuration
 
 The agent should be configured in the ElevenLabs web console with the following tools:
 
 ### Tool 1: get_availability
 
-**Description**: Get available appointment slots for a service type and location.
+**Description**: Get available appointment slots for a service type and location. You MUST include the org_id in every call.
 
 **HTTP Configuration**:
 - Method: `POST`
@@ -17,29 +25,25 @@ The agent should be configured in the ElevenLabs web console with the following 
 **Headers**:
 ```
 Content-Type: application/json
-x-org-id: {{ORG_ID}}
-x-conversation-id: {{conversation_id}}
-x-igy6-timestamp: {{current_timestamp}}
-x-igy6-signature: {{hmac_signature}}
 ```
 
 **Parameters**:
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
+| org_id | string | **YES** | Organization ID (provided in system prompt) |
 | service_type | string | Yes | Type of service (e.g., "lawn_mowing", "landscaping") |
 | zip | string | Yes | ZIP code for the service location |
 | date_from | string | Yes | Start date in ISO 8601 format |
 | date_to | string | Yes | End date in ISO 8601 format |
-| org_id | string | Yes | Organization ID |
 
 **Example Request**:
 ```json
 {
+  "org_id": "ea652662-8a3e-424d-80a0-305e491981b9",
   "service_type": "lawn_mowing",
   "zip": "78701",
   "date_from": "2026-01-15T00:00:00Z",
-  "date_to": "2026-01-17T23:59:59Z",
-  "org_id": "your-org-uuid"
+  "date_to": "2026-01-17T23:59:59Z"
 }
 ```
 
@@ -61,7 +65,7 @@ x-igy6-signature: {{hmac_signature}}
 
 ### Tool 2: book_appointment
 
-**Description**: Book an appointment for a customer at a specific time slot.
+**Description**: Book an appointment for a customer at a specific time slot. You MUST include the org_id in every call.
 
 **HTTP Configuration**:
 - Method: `POST`
@@ -70,15 +74,12 @@ x-igy6-signature: {{hmac_signature}}
 **Headers**:
 ```
 Content-Type: application/json
-x-org-id: {{ORG_ID}}
-x-conversation-id: {{conversation_id}}
-x-igy6-timestamp: {{current_timestamp}}
-x-igy6-signature: {{hmac_signature}}
 ```
 
 **Parameters**:
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
+| org_id | string | **YES** | Organization ID (provided in system prompt) |
 | customer_name | string | Yes | Full name of the customer |
 | phone | string | Yes | Customer phone number |
 | email | string | No | Customer email address |
@@ -87,11 +88,11 @@ x-igy6-signature: {{hmac_signature}}
 | slot_start | string | Yes | Start time in ISO 8601 format |
 | slot_end | string | Yes | End time in ISO 8601 format |
 | notes | string | No | Additional notes or instructions |
-| org_id | string | Yes | Organization ID |
 
 **Example Request**:
 ```json
 {
+  "org_id": "ea652662-8a3e-424d-80a0-305e491981b9",
   "customer_name": "John Smith",
   "phone": "512-555-1234",
   "email": "john@example.com",
@@ -99,8 +100,7 @@ x-igy6-signature: {{hmac_signature}}
   "address": "123 Main St, Austin, TX 78701",
   "slot_start": "2026-01-15T09:00:00Z",
   "slot_end": "2026-01-15T11:00:00Z",
-  "notes": "Gate code is 1234",
-  "org_id": "your-org-uuid"
+  "notes": "Gate code is 1234"
 }
 ```
 
@@ -144,6 +144,8 @@ Add this to your ElevenLabs agent system prompt:
 ```
 You are an AI scheduling assistant for IGY6 Rooted, a lawn care and landscaping company.
 
+CRITICAL: You will receive an org_id in your initial prompt. You MUST include this org_id in EVERY tool call you make. Without it, bookings will fail.
+
 Your primary job is to help callers schedule appointments. Follow these steps:
 
 1. GREET the caller warmly and ask how you can help
@@ -151,7 +153,7 @@ Your primary job is to help callers schedule appointments. Follow these steps:
    - What service do they need?
    - What is their address or ZIP code?
    - When would they prefer to schedule?
-3. CHECK AVAILABILITY using the get_availability tool
+3. CHECK AVAILABILITY using the get_availability tool (include org_id!)
 4. OFFER 2-3 available time slots
 5. CONFIRM the caller's choice
 6. COLLECT their information:
@@ -159,7 +161,7 @@ Your primary job is to help callers schedule appointments. Follow these steps:
    - Phone number (confirm the one they're calling from)
    - Email (optional)
    - Any special instructions or gate codes
-7. BOOK the appointment using the book_appointment tool
+7. BOOK the appointment using the book_appointment tool (include org_id!)
 8. CONFIRM the booking with date, time, and what to expect
 
 If booking fails or no slots are available:
