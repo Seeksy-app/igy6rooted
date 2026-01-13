@@ -64,22 +64,29 @@ export default function IntegrationsPage() {
   });
 
   const handleConnectJobber = async () => {
-    // Redirect to Jobber OAuth
-    const clientId = import.meta.env.VITE_JOBBER_CLIENT_ID;
-    const redirectUri = `${window.location.origin}/integrations/jobber/callback`;
-    const scopes = "read_clients read_jobs read_schedules write_jobs write_clients";
-    
-    if (!clientId) {
+    if (!currentOrg) {
       toast({
         variant: "destructive",
-        title: "Configuration Error",
-        description: "Jobber OAuth is not configured. Contact support.",
+        title: "Error",
+        description: "No organization selected.",
       });
       return;
     }
 
-    const authUrl = `https://api.getjobber.com/api/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scopes)}&state=${currentOrg?.id}`;
-    window.location.href = authUrl;
+    try {
+      // Use the edge function to initiate OAuth (it has access to server-side secrets)
+      const redirectUri = `${window.location.origin}/integrations/jobber/callback`;
+      const oauthStartUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jobber-oauth-start?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      
+      // Redirect to the edge function which will then redirect to Jobber
+      window.location.href = oauthStartUrl;
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Connection Error",
+        description: "Failed to start Jobber OAuth. Please try again.",
+      });
+    }
   };
 
   const testConnection = async (integrationId: string) => {
