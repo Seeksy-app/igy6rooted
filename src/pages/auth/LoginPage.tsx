@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,14 +35,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="glass-panel w-full max-w-md p-8">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
+      <div className="w-full max-w-md rounded-xl border bg-card p-8 shadow-lg">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary glow-primary">
-            <span className="text-2xl font-bold text-primary-foreground">R</span>
-          </div>
-          <h1 className="text-2xl font-bold">Welcome back</h1>
+          <img 
+            src={logo} 
+            alt="IGY6 Rooted" 
+            className="mx-auto mb-6 h-20 w-auto"
+          />
+          <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
           <p className="mt-1 text-muted-foreground">
             Sign in to your IGY6 Rooted account
           </p>
@@ -80,7 +83,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don't have an account?{" "}
-          <Link to="/signup" className="font-medium text-primary hover:underline">
+          <Link to="/signup" className="font-medium text-accent hover:underline">
             Create one
           </Link>
         </p>

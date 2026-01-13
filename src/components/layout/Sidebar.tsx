@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { to: "/dashboard", icon: Bot, label: "AI Control Center" },
@@ -48,13 +49,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-          <Bot className="h-5 w-5 text-primary-foreground" />
-        </div>
-        <div>
-          <h1 className="font-semibold text-sidebar-accent-foreground">IGY6 Rooted</h1>
-          <p className="text-xs text-sidebar-foreground">AI Platform</p>
-        </div>
+        <img src={logo} alt="IGY6 Rooted" className="h-10 w-auto" />
       </div>
 
       {/* Company Display */}
