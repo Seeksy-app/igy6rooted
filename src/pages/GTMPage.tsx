@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/contexts/OrgContext";
@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -30,13 +31,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Target,
   Plus,
   Trash2,
   Edit,
   Loader2,
   TrendingUp,
-  Star,
   X,
   DollarSign,
   Users,
@@ -44,6 +51,9 @@ import {
   Settings,
   Calculator,
   Megaphone,
+  MousePointerClick,
+  Eye,
+  RefreshCw,
 } from "lucide-react";
 import {
   BarChart,
@@ -57,9 +67,9 @@ import {
   Pie,
   Cell,
   Legend,
+  LineChart,
+  Line,
 } from "recharts";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
 
 interface MarketZone {
   id: string;
@@ -75,10 +85,64 @@ interface MarketZone {
   updated_at: string;
 }
 
+interface MarketingCampaign {
+  id: string;
+  org_id: string;
+  name: string;
+  channel: string;
+  campaign_type: string;
+  status: string;
+  budget: number;
+  start_date: string | null;
+  end_date: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+interface MarketingMetric {
+  id: string;
+  org_id: string;
+  campaign_id: string | null;
+  channel: string;
+  metric_date: string;
+  impressions: number;
+  clicks: number;
+  leads: number;
+  conversions: number;
+  spend: number;
+  revenue: number;
+}
+
+interface MarketingLead {
+  id: string;
+  org_id: string;
+  campaign_id: string | null;
+  channel: string;
+  source: string | null;
+  customer_name: string | null;
+  status: string;
+  lead_score: number;
+  converted_at: string | null;
+  conversion_value: number | null;
+  zip_code: string | null;
+  created_at: string;
+}
+
 const priorityColors: Record<string, string> = {
   high: "text-green-600 bg-green-100",
   medium: "text-yellow-600 bg-yellow-100",
   low: "text-red-600 bg-red-100",
+};
+
+const CHANNEL_COLORS: Record<string, string> = {
+  "google_ads": "#4285F4",
+  "meta_ads": "#1877F2",
+  "social_media": "#E1306C",
+  "referral": "#43a047",
+  "direct": "#fb8c00",
+  "door_to_door": "#9c27b0",
+  "email": "#00bcd4",
+  "other": "#757575",
 };
 
 function getPriorityLabel(priority: number): { label: string; color: string } {
@@ -87,37 +151,12 @@ function getPriorityLabel(priority: number): { label: string; color: string } {
   return { label: "Low", color: priorityColors.low };
 }
 
-// Stat card data for Market Overview
-const marketOverviewStats = [
-  { label: "Total Service Area", value: "24", suffix: "ZIP Codes", color: "text-primary" },
-  { label: "Monthly Leads", value: "156", suffix: "Active opportunities", color: "text-green-600" },
-  { label: "Conversion Rate", value: "23%", suffix: "Avg booking rate", color: "text-primary" },
-  { label: "Market Value", value: "$184K", suffix: "Monthly potential", color: "text-green-600" },
-];
-
-// Chart data
-const topMarketsData = [
-  { name: "Downtown", leads: 45, booked: 12, revenue: 28000 },
-  { name: "Suburbs North", leads: 38, booked: 10, revenue: 24000 },
-  { name: "East Side", leads: 32, booked: 8, revenue: 19000 },
-  { name: "West End", leads: 28, booked: 7, revenue: 16000 },
-  { name: "Industrial", leads: 13, booked: 3, revenue: 8000 },
-];
-
-const segmentData = [
-  { name: "Residential", value: 45, color: "#1e88e5" },
-  { name: "Commercial", value: 28, color: "#43a047" },
-  { name: "Property Mgmt", value: 17, color: "#fb8c00" },
-  { name: "Referrals", value: 10, color: "#e53935" },
-];
-
-const channelPerformance = [
-  { name: "Google Ads", reach: 45, conversion: 8, cost: "$$" },
-  { name: "Social Media", reach: 35, conversion: 12, cost: "$$" },
-  { name: "Door Hangers", reach: 28, conversion: 18, cost: "$$$" },
-  { name: "Referral Program", reach: 15, conversion: 22, cost: "$" },
-  { name: "Home Shows", reach: 12, conversion: 15, cost: "$$$" },
-];
+function formatChannel(channel: string): string {
+  return channel
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export default function GTMPage() {
   const { currentOrg, userRole } = useOrg();
@@ -126,18 +165,12 @@ export default function GTMPage() {
   const isAdmin = userRole === "admin";
 
   const [activeTab, setActiveTab] = useState("overview");
-  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
   const [isZoneDialogOpen, setIsZoneDialogOpen] = useState(false);
+  const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
   const [editingZone, setEditingZone] = useState<MarketZone | null>(null);
+  const [editingCampaign, setEditingCampaign] = useState<MarketingCampaign | null>(null);
 
-  // ROI Calculator state
-  const [channels, setChannels] = useState([
-    { name: "Google Ads", spend: 3000, leads: 85, conversions: 8, avgValue: 1200 },
-    { name: "Social Media", spend: 1500, leads: 45, conversions: 6, avgValue: 900 },
-    { name: "Door-to-Door", spend: 2000, leads: 55, conversions: 12, avgValue: 1100 },
-  ]);
-
-  // Form state
+  // Zone form state
   const [zoneName, setZoneName] = useState("");
   const [zoneZips, setZoneZips] = useState<string[]>([]);
   const [newZip, setNewZip] = useState("");
@@ -147,22 +180,16 @@ export default function GTMPage() {
   const [zoneNotes, setZoneNotes] = useState("");
   const [zoneActive, setZoneActive] = useState(true);
 
-  // Fetch Mapbox token
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("mapbox-token");
-        if (error) throw error;
-        setMapboxToken(data.token);
-      } catch (error) {
-        console.error("Failed to fetch Mapbox token:", error);
-      }
-    };
-    fetchToken();
-  }, []);
+  // Campaign form state
+  const [campaignName, setCampaignName] = useState("");
+  const [campaignChannel, setCampaignChannel] = useState("google_ads");
+  const [campaignType, setCampaignType] = useState("awareness");
+  const [campaignBudget, setCampaignBudget] = useState("");
+  const [campaignStatus, setCampaignStatus] = useState("active");
+  const [campaignNotes, setCampaignNotes] = useState("");
 
   // Fetch market zones
-  const { data: zones = [], isLoading } = useQuery({
+  const { data: zones = [], isLoading: zonesLoading } = useQuery({
     queryKey: ["gtm-zones", currentOrg?.id],
     queryFn: async () => {
       if (!currentOrg) return [];
@@ -177,11 +204,105 @@ export default function GTMPage() {
     enabled: !!currentOrg,
   });
 
-  // Create/Update zone mutation
+  // Fetch campaigns
+  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
+    queryKey: ["marketing-campaigns", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data, error } = await supabase
+        .from("marketing_campaigns")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as MarketingCampaign[];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Fetch metrics
+  const { data: metrics = [], isLoading: metricsLoading } = useQuery({
+    queryKey: ["marketing-metrics", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data, error } = await supabase
+        .from("marketing_metrics")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("metric_date", { ascending: false });
+      if (error) throw error;
+      return data as MarketingMetric[];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Fetch leads
+  const { data: leads = [], isLoading: leadsLoading } = useQuery({
+    queryKey: ["marketing-leads", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data, error } = await supabase
+        .from("marketing_leads")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as MarketingLead[];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Computed stats
+  const totalLeads = leads.length;
+  const convertedLeads = leads.filter((l) => l.converted_at).length;
+  const conversionRate = totalLeads > 0 ? ((convertedLeads / totalLeads) * 100) : 0;
+  const totalSpend = metrics.reduce((sum, m) => sum + Number(m.spend), 0);
+  const totalRevenue = metrics.reduce((sum, m) => sum + Number(m.revenue), 0);
+  const totalImpressions = metrics.reduce((sum, m) => sum + m.impressions, 0);
+  const totalClicks = metrics.reduce((sum, m) => sum + m.clicks, 0);
+  const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100) : 0;
+  const costPerLead = totalLeads > 0 ? totalSpend / totalLeads : 0;
+  const overallROI = totalSpend > 0 ? ((totalRevenue - totalSpend) / totalSpend * 100) : 0;
+
+  // Channel breakdown
+  const channelStats = Object.entries(
+    metrics.reduce((acc, m) => {
+      if (!acc[m.channel]) {
+        acc[m.channel] = { impressions: 0, clicks: 0, leads: 0, conversions: 0, spend: 0, revenue: 0 };
+      }
+      acc[m.channel].impressions += m.impressions;
+      acc[m.channel].clicks += m.clicks;
+      acc[m.channel].leads += m.leads;
+      acc[m.channel].conversions += m.conversions;
+      acc[m.channel].spend += Number(m.spend);
+      acc[m.channel].revenue += Number(m.revenue);
+      return acc;
+    }, {} as Record<string, { impressions: number; clicks: number; leads: number; conversions: number; spend: number; revenue: number }>)
+  ).map(([channel, stats]) => ({
+    name: formatChannel(channel),
+    channel,
+    ...stats,
+    roi: stats.spend > 0 ? ((stats.revenue - stats.spend) / stats.spend * 100) : 0,
+    cpl: stats.leads > 0 ? stats.spend / stats.leads : 0,
+    conversionRate: stats.leads > 0 ? (stats.conversions / stats.leads * 100) : 0,
+  }));
+
+  // Lead sources for pie chart
+  const leadsByChannel = Object.entries(
+    leads.reduce((acc, l) => {
+      acc[l.channel] = (acc[l.channel] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)
+  ).map(([channel, count]) => ({
+    name: formatChannel(channel),
+    value: count,
+    color: CHANNEL_COLORS[channel] || CHANNEL_COLORS.other,
+  }));
+
+  // Zone mutations
   const saveZoneMutation = useMutation({
     mutationFn: async (zone: Partial<MarketZone>) => {
       if (!currentOrg) throw new Error("No organization");
-      
       const payload = {
         org_id: currentOrg.id,
         name: zone.name,
@@ -192,45 +313,28 @@ export default function GTMPage() {
         notes: zone.notes || null,
         is_active: zone.is_active,
       };
-
       if (editingZone) {
-        const { error } = await supabase
-          .from("gtm_market_zones")
-          .update(payload)
-          .eq("id", editingZone.id);
+        const { error } = await supabase.from("gtm_market_zones").update(payload).eq("id", editingZone.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("gtm_market_zones")
-          .insert(payload);
+        const { error } = await supabase.from("gtm_market_zones").insert(payload);
         if (error) throw error;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["gtm-zones"] });
-      toast({
-        title: editingZone ? "Zone updated" : "Zone created",
-        description: `Market zone "${zoneName}" has been saved.`,
-      });
-      resetForm();
+      toast({ title: editingZone ? "Zone updated" : "Zone created" });
+      resetZoneForm();
       setIsZoneDialogOpen(false);
     },
     onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
+      toast({ variant: "destructive", title: "Error", description: error.message });
     },
   });
 
-  // Delete zone mutation
   const deleteZoneMutation = useMutation({
     mutationFn: async (zoneId: string) => {
-      const { error } = await supabase
-        .from("gtm_market_zones")
-        .delete()
-        .eq("id", zoneId);
+      const { error } = await supabase.from("gtm_market_zones").delete().eq("id", zoneId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -238,15 +342,57 @@ export default function GTMPage() {
       toast({ title: "Zone deleted" });
     },
     onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
+      toast({ variant: "destructive", title: "Error", description: error.message });
     },
   });
 
-  const resetForm = () => {
+  // Campaign mutations
+  const saveCampaignMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentOrg) throw new Error("No organization");
+      const payload = {
+        org_id: currentOrg.id,
+        name: campaignName,
+        channel: campaignChannel,
+        campaign_type: campaignType,
+        budget: parseFloat(campaignBudget) || 0,
+        status: campaignStatus,
+        notes: campaignNotes || null,
+      };
+      if (editingCampaign) {
+        const { error } = await supabase.from("marketing_campaigns").update(payload).eq("id", editingCampaign.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("marketing_campaigns").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketing-campaigns"] });
+      toast({ title: editingCampaign ? "Campaign updated" : "Campaign created" });
+      resetCampaignForm();
+      setIsCampaignDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
+  });
+
+  const deleteCampaignMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("marketing_campaigns").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketing-campaigns"] });
+      toast({ title: "Campaign deleted" });
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
+  });
+
+  const resetZoneForm = () => {
     setZoneName("");
     setZoneZips([]);
     setNewZip("");
@@ -258,7 +404,17 @@ export default function GTMPage() {
     setEditingZone(null);
   };
 
-  const openEditDialog = (zone: MarketZone) => {
+  const resetCampaignForm = () => {
+    setCampaignName("");
+    setCampaignChannel("google_ads");
+    setCampaignType("awareness");
+    setCampaignBudget("");
+    setCampaignStatus("active");
+    setCampaignNotes("");
+    setEditingCampaign(null);
+  };
+
+  const openEditZoneDialog = (zone: MarketZone) => {
     setEditingZone(zone);
     setZoneName(zone.name);
     setZoneZips(zone.zip_codes);
@@ -268,6 +424,17 @@ export default function GTMPage() {
     setZoneNotes(zone.notes || "");
     setZoneActive(zone.is_active);
     setIsZoneDialogOpen(true);
+  };
+
+  const openEditCampaignDialog = (campaign: MarketingCampaign) => {
+    setEditingCampaign(campaign);
+    setCampaignName(campaign.name);
+    setCampaignChannel(campaign.channel);
+    setCampaignType(campaign.campaign_type);
+    setCampaignBudget(campaign.budget.toString());
+    setCampaignStatus(campaign.status);
+    setCampaignNotes(campaign.notes || "");
+    setIsCampaignDialogOpen(true);
   };
 
   const addZipToZone = () => {
@@ -283,14 +450,9 @@ export default function GTMPage() {
 
   const handleSaveZone = () => {
     if (!zoneName || zoneZips.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Validation error",
-        description: "Please provide a zone name and at least one ZIP code.",
-      });
+      toast({ variant: "destructive", title: "Validation error", description: "Please provide a zone name and at least one ZIP code." });
       return;
     }
-
     saveZoneMutation.mutate({
       name: zoneName,
       zip_codes: zoneZips,
@@ -302,16 +464,23 @@ export default function GTMPage() {
     });
   };
 
-  // Calculate ROI metrics
-  const totalSpend = channels.reduce((sum, c) => sum + c.spend, 0);
-  const totalRevenue = channels.reduce((sum, c) => sum + (c.conversions * c.avgValue), 0);
-  const overallROI = totalSpend > 0 ? ((totalRevenue - totalSpend) / totalSpend * 100) : 0;
-
-  const updateChannel = (index: number, field: string, value: number) => {
-    const updated = [...channels];
-    updated[index] = { ...updated[index], [field]: value };
-    setChannels(updated);
+  const handleSaveCampaign = () => {
+    if (!campaignName) {
+      toast({ variant: "destructive", title: "Validation error", description: "Please provide a campaign name." });
+      return;
+    }
+    saveCampaignMutation.mutate();
   };
+
+  const isLoading = zonesLoading || campaignsLoading || metricsLoading || leadsLoading;
+
+  // Stats for overview cards
+  const overviewStats = [
+    { label: "Total ZIP Codes", value: zones.reduce((sum, z) => sum + z.zip_codes.length, 0).toString(), suffix: "in service area", icon: Target, color: "text-primary" },
+    { label: "Monthly Leads", value: totalLeads.toString(), suffix: "tracked this period", icon: Users, color: "text-green-600" },
+    { label: "Conversion Rate", value: `${conversionRate.toFixed(1)}%`, suffix: "leads to customers", icon: TrendingUp, color: "text-primary" },
+    { label: "Revenue", value: `$${totalRevenue.toLocaleString()}`, suffix: "from marketing", icon: DollarSign, color: "text-green-600" },
+  ];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -323,9 +492,9 @@ export default function GTMPage() {
             <Target className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">Marketing & GTM Plan</h1>
+            <h1 className="text-3xl font-bold">Marketing & GTM Dashboard</h1>
             <p className="mt-1 text-white/80">
-              Strategic plan to grow your service business and reach more customers
+              Real-time marketing performance, campaigns, and market zone management
             </p>
           </div>
         </div>
@@ -337,14 +506,14 @@ export default function GTMPage() {
           <TabsTrigger value="overview" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Market Overview
           </TabsTrigger>
-          <TabsTrigger value="strategy" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            GTM Strategy
-          </TabsTrigger>
-          <TabsTrigger value="metrics" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Key Metrics
+          <TabsTrigger value="campaigns" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            Campaigns
           </TabsTrigger>
           <TabsTrigger value="channels" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Channels
+            Channel Performance
+          </TabsTrigger>
+          <TabsTrigger value="zones" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            Market Zones
           </TabsTrigger>
           <TabsTrigger value="calculator" className="flex-1 max-w-[180px] rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
             ROI Calculator
@@ -353,53 +522,336 @@ export default function GTMPage() {
 
         {/* Market Overview Tab */}
         <TabsContent value="overview" className="mt-6 space-y-6">
-          {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-4">
-            {marketOverviewStats.map((stat, i) => (
-              <Card key={i}>
-                <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.suffix}</p>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              {/* Stats Grid */}
+              <div className="grid gap-4 md:grid-cols-4">
+                {overviewStats.map((stat, i) => (
+                  <Card key={i}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                        <p className="text-sm text-muted-foreground">{stat.label}</p>
+                      </div>
+                      <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
+                      <p className="text-sm text-muted-foreground">{stat.suffix}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Performance Metrics */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Channel Performance Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5" />
+                      Channel Performance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {channelStats.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={channelStats}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="name" fontSize={12} />
+                          <YAxis />
+                          <Tooltip formatter={(value: number) => value.toLocaleString()} />
+                          <Bar dataKey="leads" fill="#1565c0" name="Leads" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="conversions" fill="#43a047" name="Conversions" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+                        <BarChart3 className="h-12 w-12 mb-4 opacity-50" />
+                        <p>No marketing data yet</p>
+                        <p className="text-sm">Add campaigns to start tracking performance</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Lead Sources Pie Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Lead Sources</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {leadsByChannel.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={leadsByChannel}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            innerRadius={60}
+                            dataKey="value"
+                            label={({ name, value }) => `${name}: ${value}`}
+                          >
+                            {leadsByChannel.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+                        <Users className="h-12 w-12 mb-4 opacity-50" />
+                        <p>No leads tracked yet</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Key Metrics Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Key Performance Indicators</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="text-center p-4 rounded-lg bg-muted/50">
+                      <Eye className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-2xl font-bold">{totalImpressions.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground">Impressions</p>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-muted/50">
+                      <MousePointerClick className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-2xl font-bold">{totalClicks.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground">Clicks ({ctr.toFixed(1)}% CTR)</p>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-muted/50">
+                      <Users className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-2xl font-bold">{totalLeads}</p>
+                      <p className="text-sm text-muted-foreground">Leads</p>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-muted/50">
+                      <DollarSign className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-2xl font-bold">${costPerLead.toFixed(0)}</p>
+                      <p className="text-sm text-muted-foreground">Cost/Lead</p>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-muted/50">
+                      <TrendingUp className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                      <p className={`text-2xl font-bold ${overallROI >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {overallROI.toFixed(1)}%
+                      </p>
+                      <p className="text-sm text-muted-foreground">ROI</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+            </>
+          )}
+        </TabsContent>
 
-          {/* Top Markets Chart */}
+        {/* Campaigns Tab */}
+        <TabsContent value="campaigns" className="mt-6 space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Marketing Campaigns</CardTitle>
+                <CardDescription>Manage your marketing campaigns across all channels</CardDescription>
+              </div>
+              {isAdmin && (
+                <Dialog open={isCampaignDialogOpen} onOpenChange={(open) => {
+                  setIsCampaignDialogOpen(open);
+                  if (!open) resetCampaignForm();
+                }}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Campaign
+                    </Button>
+                  </DialogTrigger>
+                  <CampaignDialog
+                    editing={editingCampaign}
+                    name={campaignName}
+                    setName={setCampaignName}
+                    channel={campaignChannel}
+                    setChannel={setCampaignChannel}
+                    campaignType={campaignType}
+                    setCampaignType={setCampaignType}
+                    budget={campaignBudget}
+                    setBudget={setCampaignBudget}
+                    status={campaignStatus}
+                    setStatus={setCampaignStatus}
+                    notes={campaignNotes}
+                    setNotes={setCampaignNotes}
+                    onSave={handleSaveCampaign}
+                    onCancel={() => setIsCampaignDialogOpen(false)}
+                    isPending={saveCampaignMutation.isPending}
+                  />
+                </Dialog>
+              )}
+            </CardHeader>
+            <CardContent>
+              {campaignsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : campaigns.length === 0 ? (
+                <div className="text-center py-12">
+                  <Megaphone className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-lg font-medium">No campaigns yet</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Create your first marketing campaign to start tracking performance.
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Campaign</TableHead>
+                      <TableHead>Channel</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Budget</TableHead>
+                      <TableHead>Status</TableHead>
+                      {isAdmin && <TableHead className="w-20"></TableHead>}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {campaigns.map((campaign) => (
+                      <TableRow key={campaign.id}>
+                        <TableCell className="font-medium">{campaign.name}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{formatChannel(campaign.channel)}</Badge>
+                        </TableCell>
+                        <TableCell className="capitalize">{campaign.campaign_type}</TableCell>
+                        <TableCell>${Number(campaign.budget).toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Badge variant={campaign.status === "active" ? "default" : "secondary"}>
+                            {campaign.status}
+                          </Badge>
+                        </TableCell>
+                        {isAdmin && (
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => openEditCampaignDialog(campaign)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  if (confirm("Delete this campaign?")) {
+                                    deleteCampaignMutation.mutate(campaign.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Channel Performance Tab */}
+        <TabsContent value="channels" className="mt-6 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Top Markets: Leads & Bookings Performance
+                <Megaphone className="h-5 w-5" />
+                Channel Performance Breakdown
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={topMarketsData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="leads" fill="#e53935" name="Leads" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="booked" fill="#1565c0" name="Booked" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="revenue" fill="#43a047" name="Revenue ($)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <CardContent className="space-y-4">
+              {channelStats.length > 0 ? (
+                channelStats.map((channel, i) => (
+                  <div key={i} className="rounded-lg border p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold">{channel.name}</h3>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${channel.roi >= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                        {channel.roi.toFixed(1)}% ROI
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Impressions</p>
+                        <p className="font-semibold">{channel.impressions.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Clicks</p>
+                        <p className="font-semibold">{channel.clicks.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Leads</p>
+                        <p className="font-semibold">{channel.leads}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Conversions</p>
+                        <p className="font-semibold">{channel.conversions} ({channel.conversionRate.toFixed(1)}%)</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Spend / Revenue</p>
+                        <p className="font-semibold">${channel.spend.toLocaleString()} / ${channel.revenue.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-lg font-medium">No channel data yet</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Channel performance will appear here once you have marketing metrics.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Zone Management */}
+          {/* ROI Comparison Chart */}
+          {channelStats.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>ROI Comparison by Channel</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={channelStats}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+                    <Bar dataKey="roi" fill="#43a047" name="ROI %" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Market Zones Tab */}
+        <TabsContent value="zones" className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Market Zones</CardTitle>
+              <div>
+                <CardTitle>Market Zones</CardTitle>
+                <CardDescription>Define geographic zones with priority and lead scoring rules</CardDescription>
+              </div>
               {isAdmin && (
                 <Dialog open={isZoneDialogOpen} onOpenChange={(open) => {
                   setIsZoneDialogOpen(open);
-                  if (!open) resetForm();
+                  if (!open) resetZoneForm();
                 }}>
                   <DialogTrigger asChild>
-                    <Button size="sm">
+                    <Button>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Zone
                     </Button>
@@ -431,7 +883,7 @@ export default function GTMPage() {
               )}
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {zonesLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
@@ -497,7 +949,7 @@ export default function GTMPage() {
                           {isAdmin && (
                             <TableCell>
                               <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon" onClick={() => openEditDialog(zone)}>
+                                <Button variant="ghost" size="icon" onClick={() => openEditZoneDialog(zone)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button
@@ -524,161 +976,8 @@ export default function GTMPage() {
           </Card>
         </TabsContent>
 
-        {/* GTM Strategy Tab */}
-        <TabsContent value="strategy" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Go-To-Market Strategy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              <StrategyPhase
-                phase="Phase 1: Foundation (Months 1-3)"
-                color="border-l-blue-500"
-                items={[
-                  { title: "Local SEO Optimization:", desc: "Claim and optimize Google Business Profile, local directories, and review sites" },
-                  { title: "Website Landing Pages:", desc: "Create service-specific landing pages for each market zone with local keywords" },
-                  { title: "Review Generation:", desc: "Implement automated review request system after completed jobs" },
-                  { title: "Referral Program:", desc: "Launch customer referral program with incentives for both parties" },
-                ]}
-              />
-              <StrategyPhase
-                phase="Phase 2: Growth (Months 4-6)"
-                color="border-l-orange-500"
-                items={[
-                  { title: "Paid Advertising:", desc: "Launch targeted Google Ads and Facebook campaigns for high-priority zones" },
-                  { title: "Door-to-Door Marketing:", desc: "Deploy door hangers and direct mail in neighborhoods with recent service completions" },
-                  { title: "Partnership Development:", desc: "Establish referral partnerships with real estate agents, property managers" },
-                  { title: "Community Events:", desc: "Sponsor local events and home shows in target markets" },
-                ]}
-              />
-              <StrategyPhase
-                phase="Phase 3: Scale (Months 7-12)"
-                color="border-l-green-500"
-                items={[
-                  { title: "Market Expansion:", desc: "Expand service area based on data from highest-performing zones" },
-                  { title: "Brand Building:", desc: "Invest in vehicle wraps, uniforms, and brand visibility" },
-                  { title: "Commercial Accounts:", desc: "Target property management companies and commercial clients" },
-                  { title: "Technology Investment:", desc: "Implement CRM and marketing automation for scale" },
-                ]}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Key Metrics Tab */}
-        <TabsContent value="metrics" className="mt-6 space-y-6">
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Pie Chart */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Market Share by Segment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={segmentData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      innerRadius={60}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}%`}
-                    >
-                      {segmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Legend />
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* Geographic Performance */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Geographic Performance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {zones.length > 0 ? zones.slice(0, 5).map((zone) => (
-                  <div key={zone.id}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">{zone.name}</span>
-                      <span className="text-sm font-bold">{zone.target_monthly_leads || 0} leads</span>
-                    </div>
-                    <Progress value={zone.priority} className="h-2" />
-                  </div>
-                )) : (
-                  <>
-                    <GeographicBar name="Downtown Core" value={85} leads="156" />
-                    <GeographicBar name="North Suburbs" value={72} leads="142" />
-                    <GeographicBar name="East Side" value={65} leads="134" />
-                    <GeographicBar name="West End" value={58} leads="118" />
-                    <GeographicBar name="Industrial District" value={45} leads="92" />
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Additional Metrics */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Correlation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Areas with high lead scores often correlate with neighborhoods having higher property values 
-                and longer average tenure. This correlation helps identify prime markets for premium services 
-                and creates opportunities for upselling additional services.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Channels Tab */}
-        <TabsContent value="channels" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Megaphone className="h-5 w-5" />
-                Marketing Channel Performance
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {channelPerformance.map((channel, i) => (
-                <div key={i} className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold">{channel.name}</h3>
-                    <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
-                      {channel.conversion}% Conversion
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Reach Potential</p>
-                      <Progress value={channel.reach} className="h-2" />
-                      <p className="text-xs text-muted-foreground mt-1">{channel.reach}% of target market</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Cost Efficiency</p>
-                      <p className="text-lg font-semibold">{channel.cost}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         {/* ROI Calculator Tab */}
         <TabsContent value="calculator" className="mt-6 space-y-6">
-          {/* Summary Stats */}
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardContent className="pt-6">
@@ -689,19 +988,19 @@ export default function GTMPage() {
                 <p className="text-3xl font-bold text-primary">
                   ${totalSpend.toLocaleString()}
                 </p>
-                <p className="text-sm text-muted-foreground">Monthly investment</p>
+                <p className="text-sm text-muted-foreground">Total investment</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
                   <TrendingUp className="h-4 w-4" />
-                  Total Revenue Generated
+                  Total Revenue
                 </div>
                 <p className="text-3xl font-bold text-green-600">
                   ${totalRevenue.toLocaleString()}
                 </p>
-                <p className="text-sm text-muted-foreground">From conversions</p>
+                <p className="text-sm text-muted-foreground">From marketing</p>
               </CardContent>
             </Card>
             <Card>
@@ -710,7 +1009,7 @@ export default function GTMPage() {
                   <Calculator className="h-4 w-4" />
                   Overall ROI
                 </div>
-                <p className="text-3xl font-bold text-green-600">
+                <p className={`text-3xl font-bold ${overallROI >= 0 ? "text-green-600" : "text-red-600"}`}>
                   {overallROI.toFixed(1)}%
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -720,111 +1019,58 @@ export default function GTMPage() {
             </Card>
           </div>
 
-          {/* Channel Calculators */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calculator className="h-5 w-5" />
-                Channel Performance Calculator
+                Channel ROI Breakdown
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Adjust the values below to calculate ROI for each marketing channel
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {channels.map((channel, index) => {
-                const revenue = channel.conversions * channel.avgValue;
-                const roi = channel.spend > 0 ? ((revenue - channel.spend) / channel.spend * 100) : 0;
-                const costPerLead = channel.leads > 0 ? channel.spend / channel.leads : 0;
-                const costPerAcq = channel.conversions > 0 ? channel.spend / channel.conversions : 0;
-                const convRate = channel.leads > 0 ? (channel.conversions / channel.leads * 100) : 0;
-
-                return (
-                  <div key={index} className="rounded-lg border p-6">
-                    <h3 className="font-semibold text-lg mb-4">{channel.name}</h3>
-                    <div className="grid gap-4 md:grid-cols-4 mb-4">
-                      <div className="space-y-2">
-                        <Label>Monthly Spend ($)</Label>
-                        <Input
-                          type="number"
-                          value={channel.spend}
-                          onChange={(e) => updateChannel(index, "spend", Number(e.target.value))}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Leads Generated</Label>
-                        <Input
-                          type="number"
-                          value={channel.leads}
-                          onChange={(e) => updateChannel(index, "leads", Number(e.target.value))}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Conversions</Label>
-                        <Input
-                          type="number"
-                          value={channel.conversions}
-                          onChange={(e) => updateChannel(index, "conversions", Number(e.target.value))}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Avg Deal Value ($)</Label>
-                        <Input
-                          type="number"
-                          value={channel.avgValue}
-                          onChange={(e) => updateChannel(index, "avgValue", Number(e.target.value))}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-5 gap-4 text-center pt-4 border-t">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Revenue</p>
-                        <p className="text-lg font-bold text-green-600">${revenue.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">ROI</p>
-                        <p className="text-lg font-bold text-green-600">{roi.toFixed(1)}%</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Cost/Lead</p>
-                        <p className="text-lg font-bold text-primary">${costPerLead.toFixed(2)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Cost/Acquisition</p>
-                        <p className="text-lg font-bold text-primary">${costPerAcq.toFixed(2)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Conv. Rate</p>
-                        <p className="text-lg font-bold text-green-600">{convRate.toFixed(1)}%</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-
-          {/* ROI Comparison Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                ROI Comparison by Channel
-              </CardTitle>
+              <CardDescription>
+                Performance metrics calculated from your marketing data
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={channels.map(c => ({
-                  name: c.name,
-                  roi: c.spend > 0 ? ((c.conversions * c.avgValue - c.spend) / c.spend * 100) : 0
-                }))}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
-                  <Bar dataKey="roi" fill="#43a047" name="ROI %" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {channelStats.length > 0 ? (
+                <div className="space-y-4">
+                  {channelStats.map((channel, i) => (
+                    <div key={i} className="rounded-lg border p-4">
+                      <h3 className="font-semibold text-lg mb-4">{channel.name}</h3>
+                      <div className="grid grid-cols-5 gap-4 text-center">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Spend</p>
+                          <p className="text-lg font-bold">${channel.spend.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Revenue</p>
+                          <p className="text-lg font-bold text-green-600">${channel.revenue.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">ROI</p>
+                          <p className={`text-lg font-bold ${channel.roi >= 0 ? "text-green-600" : "text-red-600"}`}>
+                            {channel.roi.toFixed(1)}%
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Cost/Lead</p>
+                          <p className="text-lg font-bold text-primary">${channel.cpl.toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Conv. Rate</p>
+                          <p className="text-lg font-bold text-green-600">{channel.conversionRate.toFixed(1)}%</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Calculator className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-lg font-medium">No data for ROI calculation</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Add marketing metrics to see ROI calculations by channel.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -833,37 +1079,7 @@ export default function GTMPage() {
   );
 }
 
-// Helper Components
-function StrategyPhase({ phase, color, items }: { phase: string; color: string; items: { title: string; desc: string }[] }) {
-  return (
-    <div className={`border-l-4 ${color} pl-6`}>
-      <h3 className="font-semibold text-lg mb-4">{phase}</h3>
-      <ul className="space-y-3">
-        {items.map((item, i) => (
-          <li key={i} className="flex gap-2">
-            <span className="text-muted-foreground">•</span>
-            <span>
-              <strong className="text-primary">{item.title}</strong> {item.desc}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function GeographicBar({ name, value, leads }: { name: string; value: number; leads: string }) {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-sm font-medium">{name}</span>
-        <span className="text-sm font-bold text-primary">{leads} leads</span>
-      </div>
-      <Progress value={value} className="h-2" />
-    </div>
-  );
-}
-
+// Zone Dialog Component
 function ZoneDialog({
   editingZone,
   zoneName,
@@ -1002,6 +1218,133 @@ function ZoneDialog({
         <Button onClick={onSave} disabled={isPending}>
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {editingZone ? "Update" : "Create"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+}
+
+// Campaign Dialog Component
+function CampaignDialog({
+  editing,
+  name,
+  setName,
+  channel,
+  setChannel,
+  campaignType,
+  setCampaignType,
+  budget,
+  setBudget,
+  status,
+  setStatus,
+  notes,
+  setNotes,
+  onSave,
+  onCancel,
+  isPending,
+}: any) {
+  return (
+    <DialogContent className="max-w-lg">
+      <DialogHeader>
+        <DialogTitle>{editing ? "Edit Campaign" : "Create Campaign"}</DialogTitle>
+        <DialogDescription>
+          Set up a marketing campaign to track performance and ROI.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="space-y-4 py-4">
+        <div className="space-y-2">
+          <Label htmlFor="campaign-name">Campaign Name</Label>
+          <Input
+            id="campaign-name"
+            placeholder="e.g., Summer HVAC Special"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Channel</Label>
+            <Select value={channel} onValueChange={setChannel}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="google_ads">Google Ads</SelectItem>
+                <SelectItem value="meta_ads">Meta Ads</SelectItem>
+                <SelectItem value="social_media">Social Media</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="referral">Referral</SelectItem>
+                <SelectItem value="door_to_door">Door to Door</SelectItem>
+                <SelectItem value="direct">Direct</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Campaign Type</Label>
+            <Select value={campaignType} onValueChange={setCampaignType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="awareness">Awareness</SelectItem>
+                <SelectItem value="lead_gen">Lead Generation</SelectItem>
+                <SelectItem value="conversion">Conversion</SelectItem>
+                <SelectItem value="retention">Retention</SelectItem>
+                <SelectItem value="seasonal">Seasonal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="campaign-budget">Budget ($)</Label>
+            <Input
+              id="campaign-budget"
+              type="number"
+              placeholder="0"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="campaign-notes">Notes</Label>
+          <Textarea
+            id="campaign-notes"
+            placeholder="Campaign details, goals, etc."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+          />
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button onClick={onSave} disabled={isPending}>
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {editing ? "Update" : "Create"}
         </Button>
       </DialogFooter>
     </DialogContent>
