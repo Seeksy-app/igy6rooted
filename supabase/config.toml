@@ -35,3 +35,9 @@ verify_jwt = false
 
 [functions.meta-ads-oauth-callback]
 verify_jwt = false
+
+[functions.google-ads-metrics]
+verify_jwt = false
+
+[functions.meta-ads-metrics]
+verify_jwt = false
