@@ -63,6 +63,23 @@ export default function IntegrationsPage() {
     enabled: !!currentOrg
   });
 
+  // Fetch ad account connections
+  const { data: adAccounts, isLoading: loadingAdAccounts } = useQuery({
+    queryKey: ["ad-accounts", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data } = await supabase
+        .from("integration_ad_accounts")
+        .select("*")
+        .eq("org_id", currentOrg.id);
+      return data || [];
+    },
+    enabled: !!currentOrg
+  });
+
+  const googleAdsConnection = adAccounts?.find(a => a.provider === "google_ads");
+  const metaAdsConnection = adAccounts?.find(a => a.provider === "meta_ads");
+
   const handleConnectJobber = async () => {
     if (!currentOrg) {
       toast({
@@ -74,17 +91,60 @@ export default function IntegrationsPage() {
     }
 
     try {
-      // Use the edge function to initiate OAuth (it has access to server-side secrets)
       const redirectUri = `${window.location.origin}/integrations/jobber/callback`;
       const oauthStartUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jobber-oauth-start?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-      
-      // Redirect to the edge function which will then redirect to Jobber
       window.location.href = oauthStartUrl;
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Connection Error",
         description: "Failed to start Jobber OAuth. Please try again.",
+      });
+    }
+  };
+
+  const handleConnectGoogleAds = async () => {
+    if (!currentOrg) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No organization selected.",
+      });
+      return;
+    }
+
+    try {
+      const redirectUri = `${window.location.origin}/integrations/google-ads/callback`;
+      const oauthStartUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-ads-oauth-start?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      window.location.href = oauthStartUrl;
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Connection Error",
+        description: "Failed to start Google Ads OAuth. Please try again.",
+      });
+    }
+  };
+
+  const handleConnectMetaAds = async () => {
+    if (!currentOrg) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No organization selected.",
+      });
+      return;
+    }
+
+    try {
+      const redirectUri = `${window.location.origin}/integrations/meta-ads/callback`;
+      const oauthStartUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/meta-ads-oauth-start?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      window.location.href = oauthStartUrl;
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Connection Error",
+        description: "Failed to start Meta Ads OAuth. Please try again.",
       });
     }
   };
@@ -133,7 +193,14 @@ export default function IntegrationsPage() {
     }
   };
 
-  const loading = loadingJobber;
+  const loading = loadingJobber || loadingAdAccounts;
+
+  const getAdAccountStatus = (connection: typeof googleAdsConnection): Integration["status"] => {
+    if (!connection) return "disconnected";
+    if (connection.status === "connected") return "connected";
+    if (connection.status === "error" || connection.status === "expired") return "pending";
+    return "disconnected";
+  };
 
   const integrations: Integration[] = [
     {
@@ -168,16 +235,18 @@ export default function IntegrationsPage() {
       name: "Google Ads",
       description: "Ad performance & spend • ROI tracking",
       category: "Marketing",
-      status: "coming_soon",
+      status: getAdAccountStatus(googleAdsConnection),
       icon: "🎯",
+      lastSync: googleAdsConnection?.updated_at,
     },
     {
       id: "meta-ads",
       name: "Meta Ads",
       description: "Facebook & Instagram ads • Campaign performance",
       category: "Marketing",
-      status: "coming_soon",
+      status: getAdAccountStatus(metaAdsConnection),
       icon: "📱",
+      lastSync: metaAdsConnection?.updated_at,
     },
     {
       id: "google-business",
@@ -252,7 +321,7 @@ export default function IntegrationsPage() {
             Connect and manage external services • All credentials stored securely
           </p>
         </div>
-        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["jobber-connection"] })} variant="outline">
+        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["jobber-connection", "ad-accounts"] })} variant="outline">
           <RefreshCw className="mr-2 h-4 w-4" />
           Refresh Status
         </Button>
@@ -344,6 +413,18 @@ export default function IntegrationsPage() {
                           Connect Jobber
                         </Button>
                       )}
+                      {integration.id === "google-ads" && (
+                        <Button className="w-full" onClick={handleConnectGoogleAds}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Connect Google Ads
+                        </Button>
+                      )}
+                      {integration.id === "meta-ads" && (
+                        <Button className="w-full" onClick={handleConnectMetaAds}>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Connect Meta Ads
+                        </Button>
+                      )}
                     </>
                   )}
                   
@@ -353,6 +434,17 @@ export default function IntegrationsPage() {
                         <Settings className="mr-2 h-4 w-4" />
                         Complete Setup
                       </Link>
+                    </Button>
+                  )}
+
+                  {integration.status === "pending" && isAdmin && (integration.id === "google-ads" || integration.id === "meta-ads") && (
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={integration.id === "google-ads" ? handleConnectGoogleAds : handleConnectMetaAds}
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Reconnect
                     </Button>
                   )}
                   
