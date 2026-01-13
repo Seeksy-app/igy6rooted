@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.jobber-api]
 verify_jwt = false
+
+[functions.mapbox-token]
+verify_jwt = false
