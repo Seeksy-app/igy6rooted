@@ -708,6 +708,172 @@ export type Database = {
           },
         ]
       }
+      marketing_campaigns: {
+        Row: {
+          budget: number
+          campaign_type: string
+          channel: string
+          created_at: string
+          end_date: string | null
+          external_id: string | null
+          id: string
+          name: string
+          notes: string | null
+          org_id: string
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          budget?: number
+          campaign_type?: string
+          channel: string
+          created_at?: string
+          end_date?: string | null
+          external_id?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          org_id: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          budget?: number
+          campaign_type?: string
+          channel?: string
+          created_at?: string
+          end_date?: string | null
+          external_id?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          org_id?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketing_leads: {
+        Row: {
+          campaign_id: string | null
+          channel: string
+          conversion_value: number | null
+          converted_at: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          lead_score: number | null
+          notes: string | null
+          org_id: string
+          source: string | null
+          status: string
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          channel: string
+          conversion_value?: number | null
+          converted_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          lead_score?: number | null
+          notes?: string | null
+          org_id: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          channel?: string
+          conversion_value?: number | null
+          converted_at?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          lead_score?: number | null
+          notes?: string | null
+          org_id?: string
+          source?: string | null
+          status?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_metrics: {
+        Row: {
+          campaign_id: string | null
+          channel: string
+          clicks: number
+          conversions: number
+          created_at: string
+          id: string
+          impressions: number
+          leads: number
+          metric_date: string
+          org_id: string
+          revenue: number
+          spend: number
+        }
+        Insert: {
+          campaign_id?: string | null
+          channel: string
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          id?: string
+          impressions?: number
+          leads?: number
+          metric_date?: string
+          org_id: string
+          revenue?: number
+          spend?: number
+        }
+        Update: {
+          campaign_id?: string | null
+          channel?: string
+          clicks?: number
+          conversions?: number
+          created_at?: string
+          id?: string
+          impressions?: number
+          leads?: number
+          metric_date?: string
+          org_id?: string
+          revenue?: number
+          spend?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meta_ad_campaigns: {
         Row: {
           ad_type: string
