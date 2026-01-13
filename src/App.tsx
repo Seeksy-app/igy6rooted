@@ -23,6 +23,7 @@ import IntegrationsPage from "@/pages/IntegrationsPage";
 import MarketingAnalyticsPage from "@/pages/MarketingAnalyticsPage";
 import AIProductivityPage from "@/pages/AIProductivityPage";
 import MetaAdsGuidePage from "@/pages/MetaAdsGuidePage";
+import GoogleAdsGuidePage from "@/pages/GoogleAdsGuidePage";
 import SettingsPage from "@/pages/SettingsPage";
 import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import NotFound from "@/pages/NotFound";
@@ -117,6 +118,7 @@ function AppRoutes() {
       <Route path="/integrations/jobber" element={<ProtectedRoute><JobberIntegrationPage /></ProtectedRoute>} />
       <Route path="/marketing" element={<ProtectedRoute><MarketingAnalyticsPage /></ProtectedRoute>} />
       <Route path="/meta-ads-guide" element={<ProtectedRoute><MetaAdsGuidePage /></ProtectedRoute>} />
+      <Route path="/google-ads-guide" element={<ProtectedRoute><GoogleAdsGuidePage /></ProtectedRoute>} />
       <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
 
