@@ -614,27 +614,39 @@ serve(async (req) => {
             console.log("Found existing client:", clientId);
           } else {
             // Create new client
+            console.log("Creating new client:", { customer_name, phone, email, address });
             const clientResult = await jobberGraphQL(accessToken, QUERIES.createClient, {
               input: {
-                firstName: customer_name.split(" ")[0],
-                lastName: customer_name.split(" ").slice(1).join(" ") || "Customer",
+                firstName: customer_name.split(" ")[0] || "Customer",
+                lastName: customer_name.split(" ").slice(1).join(" ") || "",
                 phones: [{ number: phone, primary: true }],
                 emails: email ? [{ address: email, primary: true }] : [],
-                billingAddress: {
+                billingAddress: address ? {
                   street: address,
-                },
+                } : undefined,
               },
             });
 
-            if (clientResult?.clientCreate?.userErrors?.length > 0) {
+            console.log("Client create response:", JSON.stringify(clientResult));
+
+            if (!clientResult?.clientCreate) {
+              throw new Error("Failed to create client - no response from Jobber API");
+            }
+
+            if (clientResult.clientCreate.userErrors?.length > 0) {
               throw new Error(clientResult.clientCreate.userErrors[0].message);
+            }
+
+            if (!clientResult.clientCreate.client?.id) {
+              throw new Error("Failed to create client - no client ID returned");
             }
 
             clientId = clientResult.clientCreate.client.id;
             console.log("Created new client:", clientId);
           }
 
-          // Step 2: Create a request/job
+          // Step 2: Create a request
+          console.log("Creating request for client:", clientId);
           const requestResult = await jobberGraphQL(accessToken, QUERIES.createRequest, {
             input: {
               clientId,
@@ -643,14 +655,21 @@ serve(async (req) => {
             },
           });
 
-          if (requestResult?.requestCreate?.userErrors?.length > 0) {
+          console.log("Request create response:", JSON.stringify(requestResult));
+
+          if (!requestResult?.requestCreate) {
+            throw new Error("Failed to create request - no response from Jobber API");
+          }
+
+          if (requestResult.requestCreate.userErrors?.length > 0) {
             throw new Error(requestResult.requestCreate.userErrors[0].message);
           }
 
-          const requestId = requestResult.requestCreate.request.id;
+          const requestId = requestResult.requestCreate.request?.id || null;
           console.log("Created request:", requestId);
 
-          // Step 3: Create job from request
+          // Step 3: Create job
+          console.log("Creating job for client:", clientId);
           const jobResult = await jobberGraphQL(accessToken, QUERIES.createJob, {
             input: {
               clientId,
@@ -659,15 +678,26 @@ serve(async (req) => {
             },
           });
 
-          if (jobResult?.jobCreate?.userErrors?.length > 0) {
+          console.log("Job create response:", JSON.stringify(jobResult));
+
+          if (!jobResult?.jobCreate) {
+            throw new Error("Failed to create job - no response from Jobber API");
+          }
+
+          if (jobResult.jobCreate.userErrors?.length > 0) {
             throw new Error(jobResult.jobCreate.userErrors[0].message);
+          }
+
+          if (!jobResult.jobCreate.job?.id) {
+            throw new Error("Failed to create job - no job ID returned");
           }
 
           const jobId = jobResult.jobCreate.job.id;
           const jobNumber = jobResult.jobCreate.job.jobNumber;
-          console.log("Created job:", jobId);
+          console.log("Created job:", jobId, "number:", jobNumber);
 
           // Step 4: Create visit (scheduled appointment)
+          console.log("Creating visit for job:", jobId);
           const visitResult = await jobberGraphQL(accessToken, QUERIES.createVisit, {
             input: {
               jobId,
@@ -678,8 +708,18 @@ serve(async (req) => {
             },
           });
 
-          if (visitResult?.visitCreate?.userErrors?.length > 0) {
+          console.log("Visit create response:", JSON.stringify(visitResult));
+
+          if (!visitResult?.visitCreate) {
+            throw new Error("Failed to create visit - no response from Jobber API");
+          }
+
+          if (visitResult.visitCreate.userErrors?.length > 0) {
             throw new Error(visitResult.visitCreate.userErrors[0].message);
+          }
+
+          if (!visitResult.visitCreate.visit?.id) {
+            throw new Error("Failed to create visit - no visit ID returned");
           }
 
           const visitId = visitResult.visitCreate.visit.id;
