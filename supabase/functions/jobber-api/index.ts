@@ -129,6 +129,8 @@ async function getValidAccessToken(supabase: any, orgId: string): Promise<string
 
 // Execute Jobber GraphQL query
 async function jobberGraphQL(accessToken: string, query: string, variables?: Record<string, any>): Promise<any> {
+  console.log("GraphQL request:", JSON.stringify({ query: query.substring(0, 100), variables }));
+  
   const response = await fetch(JOBBER_GRAPHQL_URL, {
     method: "POST",
     headers: {
@@ -139,7 +141,16 @@ async function jobberGraphQL(accessToken: string, query: string, variables?: Rec
     body: JSON.stringify({ query, variables }),
   });
 
-  const data = await response.json();
+  const responseText = await response.text();
+  console.log("GraphQL raw response:", responseText);
+  
+  let data;
+  try {
+    data = JSON.parse(responseText);
+  } catch (e) {
+    console.error("Failed to parse GraphQL response:", responseText);
+    throw new Error(`Invalid JSON response from Jobber API: ${responseText.substring(0, 200)}`);
+  }
 
   if (data.errors) {
     console.error("GraphQL errors:", data.errors);
@@ -613,18 +624,29 @@ serve(async (req) => {
             clientId = searchResult.clients.nodes[0].id;
             console.log("Found existing client:", clientId);
           } else {
-            // Create new client
+            // Create new client - Jobber requires specific enum values for description
             console.log("Creating new client:", { customer_name, phone, email, address });
+            const clientInput: any = {
+              firstName: customer_name.split(" ")[0] || "Customer",
+              lastName: customer_name.split(" ").slice(1).join(" ") || "Customer",
+              phones: [{ number: phone, primary: true, description: "MOBILE" }],
+            };
+            
+            // Add email if provided
+            if (email) {
+              clientInput.emails = [{ address: email, primary: true, description: "MAIN" }];
+            }
+            
+            // Add billing address if provided - need to parse properly
+            if (address) {
+              clientInput.billingAddress = {
+                street1: address,
+              };
+            }
+            
+            console.log("Client input payload:", JSON.stringify(clientInput));
             const clientResult = await jobberGraphQL(accessToken, QUERIES.createClient, {
-              input: {
-                firstName: customer_name.split(" ")[0] || "Customer",
-                lastName: customer_name.split(" ").slice(1).join(" ") || "",
-                phones: [{ number: phone, primary: true }],
-                emails: email ? [{ address: email, primary: true }] : [],
-                billingAddress: address ? {
-                  street: address,
-                } : undefined,
-              },
+              input: clientInput,
             });
 
             console.log("Client create response:", JSON.stringify(clientResult));
