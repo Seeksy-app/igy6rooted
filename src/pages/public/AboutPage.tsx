@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Shield, CheckCircle, Star, Phone, Award, Heart } from "lucide-react";
+import craigPhoto from "@/assets/craig-orner.avif";
 
 export default function AboutPage() {
   return (
@@ -79,6 +80,13 @@ export default function AboutPage() {
             </div>
 
             <div className="space-y-6">
+              <div className="rounded-2xl overflow-hidden mb-6">
+                <img
+                  src={craigPhoto}
+                  alt="Craig Orner, owner of IGY6 Rooted Tree Service"
+                  className="w-full h-auto object-cover rounded-2xl"
+                />
+              </div>
               <div className="bg-[hsl(82,15%,95%)] rounded-2xl p-8">
                 <h3 className="font-bold text-xl text-[hsl(82,25%,20%)] mb-6">Our Values</h3>
                 <div className="space-y-4">
