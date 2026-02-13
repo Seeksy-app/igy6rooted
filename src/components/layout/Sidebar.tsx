@@ -33,6 +33,7 @@ const navItems = [
   { to: "/meta-ads-guide", icon: Megaphone, label: "Meta Ads" },
   { to: "/google-ads-guide", icon: Search, label: "Google Ads" },
   { to: "/gtm", icon: MapPinned, label: "GTM" },
+  { to: "/seo", icon: Search, label: "SEO Dashboard" },
   { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
 ];
 
