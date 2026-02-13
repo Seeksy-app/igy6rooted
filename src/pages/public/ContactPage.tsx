@@ -1,7 +1,29 @@
+import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
 
 export default function ContactPage() {
+  useEffect(() => {
+    // Load Jobber embed stylesheet
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://d3ey4dbjkt2f6s.cloudfront.net/assets/external/work_request_embed.css";
+    link.media = "screen";
+    document.head.appendChild(link);
+
+    // Load Jobber embed script
+    const script = document.createElement("script");
+    script.src = "https://d3ey4dbjkt2f6s.cloudfront.net/assets/static_link/work_request_embed_snippet.js";
+    script.setAttribute("clienthub_id", "098c4d0e-40ac-4280-b8c9-70e5a93704f7-2162555");
+    script.setAttribute("form_url", "https://clienthub.getjobber.com/client_hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/work_request/embedded_work_request_form?form_id=2162555");
+    document.body.appendChild(script);
+
+    return () => {
+      document.head.removeChild(link);
+      document.body.removeChild(script);
+    };
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -23,7 +45,7 @@ export default function ContactPage() {
               Contact <span className="text-[hsl(82,50%,65%)]">IGY6 Rooted</span>
             </h1>
             <p className="text-xl text-white/80 max-w-2xl">
-              Ready for a free estimate? Call us today or send us an email. We respond quickly.
+              Ready for a free estimate? Fill out the form below or give us a call. We respond quickly.
             </p>
           </div>
         </div>
@@ -32,9 +54,18 @@ export default function ContactPage() {
       <section className="bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="grid lg:grid-cols-2 gap-12">
+            {/* Jobber Embed Form */}
+            <div>
+              <h2 className="text-2xl font-bold text-[hsl(82,25%,20%)] mb-6">Request a Free Estimate</h2>
+              <div
+                id="098c4d0e-40ac-4280-b8c9-70e5a93704f7-2162555"
+                className="rounded-xl border border-[hsl(82,15%,90%)] p-1 min-h-[500px]"
+              />
+            </div>
+
             {/* Contact info */}
             <div>
-              <h2 className="text-2xl font-bold text-[hsl(82,25%,20%)] mb-8">Get Your Free Estimate</h2>
+              <h2 className="text-2xl font-bold text-[hsl(82,25%,20%)] mb-8">Other Ways to Reach Us</h2>
               <div className="space-y-6">
                 <a
                   href="tel:+15182650275"
@@ -88,20 +119,6 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Map */}
-            <div className="rounded-xl overflow-hidden shadow-lg border border-[hsl(82,15%,90%)]">
-              <iframe
-                title="IGY6 Rooted Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3456.789!2d-86.4822!3d30.5169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8893e0d8e34a4f91%3A0x2567a2d79f99de62!2s1639+Parkside+Cir%2C+Niceville%2C+FL+32578!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
-                width="100%"
-                height="100%"
-                style={{ border: 0, minHeight: "500px" }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
             </div>
           </div>
         </div>
