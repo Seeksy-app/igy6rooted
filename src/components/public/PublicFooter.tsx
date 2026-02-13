@@ -126,7 +126,7 @@ export function PublicFooter() {
               </li>
               <li className="flex items-start gap-2.5 text-sm text-white/70">
                 <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                1639 Parkside Cir, Niceville, FL 32578
+                Niceville, FL 32578
               </li>
               <li className="flex items-start gap-2.5 text-sm text-white/70">
                 <Clock className="h-4 w-4 shrink-0 mt-0.5" />
