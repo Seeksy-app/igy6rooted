@@ -97,7 +97,7 @@ export default function HomePage() {
             alt="Professional stump grinding service in Northwest Florida"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, hsla(82,25%,10%,0.95), hsla(82,25%,10%,0.85), hsla(82,25%,10%,0.55))' }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, hsla(82,25%,10%,0.82), hsla(82,25%,10%,0.65), hsla(82,25%,10%,0.3))' }} />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
           <div className="max-w-2xl">
