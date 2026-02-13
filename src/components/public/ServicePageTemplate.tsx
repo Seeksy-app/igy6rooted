@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Phone, CheckCircle, ArrowLeft, TreePine } from "lucide-react";
@@ -21,6 +22,10 @@ export function ServicePageTemplate({
   benefits,
   relatedServices,
 }: ServicePageTemplateProps) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <>
       <Helmet>
