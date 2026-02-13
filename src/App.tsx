@@ -3,14 +3,34 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { OrgProvider, useOrg } from "@/contexts/OrgContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { PublicLayout } from "@/components/public/PublicLayout";
 
 // Auth pages
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
 import OnboardingPage from "@/pages/auth/OnboardingPage";
+
+// Public pages
+import HomePage from "@/pages/public/HomePage";
+import AboutPage from "@/pages/public/AboutPage";
+import ServicesPage from "@/pages/public/ServicesPage";
+import ContactPage from "@/pages/public/ContactPage";
+import {
+  TreeRemovalPage,
+  TreeTrimmingPage,
+  TreePruningPage,
+  StumpGrindingPage,
+  EmergencyTreeRemovalPage,
+  DebrisRemovalPage,
+  LandscapingPage,
+  LandClearingPage,
+  LotClearingPage,
+  BrushRemovalPage,
+} from "@/pages/public/services";
 
 // AI Platform pages
 import AIControlCenter from "@/pages/AIControlCenter";
@@ -107,12 +127,28 @@ function OnboardingRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public website */}
+      <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
+      <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
+      <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+      <Route path="/services/tree-removal" element={<PublicLayout><TreeRemovalPage /></PublicLayout>} />
+      <Route path="/services/tree-trimming" element={<PublicLayout><TreeTrimmingPage /></PublicLayout>} />
+      <Route path="/services/tree-pruning" element={<PublicLayout><TreePruningPage /></PublicLayout>} />
+      <Route path="/services/stump-grinding" element={<PublicLayout><StumpGrindingPage /></PublicLayout>} />
+      <Route path="/services/emergency-tree-removal" element={<PublicLayout><EmergencyTreeRemovalPage /></PublicLayout>} />
+      <Route path="/services/debris-removal" element={<PublicLayout><DebrisRemovalPage /></PublicLayout>} />
+      <Route path="/services/landscaping" element={<PublicLayout><LandscapingPage /></PublicLayout>} />
+      <Route path="/services/land-clearing" element={<PublicLayout><LandClearingPage /></PublicLayout>} />
+      <Route path="/services/lot-clearing" element={<PublicLayout><LotClearingPage /></PublicLayout>} />
+      <Route path="/services/brush-removal" element={<PublicLayout><BrushRemovalPage /></PublicLayout>} />
+
+      {/* Auth routes */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
       <Route path="/onboarding" element={<OnboardingRoute><OnboardingPage /></OnboardingRoute>} />
 
-      {/* AI Platform routes */}
+      {/* Admin/Dashboard routes */}
       <Route path="/dashboard" element={<ProtectedRoute><AIControlCenter /></ProtectedRoute>} />
       <Route path="/ai-chat" element={<ProtectedRoute><AIChatPage /></ProtectedRoute>} />
       <Route path="/ai-calls" element={<ProtectedRoute><AICallsPage /></ProtectedRoute>} />
@@ -129,34 +165,32 @@ function AppRoutes() {
       <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
       <Route path="/gtm" element={<ProtectedRoute><GTMPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-
-      {/* Admin routes */}
       <Route path="/admin/logs" element={<ProtectedRoute><ToolCallLogsPage /></ProtectedRoute>} />
 
       {/* Voice Agent Test - Public route */}
       <Route path="/voice-agent-test" element={<VoiceAgentTestPage />} />
 
-      {/* Redirects */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <OrgProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AppRoutes />
-          </TooltipProvider>
-        </OrgProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <OrgProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <AppRoutes />
+            </TooltipProvider>
+          </OrgProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
