@@ -96,8 +96,8 @@ export default function ContactPage() {
                     <MapPin className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[hsl(82,25%,20%)]">1639 Parkside Cir</p>
-                    <p className="text-sm text-[hsl(82,10%,50%)]">Niceville, FL 32578</p>
+                    <p className="font-semibold text-[hsl(82,25%,20%)]">Niceville, FL 32578</p>
+                    <p className="text-sm text-[hsl(82,10%,50%)]">Serving Northwest Florida</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-5 rounded-xl bg-[hsl(82,10%,96%)]">

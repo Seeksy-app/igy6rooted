@@ -12,7 +12,6 @@ export function LocalBusinessSchema() {
     email: "CO@IGY6Rooted.com",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "1639 Parkside Cir",
       addressLocality: "Niceville",
       addressRegion: "FL",
       postalCode: "32578",
