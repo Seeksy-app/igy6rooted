@@ -34,11 +34,12 @@ export function PublicFooter() {
             Call us today for a no-obligation assessment of your tree service needs.
           </p>
           <a
-            href="tel:+15182650275"
+            href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-white text-[hsl(82,25%,25%)] px-8 py-3.5 rounded-lg font-bold text-lg hover:bg-white/90 transition-colors"
           >
-            <Phone className="h-5 w-5" />
-            (518) 265-0275
+            Get Free Estimate
           </a>
         </div>
       </div>

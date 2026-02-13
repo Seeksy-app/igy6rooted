@@ -119,7 +119,9 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="tel:+15182650275"
+                href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 bg-[hsl(82,40%,45%)] hover:bg-[hsl(82,40%,38%)] text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
               >
                 <Phone className="h-5 w-5" />

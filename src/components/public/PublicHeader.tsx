@@ -132,7 +132,9 @@ export function PublicHeader() {
             {/* CTA + mobile toggle */}
             <div className="flex items-center gap-3">
               <a
-                href="tel:+15182650275"
+                href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hidden sm:inline-flex items-center gap-2 bg-[hsl(82,25%,28%)] hover:bg-[hsl(82,25%,22%)] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
               >
                 <Phone className="h-4 w-4" />

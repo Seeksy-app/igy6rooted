@@ -67,11 +67,12 @@ export function ServicePageTemplate({
                   Call us today for a no-obligation assessment.
                 </p>
                 <a
-                  href="tel:+15182650275"
+                  href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 bg-white text-[hsl(82,25%,25%)] px-6 py-3 rounded-lg font-bold hover:bg-white/90 transition-colors"
                 >
-                  <Phone className="h-4 w-4" />
-                  (518) 265-0275
+                  Get Free Estimate
                 </a>
               </div>
 
