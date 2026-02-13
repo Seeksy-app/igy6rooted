@@ -47,6 +47,7 @@ import GoogleAdsGuidePage from "@/pages/GoogleAdsGuidePage";
 import SettingsPage from "@/pages/SettingsPage";
 import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import GTMPage from "@/pages/GTMPage";
+import SEODashboardPage from "@/pages/SEODashboardPage";
 import NotFound from "@/pages/NotFound";
 
 // Admin pages
@@ -164,6 +165,7 @@ function AppRoutes() {
       <Route path="/google-ads-guide" element={<ProtectedRoute><GoogleAdsGuidePage /></ProtectedRoute>} />
       <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
       <Route path="/gtm" element={<ProtectedRoute><GTMPage /></ProtectedRoute>} />
+      <Route path="/seo" element={<ProtectedRoute><SEODashboardPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/admin/logs" element={<ProtectedRoute><ToolCallLogsPage /></ProtectedRoute>} />
 
