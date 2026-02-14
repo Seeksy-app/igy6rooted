@@ -6,9 +6,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-// Models to query
 const MODELS = [
   "google/gemini-2.5-flash",
   "google/gemini-2.5-pro",
@@ -16,16 +16,18 @@ const MODELS = [
   "openai/gpt-5",
 ];
 
-// Prompt templates per category
 function generatePrompts(brandName: string, domain: string, industry: string): Array<{ text: string; category: string }> {
   const service = industry || "services";
+  // Sanitize brand name and domain to prevent prompt injection
+  const safeBrand = brandName.slice(0, 100).replace(/[<>{}]/g, "");
+  const safeDomain = domain.slice(0, 100).replace(/[<>{}]/g, "");
   return [
     { text: `What are the best ${service} companies in the Dallas Fort Worth area?`, category: "recommendation" },
     { text: `Can you recommend a reliable ${service} provider near me?`, category: "recommendation" },
     { text: `Compare the top ${service} companies. Which one is best?`, category: "comparison" },
-    { text: `What do people say about ${brandName}? Are they reputable?`, category: "review" },
+    { text: `What do people say about ${safeBrand}? Are they reputable?`, category: "review" },
     { text: `I need ${service} done at my home. Who should I hire?`, category: "recommendation" },
-    { text: `Tell me about ${domain} and their services.`, category: "direct" },
+    { text: `Tell me about ${safeDomain} and their services.`, category: "direct" },
   ];
 }
 
@@ -36,7 +38,6 @@ function analyzeResponse(response: string, brandName: string, domain: string) {
 
   const brand_mentioned = lower.includes(brandLower) || lower.includes(domainLower);
 
-  // Find position in numbered lists
   let brand_position: number | null = null;
   const lines = response.split("\n");
   for (const line of lines) {
@@ -47,22 +48,15 @@ function analyzeResponse(response: string, brandName: string, domain: string) {
     }
   }
 
-  // Citation
   const citation_found = lower.includes(domainLower);
   const urlMatch = response.match(new RegExp(`https?://[^\\s]*${domain.replace(/\./g, "\\.")}[^\\s]*`, "i"));
   const citation_url = urlMatch ? urlMatch[0] : null;
 
-  // Simple sentiment
   const positiveWords = ["excellent", "great", "best", "top", "recommended", "reliable", "trusted", "quality", "professional"];
   const negativeWords = ["avoid", "poor", "bad", "complaints", "issues", "unreliable", "scam"];
-  let posCount = 0, negCount = 0;
-  for (const w of positiveWords) if (lower.includes(w)) posCount++;
-  for (const w of negativeWords) if (lower.includes(w)) negCount++;
-  
   let sentiment = "neutral";
   let sentiment_score = 0;
   if (brand_mentioned) {
-    // Extract context around brand mention
     const idx = lower.indexOf(brandLower);
     const context = lower.substring(Math.max(0, idx - 200), Math.min(lower.length, idx + 200));
     const ctxPos = positiveWords.filter(w => context.includes(w)).length;
@@ -71,7 +65,6 @@ function analyzeResponse(response: string, brandName: string, domain: string) {
     else if (ctxNeg > ctxPos) { sentiment = "negative"; sentiment_score = -Math.min(1, ctxNeg * 0.3); }
   }
 
-  // Competitor mentions (look for numbered company names)
   const competitors: string[] = [];
   for (const line of lines) {
     const m = line.match(/^\d+[.)]\s+\*?\*?([A-Z][A-Za-z\s&']+)/);
@@ -80,7 +73,6 @@ function analyzeResponse(response: string, brandName: string, domain: string) {
     }
   }
 
-  // Presence score: 0-100
   let presence_score = 0;
   if (brand_mentioned) presence_score += 40;
   if (brand_position === 1) presence_score += 30;
@@ -100,25 +92,70 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+    // Validate JWT
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(SUPABASE_URL, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const tokenStr = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(tokenStr);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = claimsData.claims.sub;
 
     const { client_profile_id, org_id } = await req.json();
-    if (!client_profile_id || !org_id) throw new Error("client_profile_id and org_id required");
 
-    // Get client profile
-    const { data: profile, error: profileErr } = await supabase
+    // Validate inputs
+    if (!client_profile_id || !UUID_REGEX.test(client_profile_id)) {
+      throw new Error("Valid client_profile_id is required");
+    }
+    if (!org_id || !UUID_REGEX.test(org_id)) {
+      throw new Error("Valid org_id is required");
+    }
+
+    // Verify user is org member
+    const serviceSupabase = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: membership } = await serviceSupabase
+      .from("team_members")
+      .select("role")
+      .eq("org_id", org_id)
+      .eq("user_id", userId)
+      .single();
+
+    if (!membership) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get client profile using service role
+    const { data: profile, error: profileErr } = await serviceSupabase
       .from("seo_client_profiles")
       .select("*")
       .eq("id", client_profile_id)
+      .eq("org_id", org_id)
       .single();
     if (profileErr || !profile) throw new Error("Client profile not found");
 
     const prompts = generatePrompts(profile.brand_name, profile.domain, profile.industry || "");
 
     // Create scan record
-    const { data: scan, error: scanErr } = await supabase
+    const { data: scan, error: scanErr } = await serviceSupabase
       .from("llm_brand_scans")
       .insert({
         org_id,
@@ -134,7 +171,6 @@ serve(async (req) => {
 
     const allResults: any[] = [];
 
-    // Query each model with each prompt
     for (const model of MODELS) {
       for (const prompt of prompts) {
         try {
@@ -179,17 +215,15 @@ serve(async (req) => {
       }
     }
 
-    // Insert results
     if (allResults.length > 0) {
-      await supabase.from("llm_brand_results").insert(allResults);
+      await serviceSupabase.from("llm_brand_results").insert(allResults);
     }
 
-    // Compute overall score
     const avgScore = allResults.length > 0
       ? allResults.reduce((s, r) => s + (r.presence_score || 0), 0) / allResults.length
       : 0;
 
-    await supabase
+    await serviceSupabase
       .from("llm_brand_scans")
       .update({
         status: "completed",
@@ -202,7 +236,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error("LLM Brand Scan error:", error);
+    console.error("LLM Brand Scan error:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

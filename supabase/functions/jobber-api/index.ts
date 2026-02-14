@@ -9,6 +9,7 @@ const corsHeaders = {
 
 const JOBBER_GRAPHQL_URL = "https://api.getjobber.com/api/graphql";
 const JOBBER_GRAPHQL_VERSION = "2024-09-16";
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // HMAC-SHA256 verification
 async function verifyHmacSignature(
@@ -129,7 +130,7 @@ async function getValidAccessToken(supabase: any, orgId: string): Promise<string
 
 // Execute Jobber GraphQL query
 async function jobberGraphQL(accessToken: string, query: string, variables?: Record<string, any>): Promise<any> {
-  console.log("GraphQL request:", JSON.stringify({ query: query.substring(0, 100), variables }));
+  console.log("GraphQL request type:", query.trim().substring(0, 30));
   
   const response = await fetch(JOBBER_GRAPHQL_URL, {
     method: "POST",
@@ -142,7 +143,7 @@ async function jobberGraphQL(accessToken: string, query: string, variables?: Rec
   });
 
   const responseText = await response.text();
-  console.log("GraphQL raw response:", responseText);
+  console.log("GraphQL response status:", response.status);
   
   let data;
   try {
@@ -416,9 +417,12 @@ serve(async (req) => {
   // Use org_id from body if not in headers
   const effectiveOrgId = orgId || body.org_id;
 
-  console.log(`[${new Date().toISOString()}] ${req.method} ${path} - org: ${effectiveOrgId}, conversation: ${conversationId}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${path}`);
 
-  // Verify HMAC signature if secret is configured (for ElevenLabs tool calls)
+  // Authentication: either HMAC (ElevenLabs) or JWT (user requests)
+  let isAuthenticated = false;
+
+  // Check HMAC first (for ElevenLabs tool calls)
   if (ELEVENLABS_HMAC_SECRET && signature && timestamp) {
     const isValid = await verifyHmacSignature(rawBody, signature, ELEVENLABS_HMAC_SECRET, timestamp);
     if (!isValid) {
@@ -428,11 +432,53 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    isAuthenticated = true;
   }
 
-  if (!effectiveOrgId) {
+  // If not HMAC authenticated, require JWT
+  if (!isAuthenticated) {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseAnon = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const tokenStr = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseAnon.auth.getClaims(tokenStr);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify org membership
+    if (effectiveOrgId) {
+      const { data: membership } = await supabase
+        .from("team_members")
+        .select("role")
+        .eq("org_id", effectiveOrgId)
+        .eq("user_id", claimsData.claims.sub)
+        .single();
+      if (!membership) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+    isAuthenticated = true;
+  }
+
+  // Validate org_id format
+  if (!effectiveOrgId || !UUID_REGEX.test(effectiveOrgId)) {
     return new Response(
-      JSON.stringify({ error: "Missing org_id" }),
+      JSON.stringify({ error: "Valid org_id is required" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
