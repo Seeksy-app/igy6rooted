@@ -11,7 +11,6 @@ import {
   TrendingUp,
   Settings,
   LogOut,
-  ScrollText,
   Mic,
   Megaphone,
   Search,
@@ -68,10 +67,6 @@ const navGroups: NavGroup[] = [
       { to: "/integrations", icon: Link2, label: "Integrations" },
     ],
   },
-];
-
-const adminItems = [
-  { to: "/admin/logs", icon: ScrollText, label: "Tool Call Logs" },
 ];
 
 function NavGroupSection({ group }: { group: NavGroup }) {
@@ -148,21 +143,6 @@ export function Sidebar() {
           <NavGroupSection key={group.label} group={group} />
         ))}
 
-        <div className="pt-3 mt-3 border-t border-sidebar-border">
-          <p className="px-3 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Admin</p>
-          {adminItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cn("nav-item", isActive && "active")
-              }
-            >
-              <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </div>
       </nav>
 
       {/* Footer */}
