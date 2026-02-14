@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.meta-ads-metrics]
 verify_jwt = false
+
+[functions.llm-brand-scan]
+verify_jwt = false
