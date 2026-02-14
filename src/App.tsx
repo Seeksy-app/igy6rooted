@@ -34,6 +34,7 @@ import {
 
 // AI Platform pages
 import AIControlCenter from "@/pages/AIControlCenter";
+import MainDashboardPage from "@/pages/MainDashboardPage";
 import AIChatPage from "@/pages/AIChatPage";
 import AICallsPage from "@/pages/AICallsPage";
 import AIBookingAssistantPage from "@/pages/AIBookingAssistantPage";
@@ -152,7 +153,8 @@ function AppRoutes() {
       <Route path="/onboarding" element={<OnboardingRoute><OnboardingPage /></OnboardingRoute>} />
 
       {/* Admin/Dashboard routes */}
-      <Route path="/dashboard" element={<ProtectedRoute><AIControlCenter /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><MainDashboardPage /></ProtectedRoute>} />
+      <Route path="/ai-control" element={<ProtectedRoute><AIControlCenter /></ProtectedRoute>} />
       <Route path="/ai-chat" element={<ProtectedRoute><AIChatPage /></ProtectedRoute>} />
       <Route path="/ai-calls" element={<ProtectedRoute><AICallsPage /></ProtectedRoute>} />
       <Route path="/ai-booking" element={<ProtectedRoute><AIBookingAssistantPage /></ProtectedRoute>} />

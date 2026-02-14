@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
+  LayoutDashboard,
   Bot,
   MessageSquare,
   Phone,
@@ -34,7 +35,7 @@ const navGroups: NavGroup[] = [
   {
     label: "AI Assistants",
     items: [
-      { to: "/dashboard", icon: Bot, label: "AI Control Center" },
+      { to: "/ai-control", icon: Bot, label: "AI Control Center" },
       { to: "/ai-chat", icon: MessageSquare, label: "AI Chat" },
       { to: "/ai-calls", icon: Phone, label: "AI Calls" },
       { to: "/ai-booking", icon: Calendar, label: "Booking Assistant" },
@@ -134,6 +135,14 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) => cn("nav-item mb-2", isActive && "active")}
+        >
+          <LayoutDashboard className="h-5 w-5" />
+          <span>Dashboard</span>
+        </NavLink>
+
         {navGroups.map((group) => (
           <NavGroupSection key={group.label} group={group} />
         ))}

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Globe, BarChart3, Search, Megaphone, Share2, Database, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Globe, BarChart3, Search, Megaphone, Share2, Database, ChevronRight, ChevronLeft, Check, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
@@ -61,7 +61,7 @@ export default function SEOOnboardingPage() {
   const update = (field: keyof FormData, value: string) =>
     setForm((f) => ({ ...f, [field]: value }));
 
-  const handleSave = async () => {
+  const saveProfile = async (completed: boolean) => {
     if (!currentOrg) return;
     if (!form.domain || !form.brand_name) {
       toast.error("Domain and Brand Name are required");
@@ -71,7 +71,7 @@ export default function SEOOnboardingPage() {
     const { error } = await supabase.from("seo_client_profiles").insert({
       org_id: currentOrg.id,
       ...form,
-      onboarding_completed: true,
+      onboarding_completed: completed,
     } as any);
     setSaving(false);
     if (error) {
@@ -79,9 +79,12 @@ export default function SEOOnboardingPage() {
       else toast.error(error.message);
       return;
     }
-    toast.success("Client profile created!");
-    navigate("/llm-presence");
+    toast.success(completed ? "Client profile created!" : "Progress saved!");
+    navigate(completed ? "/llm-presence" : "/dashboard");
   };
+
+  const handleSave = () => saveProfile(true);
+  const handleSaveAndExit = () => saveProfile(false);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
@@ -193,9 +196,14 @@ export default function SEOOnboardingPage() {
 
       {/* Navigation */}
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setStep((s) => s - 1)} disabled={step === 0}>
-          <ChevronLeft className="mr-1 h-4 w-4" /> Back
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setStep((s) => s - 1)} disabled={step === 0}>
+            <ChevronLeft className="mr-1 h-4 w-4" /> Back
+          </Button>
+          <Button variant="ghost" onClick={handleSaveAndExit} disabled={saving}>
+            <Save className="mr-1 h-4 w-4" /> Save & Exit
+          </Button>
+        </div>
         {step < STEPS.length - 1 ? (
           <Button onClick={() => setStep((s) => s + 1)}>
             Next <ChevronRight className="ml-1 h-4 w-4" />
