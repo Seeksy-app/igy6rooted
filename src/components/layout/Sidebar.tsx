@@ -15,6 +15,8 @@ import {
   Megaphone,
   Search,
   MapPinned,
+  UserPlus,
+  Eye,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
@@ -34,6 +36,8 @@ const navItems = [
   { to: "/google-ads-guide", icon: Search, label: "Google Ads" },
   { to: "/gtm", icon: MapPinned, label: "GTM" },
   { to: "/seo", icon: Search, label: "SEO Dashboard" },
+  { to: "/seo-onboarding", icon: UserPlus, label: "SEO Onboarding" },
+  { to: "/llm-presence", icon: Eye, label: "LLM Presence" },
   { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
 ];
 

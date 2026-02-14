@@ -48,6 +48,8 @@ import SettingsPage from "@/pages/SettingsPage";
 import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import GTMPage from "@/pages/GTMPage";
 import SEODashboardPage from "@/pages/SEODashboardPage";
+import SEOOnboardingPage from "@/pages/SEOOnboardingPage";
+import LLMPresencePage from "@/pages/LLMPresencePage";
 import NotFound from "@/pages/NotFound";
 
 // Admin pages
@@ -166,6 +168,8 @@ function AppRoutes() {
       <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
       <Route path="/gtm" element={<ProtectedRoute><GTMPage /></ProtectedRoute>} />
       <Route path="/seo" element={<ProtectedRoute><SEODashboardPage /></ProtectedRoute>} />
+      <Route path="/seo-onboarding" element={<ProtectedRoute><SEOOnboardingPage /></ProtectedRoute>} />
+      <Route path="/llm-presence" element={<ProtectedRoute><LLMPresencePage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/admin/logs" element={<ProtectedRoute><ToolCallLogsPage /></ProtectedRoute>} />
 

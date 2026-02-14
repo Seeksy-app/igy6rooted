@@ -812,6 +812,135 @@ export type Database = {
           },
         ]
       }
+      llm_brand_results: {
+        Row: {
+          brand_mentioned: boolean
+          brand_position: number | null
+          citation_found: boolean
+          citation_url: string | null
+          competitor_mentions: Json | null
+          created_at: string
+          id: string
+          model_name: string
+          org_id: string
+          presence_score: number | null
+          prompt_category: string | null
+          prompt_text: string
+          response_text: string
+          scan_id: string
+          sentiment: string | null
+          sentiment_score: number | null
+        }
+        Insert: {
+          brand_mentioned?: boolean
+          brand_position?: number | null
+          citation_found?: boolean
+          citation_url?: string | null
+          competitor_mentions?: Json | null
+          created_at?: string
+          id?: string
+          model_name: string
+          org_id: string
+          presence_score?: number | null
+          prompt_category?: string | null
+          prompt_text: string
+          response_text: string
+          scan_id: string
+          sentiment?: string | null
+          sentiment_score?: number | null
+        }
+        Update: {
+          brand_mentioned?: boolean
+          brand_position?: number | null
+          citation_found?: boolean
+          citation_url?: string | null
+          competitor_mentions?: Json | null
+          created_at?: string
+          id?: string
+          model_name?: string
+          org_id?: string
+          presence_score?: number | null
+          prompt_category?: string | null
+          prompt_text?: string
+          response_text?: string
+          scan_id?: string
+          sentiment?: string | null
+          sentiment_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "llm_brand_results_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "llm_brand_results_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "llm_brand_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      llm_brand_scans: {
+        Row: {
+          client_profile_id: string
+          completed_at: string | null
+          created_at: string
+          error: string | null
+          id: string
+          models_queried: string[]
+          org_id: string
+          overall_brand_score: number | null
+          prompts_used: Json
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          client_profile_id: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          models_queried?: string[]
+          org_id: string
+          overall_brand_score?: number | null
+          prompts_used?: Json
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          client_profile_id?: string
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          models_queried?: string[]
+          org_id?: string
+          overall_brand_score?: number | null
+          prompts_used?: Json
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "llm_brand_scans_client_profile_id_fkey"
+            columns: ["client_profile_id"]
+            isOneToOne: false
+            referencedRelation: "seo_client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "llm_brand_scans_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_campaigns: {
         Row: {
           budget: number
@@ -1033,6 +1162,95 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      seo_client_profiles: {
+        Row: {
+          brand_name: string
+          created_at: string
+          crm_account_id: string | null
+          crm_platform: string | null
+          domain: string
+          facebook_page_url: string | null
+          ga4_measurement_id: string | null
+          ga4_property_id: string | null
+          google_ads_cid: string | null
+          google_business_profile_url: string | null
+          id: string
+          industry: string | null
+          instagram_handle: string | null
+          linkedin_url: string | null
+          meta_ad_account_id: string | null
+          notes: string | null
+          onboarding_completed: boolean
+          org_id: string
+          search_console_property: string | null
+          semrush_project_id: string | null
+          tiktok_handle: string | null
+          updated_at: string
+          x_handle: string | null
+          youtube_channel_url: string | null
+        }
+        Insert: {
+          brand_name: string
+          created_at?: string
+          crm_account_id?: string | null
+          crm_platform?: string | null
+          domain: string
+          facebook_page_url?: string | null
+          ga4_measurement_id?: string | null
+          ga4_property_id?: string | null
+          google_ads_cid?: string | null
+          google_business_profile_url?: string | null
+          id?: string
+          industry?: string | null
+          instagram_handle?: string | null
+          linkedin_url?: string | null
+          meta_ad_account_id?: string | null
+          notes?: string | null
+          onboarding_completed?: boolean
+          org_id: string
+          search_console_property?: string | null
+          semrush_project_id?: string | null
+          tiktok_handle?: string | null
+          updated_at?: string
+          x_handle?: string | null
+          youtube_channel_url?: string | null
+        }
+        Update: {
+          brand_name?: string
+          created_at?: string
+          crm_account_id?: string | null
+          crm_platform?: string | null
+          domain?: string
+          facebook_page_url?: string | null
+          ga4_measurement_id?: string | null
+          ga4_property_id?: string | null
+          google_ads_cid?: string | null
+          google_business_profile_url?: string | null
+          id?: string
+          industry?: string | null
+          instagram_handle?: string | null
+          linkedin_url?: string | null
+          meta_ad_account_id?: string | null
+          notes?: string | null
+          onboarding_completed?: boolean
+          org_id?: string
+          search_console_property?: string | null
+          semrush_project_id?: string | null
+          tiktok_handle?: string | null
+          updated_at?: string
+          x_handle?: string | null
+          youtube_channel_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_client_profiles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_catalog: {
         Row: {
