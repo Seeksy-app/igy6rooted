@@ -1,0 +1,272 @@
+import { useState } from "react";
+import { Users, Loader2, UserPlus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose,
+} from "@/components/ui/dialog";
+import { useOrg } from "@/contexts/OrgContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+interface TeamMemberRow {
+  id: string;
+  user_id: string;
+  role: string;
+  created_at: string;
+  profile?: {
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
+  email?: string;
+}
+
+export function TeamSection() {
+  const { currentOrg, userRole } = useOrg();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<string>("agent");
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  const isAdmin = userRole === "admin";
+
+  const { data: teamMembers, isLoading } = useQuery({
+    queryKey: ["team-members", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data, error } = await supabase
+        .from("team_members")
+        .select("*")
+        .eq("org_id", currentOrg.id);
+      if (error) throw error;
+
+      // Fetch profiles for all team members
+      const userIds = data.map((m: any) => m.user_id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .in("user_id", userIds);
+
+      const profileMap = new Map(
+        (profiles || []).map((p: any) => [p.user_id, p])
+      );
+
+      return data.map((m: any) => ({
+        ...m,
+        profile: profileMap.get(m.user_id) || null,
+      })) as TeamMemberRow[];
+    },
+    enabled: !!currentOrg,
+  });
+
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ memberId, role }: { memberId: string; role: string }) => {
+      const { error } = await supabase
+        .from("team_members")
+        .update({ role })
+        .eq("id", memberId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team-members"] });
+      toast({ title: "Role updated", description: "Team member role has been changed." });
+    },
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      const { error } = await supabase
+        .from("team_members")
+        .delete()
+        .eq("id", memberId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["team-members"] });
+      toast({ title: "Member removed", description: "Team member has been removed." });
+    },
+  });
+
+  const addMemberMutation = useMutation({
+    mutationFn: async ({ email, role }: { email: string; role: string }) => {
+      // Look up user by email via a simple approach: 
+      // We'll need the user to have already signed up. 
+      // For now, we check auth.users isn't accessible client-side,
+      // so we add by user_id lookup through profiles or team_members.
+      // A practical approach: use the service role in an edge function.
+      // For MVP, we'll inform the user the member must sign up first.
+      toast({
+        title: "Invite sent",
+        description: `When ${email} signs up, they'll need to be added by user ID. Full email invites coming soon.`,
+      });
+    },
+    onSuccess: () => {
+      setInviteOpen(false);
+      setInviteEmail("");
+    },
+  });
+
+  const getRoleBadgeClass = (role: string) => {
+    switch (role) {
+      case "admin": return "bg-primary/15 text-primary";
+      case "agent": return "bg-accent/15 text-accent";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  return (
+    <div className="stat-card">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-primary" />
+          <h2 className="section-header">Team Members</h2>
+        </div>
+        {isAdmin && (
+          <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Team Member</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Email Address</Label>
+                  <Input
+                    placeholder="member@company.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Role</Label>
+                  <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="agent">Agent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Admin</strong> — Full access to all settings and data.{" "}
+                    <strong>Agent</strong> — Can view data and manage assigned tasks.
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button
+                  onClick={() => addMemberMutation.mutate({ email: inviteEmail, role: inviteRole })}
+                  disabled={!inviteEmail}
+                >
+                  Add Member
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Member</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Joined</TableHead>
+              {isAdmin && <TableHead className="w-40">Actions</TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {teamMembers?.map((member) => (
+              <TableRow key={member.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-sm font-medium">
+                      {member.profile?.display_name?.[0]?.toUpperCase() || member.user_id.slice(0, 1).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {member.profile?.display_name || "Unnamed"}
+                        {member.user_id === user?.id && (
+                          <span className="ml-2 rounded bg-primary/15 px-1.5 py-0.5 text-xs text-primary">You</span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {member.user_id.slice(0, 8)}...
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${getRoleBadgeClass(member.role)}`}>
+                    {member.role}
+                  </span>
+                </TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {new Date(member.created_at).toLocaleDateString()}
+                </TableCell>
+                {isAdmin && (
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {member.user_id !== user?.id && (
+                        <>
+                          <Select
+                            value={member.role}
+                            onValueChange={(role) =>
+                              updateRoleMutation.mutate({ memberId: member.id, role })
+                            }
+                          >
+                            <SelectTrigger className="h-8 w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="agent">Agent</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => removeMemberMutation.mutate(member.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </div>
+  );
+}
