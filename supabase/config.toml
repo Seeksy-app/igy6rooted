@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.llm-brand-scan]
 verify_jwt = false
+
+[functions.gtm-ai-strategy]
+verify_jwt = false
+
+[functions.semrush-api]
+verify_jwt = false

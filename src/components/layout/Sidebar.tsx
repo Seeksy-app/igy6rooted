@@ -46,10 +46,11 @@ const navGroups: NavGroup[] = [
   {
     label: "Marketing",
     items: [
+      { to: "/gtm", icon: MapPinned, label: "GTM Command Center" },
+      { to: "/gtm-onboarding", icon: UserPlus, label: "GTM Setup" },
       { to: "/marketing", icon: BarChart3, label: "Marketing Analytics" },
       { to: "/meta-ads-guide", icon: Megaphone, label: "Meta Ads" },
       { to: "/google-ads-guide", icon: Search, label: "Google Ads" },
-      { to: "/gtm", icon: MapPinned, label: "GTM" },
     ],
   },
   {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/contexts/OrgContext";
@@ -58,6 +59,10 @@ import {
   Globe,
   ExternalLink,
   Sparkles,
+  Brain,
+  Zap,
+  ArrowRight,
+  UserPlus,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -75,6 +80,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
+
 
 interface MarketZone {
   id: string;
@@ -654,20 +660,136 @@ export default function GTMPage() {
     { label: "Revenue", value: `$${totalRevenue.toLocaleString()}`, suffix: "from marketing", icon: DollarSign, color: "text-green-600" },
   ];
 
+  const navigate = useNavigate();
+
+  // Fetch GTM profile
+  const { data: gtmProfile } = useQuery({
+    queryKey: ["gtm-profile", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return null;
+      const { data, error } = await supabase
+        .from("gtm_profiles")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Fetch AI strategies
+  const { data: strategies = [], isLoading: strategiesLoading } = useQuery({
+    queryKey: ["gtm-strategies", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data, error } = await supabase
+        .from("gtm_ai_strategies")
+        .select("*")
+        .eq("org_id", currentOrg.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Generate AI strategy
+  const generateStrategyMutation = useMutation({
+    mutationFn: async (strategyType: string) => {
+      if (!currentOrg || !gtmProfile) throw new Error("Complete GTM onboarding first");
+      const { data, error } = await supabase.functions.invoke("gtm-ai-strategy", {
+        body: {
+          gtm_profile_id: gtmProfile.id,
+          org_id: currentOrg.id,
+          strategy_type: strategyType,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gtm-strategies"] });
+      toast({ title: "AI Strategy Generated!", description: "Your GTM strategy is ready." });
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Strategy generation failed", description: error.message });
+    },
+  });
+
+  // Spend calculator state
+  const [calcBudget, setCalcBudget] = useState("3000");
+  const [calcJobValue, setCalcJobValue] = useState("1200");
+  const [calcCloseRate, setCalcCloseRate] = useState("30");
+
+  const calcBudgetNum = parseFloat(calcBudget) || 0;
+  const calcJobValueNum = parseFloat(calcJobValue) || 0;
+  const calcCloseRateNum = (parseFloat(calcCloseRate) || 0) / 100;
+
+  // Industry benchmark CPLs for home services
+  const channelBenchmarks = [
+    { channel: "Google Ads (PPC)", cpl: 75, convRate: 0.12 },
+    { channel: "Google LSA", cpl: 45, convRate: 0.20 },
+    { channel: "Meta/Facebook Ads", cpl: 55, convRate: 0.08 },
+    { channel: "SEO (Organic)", cpl: 25, convRate: 0.15 },
+    { channel: "Google Business Profile", cpl: 15, convRate: 0.18 },
+    { channel: "Direct Mail/EDDM", cpl: 90, convRate: 0.05 },
+    { channel: "Referral Program", cpl: 20, convRate: 0.35 },
+    { channel: "Nextdoor", cpl: 35, convRate: 0.10 },
+    { channel: "Yelp", cpl: 65, convRate: 0.09 },
+  ];
+
+  const calcProjections = channelBenchmarks.map((b) => {
+    const leads = calcBudgetNum > 0 ? Math.round(calcBudgetNum / b.cpl) : 0;
+    const jobs = Math.round(leads * calcCloseRateNum);
+    const revenue = jobs * calcJobValueNum;
+    const roi = calcBudgetNum > 0 ? ((revenue - calcBudgetNum) / calcBudgetNum * 100) : 0;
+    return { ...b, leads, jobs, revenue, roi };
+  });
+
+  const latestStrategy = strategies.find((s: any) => s.status === "completed");
+  const strategyContent = latestStrategy?.strategy_content as any;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Hero Banner */}
       <div className="relative overflow-hidden rounded-xl bg-[#1565c0] text-white p-8">
         <div className="absolute inset-0 bg-gradient-to-r from-[#1565c0] to-[#1976d2]" />
-        <div className="relative flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/30">
-            <Target className="h-8 w-8" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/30">
+              <Target className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Marketing & GTM Command Center</h1>
+              <p className="mt-1 text-white/80">
+                AI-powered go-to-market strategy, ROI forecasting, and competitor intelligence
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">Marketing & GTM Dashboard</h1>
-            <p className="mt-1 text-white/80">
-              Real-time marketing performance, campaigns, and market zone management
-            </p>
+          <div className="flex gap-2">
+            {!gtmProfile?.onboarding_completed && (
+              <Button variant="secondary" onClick={() => navigate("/gtm-onboarding")}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                {gtmProfile ? "Resume Setup" : "Start Setup"}
+              </Button>
+            )}
+            {gtmProfile?.onboarding_completed && (
+              <Button
+                variant="secondary"
+                onClick={() => generateStrategyMutation.mutate("full")}
+                disabled={generateStrategyMutation.isPending}
+              >
+                {generateStrategyMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Brain className="mr-2 h-4 w-4" />
+                )}
+                Generate AI Strategy
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -677,6 +799,12 @@ export default function GTMPage() {
         <TabsList className="w-full justify-start gap-0 rounded-lg border bg-muted/50 p-1 flex-wrap">
           <TabsTrigger value="overview" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Overview
+          </TabsTrigger>
+          <TabsTrigger value="ai-strategy" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Brain className="mr-1 h-3.5 w-3.5" /> AI Strategy
+          </TabsTrigger>
+          <TabsTrigger value="spend-calc" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Calculator className="mr-1 h-3.5 w-3.5" /> Spend Calculator
           </TabsTrigger>
           <TabsTrigger value="competitors" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm">
             Competitors
@@ -804,6 +932,324 @@ export default function GTMPage() {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* AI Strategy Tab */}
+        <TabsContent value="ai-strategy" className="mt-6 space-y-6">
+          {!gtmProfile?.onboarding_completed ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Brain className="mx-auto h-16 w-16 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-xl font-semibold">Complete GTM Setup First</h3>
+                  <p className="mt-2 text-muted-foreground max-w-md mx-auto">
+                    We need your business profile, service area, budget, and channel preferences
+                    to generate an AI-powered GTM strategy.
+                  </p>
+                  <Button className="mt-6" onClick={() => navigate("/gtm-onboarding")}>
+                    <UserPlus className="mr-2 h-4 w-4" /> Start GTM Setup
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : strategyContent ? (
+            <div className="space-y-6">
+              {/* Executive Summary */}
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Executive Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-foreground leading-relaxed">{strategyContent.executive_summary}</p>
+                  {strategyContent.total_projected_monthly_roi != null && (
+                    <div className="grid gap-4 mt-4 md:grid-cols-3">
+                      <div className="rounded-lg bg-background p-4 border">
+                        <p className="text-sm text-muted-foreground">Projected Monthly ROI</p>
+                        <p className="text-2xl font-bold text-green-600">{strategyContent.total_projected_monthly_roi}%</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-4 border">
+                        <p className="text-sm text-muted-foreground">Projected Monthly Leads</p>
+                        <p className="text-2xl font-bold text-primary">{strategyContent.total_projected_monthly_leads || "—"}</p>
+                      </div>
+                      <div className="rounded-lg bg-background p-4 border">
+                        <p className="text-sm text-muted-foreground">Projected Monthly Revenue</p>
+                        <p className="text-2xl font-bold text-green-600">${(strategyContent.total_projected_monthly_revenue || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Channel Recommendations */}
+              {strategyContent.channel_recommendations?.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Channel Recommendations</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {strategyContent.channel_recommendations.map((ch: any, i: number) => (
+                      <div key={i} className="rounded-lg border p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-lg">{ch.channel}</h4>
+                          <Badge variant={ch.priority === "high" ? "default" : ch.priority === "medium" ? "secondary" : "outline"}>
+                            {ch.priority} priority
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm mb-3">
+                          <div>
+                            <p className="text-muted-foreground">Rec. Spend</p>
+                            <p className="font-bold">${(ch.recommended_monthly_spend || 0).toLocaleString()}/mo</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Expected CPL</p>
+                            <p className="font-bold">${ch.expected_cpl}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Expected Leads</p>
+                            <p className="font-bold">{ch.expected_monthly_leads}/mo</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Conv. Rate</p>
+                            <p className="font-bold">{ch.expected_conversion_rate || "—"}%</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Expected ROI</p>
+                            <p className="font-bold text-green-600">{ch.expected_roi_percentage}%</p>
+                          </div>
+                        </div>
+                        {ch.tactics?.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">Tactics:</p>
+                            <ul className="text-sm text-muted-foreground space-y-1">
+                              {ch.tactics.map((t: string, j: number) => (
+                                <li key={j} className="flex items-start gap-2">
+                                  <Zap className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                                  {t}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {ch.timeline && <p className="text-xs text-muted-foreground mt-2">Timeline: {ch.timeline}</p>}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Budget Allocation */}
+              {strategyContent.budget_allocation && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recommended Budget Allocation</CardTitle>
+                    <CardDescription>
+                      Total: ${(strategyContent.budget_allocation.total_recommended_budget || 0).toLocaleString()}/mo
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {strategyContent.budget_allocation.allocation?.map((a: any, i: number) => (
+                        <div key={i} className="flex items-center gap-4">
+                          <div className="w-40 text-sm font-medium">{a.channel}</div>
+                          <div className="flex-1">
+                            <Progress value={a.percentage} className="h-3" />
+                          </div>
+                          <div className="w-20 text-right text-sm font-bold">${a.amount.toLocaleString()}</div>
+                          <div className="w-12 text-right text-xs text-muted-foreground">{a.percentage}%</div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Quick Wins + 90-Day Plan */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                {strategyContent.quick_wins?.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-yellow-500" />
+                        Quick Wins
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {strategyContent.quick_wins.map((w: string, i: number) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <ArrowRight className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                            {w}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {strategyContent.ninety_day_plan?.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>90-Day Plan</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {strategyContent.ninety_day_plan.map((phase: any, i: number) => (
+                        <div key={i} className="border-l-2 border-primary/30 pl-4">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-sm">{phase.phase}</h4>
+                            <Badge variant="outline" className="text-xs">{phase.weeks}</Badge>
+                          </div>
+                          <ul className="text-sm text-muted-foreground mt-1 space-y-0.5">
+                            {phase.actions?.map((a: string, j: number) => <li key={j}>• {a}</li>)}
+                          </ul>
+                          {phase.expected_outcome && (
+                            <p className="text-xs text-primary mt-1">→ {phase.expected_outcome}</p>
+                          )}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Competitive Insights */}
+              {strategyContent.competitive_insights?.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Competitive Insights</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {strategyContent.competitive_insights.map((ci: any, i: number) => (
+                        <div key={i} className="flex items-start gap-4 rounded-lg border p-3">
+                          <Badge variant={ci.impact === "high" ? "default" : ci.impact === "medium" ? "secondary" : "outline"} className="mt-0.5 shrink-0">
+                            {ci.impact}
+                          </Badge>
+                          <div>
+                            <p className="text-sm font-medium">{ci.insight}</p>
+                            <p className="text-sm text-muted-foreground mt-1"><strong>Action:</strong> {ci.action}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => generateStrategyMutation.mutate("full")}
+                  disabled={generateStrategyMutation.isPending}
+                >
+                  {generateStrategyMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                  Regenerate Strategy
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Brain className="mx-auto h-16 w-16 text-muted-foreground/50" />
+                  <h3 className="mt-4 text-xl font-semibold">No AI Strategy Yet</h3>
+                  <p className="mt-2 text-muted-foreground">
+                    Click "Generate AI Strategy" to create a comprehensive GTM plan powered by AI.
+                  </p>
+                  <Button
+                    className="mt-6"
+                    onClick={() => generateStrategyMutation.mutate("full")}
+                    disabled={generateStrategyMutation.isPending}
+                  >
+                    {generateStrategyMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Brain className="mr-2 h-4 w-4" />}
+                    Generate AI Strategy
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Spend Calculator Tab */}
+        <TabsContent value="spend-calc" className="mt-6 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="h-5 w-5" />
+                Marketing Spend Simulator
+              </CardTitle>
+              <CardDescription>
+                See projected results across channels based on industry benchmarks for home services
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3 mb-6">
+                <div className="space-y-2">
+                  <Label>Monthly Budget ($)</Label>
+                  <Input type="number" value={calcBudget} onChange={(e) => setCalcBudget(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Average Job Value ($)</Label>
+                  <Input type="number" value={calcJobValue} onChange={(e) => setCalcJobValue(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Close Rate (%)</Label>
+                  <Input type="number" value={calcCloseRate} onChange={(e) => setCalcCloseRate(e.target.value)} min="1" max="100" />
+                </div>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Channel</TableHead>
+                    <TableHead className="text-right">Avg CPL</TableHead>
+                    <TableHead className="text-right">Est. Leads</TableHead>
+                    <TableHead className="text-right">Est. Jobs</TableHead>
+                    <TableHead className="text-right">Est. Revenue</TableHead>
+                    <TableHead className="text-right">Est. ROI</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {calcProjections.map((p, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="font-medium">{p.channel}</TableCell>
+                      <TableCell className="text-right">${p.cpl}</TableCell>
+                      <TableCell className="text-right font-semibold">{p.leads}</TableCell>
+                      <TableCell className="text-right">{p.jobs}</TableCell>
+                      <TableCell className="text-right text-green-600 font-semibold">${p.revenue.toLocaleString()}</TableCell>
+                      <TableCell className={`text-right font-bold ${p.roi >= 0 ? "text-green-600" : "text-red-600"}`}>
+                        {p.roi.toFixed(0)}%
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <p className="text-xs text-muted-foreground mt-4">
+                * Based on industry averages for local home service businesses. Actual results vary by market, competition, and execution.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Visual comparison */}
+          <Card>
+            <CardHeader>
+              <CardTitle>ROI by Channel (Projected)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={calcProjections}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="channel" fontSize={11} angle={-20} textAnchor="end" height={60} />
+                  <YAxis />
+                  <Tooltip formatter={(value: number) => `${value.toFixed(0)}%`} />
+                  <Bar dataKey="roi" fill="#43a047" name="Projected ROI %" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </TabsContent>

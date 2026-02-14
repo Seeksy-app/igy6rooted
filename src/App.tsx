@@ -48,6 +48,7 @@ import GoogleAdsGuidePage from "@/pages/GoogleAdsGuidePage";
 import SettingsPage from "@/pages/SettingsPage";
 import VoiceAgentTestPage from "@/pages/VoiceAgentTestPage";
 import GTMPage from "@/pages/GTMPage";
+import GTMOnboardingPage from "@/pages/GTMOnboardingPage";
 import SEODashboardPage from "@/pages/SEODashboardPage";
 import SEOOnboardingPage from "@/pages/SEOOnboardingPage";
 import LLMPresencePage from "@/pages/LLMPresencePage";
@@ -169,6 +170,7 @@ function AppRoutes() {
       <Route path="/google-ads-guide" element={<ProtectedRoute><GoogleAdsGuidePage /></ProtectedRoute>} />
       <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
       <Route path="/gtm" element={<ProtectedRoute><GTMPage /></ProtectedRoute>} />
+      <Route path="/gtm-onboarding" element={<ProtectedRoute><GTMOnboardingPage /></ProtectedRoute>} />
       <Route path="/seo" element={<ProtectedRoute><SEODashboardPage /></ProtectedRoute>} />
       <Route path="/seo-onboarding" element={<ProtectedRoute><SEOOnboardingPage /></ProtectedRoute>} />
       <Route path="/llm-presence" element={<ProtectedRoute><LLMPresencePage /></ProtectedRoute>} />

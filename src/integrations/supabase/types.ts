@@ -615,6 +615,63 @@ export type Database = {
           },
         ]
       }
+      gtm_ai_strategies: {
+        Row: {
+          ai_model: string
+          channel: string | null
+          created_at: string
+          error: string | null
+          gtm_profile_id: string
+          id: string
+          org_id: string
+          prompt_used: string | null
+          status: string
+          strategy_content: Json
+          strategy_type: string
+        }
+        Insert: {
+          ai_model?: string
+          channel?: string | null
+          created_at?: string
+          error?: string | null
+          gtm_profile_id: string
+          id?: string
+          org_id: string
+          prompt_used?: string | null
+          status?: string
+          strategy_content?: Json
+          strategy_type?: string
+        }
+        Update: {
+          ai_model?: string
+          channel?: string | null
+          created_at?: string
+          error?: string | null
+          gtm_profile_id?: string
+          id?: string
+          org_id?: string
+          prompt_used?: string | null
+          status?: string
+          strategy_content?: Json
+          strategy_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gtm_ai_strategies_gtm_profile_id_fkey"
+            columns: ["gtm_profile_id"]
+            isOneToOne: false
+            referencedRelation: "gtm_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gtm_ai_strategies_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gtm_market_zones: {
         Row: {
           created_at: string
@@ -660,6 +717,80 @@ export type Database = {
             foreignKeyName: "gtm_market_zones_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gtm_profiles: {
+        Row: {
+          active_channels: Json
+          average_job_value: number | null
+          business_name: string
+          business_type: string
+          created_at: string
+          current_monthly_leads: number | null
+          gbp_url: string | null
+          id: string
+          industry: string | null
+          monthly_marketing_budget: number | null
+          onboarding_completed: boolean | null
+          org_id: string
+          semrush_connected: boolean | null
+          service_radius_miles: number | null
+          service_zip_codes: string[]
+          target_monthly_leads: number | null
+          target_monthly_revenue: number | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          active_channels?: Json
+          average_job_value?: number | null
+          business_name?: string
+          business_type?: string
+          created_at?: string
+          current_monthly_leads?: number | null
+          gbp_url?: string | null
+          id?: string
+          industry?: string | null
+          monthly_marketing_budget?: number | null
+          onboarding_completed?: boolean | null
+          org_id: string
+          semrush_connected?: boolean | null
+          service_radius_miles?: number | null
+          service_zip_codes?: string[]
+          target_monthly_leads?: number | null
+          target_monthly_revenue?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          active_channels?: Json
+          average_job_value?: number | null
+          business_name?: string
+          business_type?: string
+          created_at?: string
+          current_monthly_leads?: number | null
+          gbp_url?: string | null
+          id?: string
+          industry?: string | null
+          monthly_marketing_budget?: number | null
+          onboarding_completed?: boolean | null
+          org_id?: string
+          semrush_connected?: boolean | null
+          service_radius_miles?: number | null
+          service_zip_codes?: string[]
+          target_monthly_leads?: number | null
+          target_monthly_revenue?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gtm_profiles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
