@@ -21,10 +21,8 @@ function getGreeting() {
 }
 
 const actionCards: { to: string; icon: React.ElementType; title: string; desc: string }[] = [
-  { to: "/ai-control", icon: Bot, title: "AI Control Center", desc: "Manage your AI voice agent, scripts, and booking rules." },
-  { to: "/ai-chat", icon: MessageSquare, title: "AI Assistant", desc: "Chat with AI or review call logs and conversations." },
-  { to: "/ai-booking", icon: Calendar, title: "Booking Assistant", desc: "Manage AI-powered bookings and scheduling." },
-  { to: "/ai-voice-content", icon: Mic, title: "Voice Content", desc: "Create and manage AI voice scripts and content." },
+  { to: "/ai-chat", icon: MessageSquare, title: "AI Assistant", desc: "Chat with AI, review calls, and manage bookings." },
+  { to: "/ai-control", icon: Bot, title: "AI Control Center", desc: "Configure your AI voice agent and booking rules." },
   { to: "/gtm", icon: MapPinned, title: "GTM Command Center", desc: "Market zones, lead scoring, and go-to-market strategy." },
   { to: "/marketing", icon: BarChart3, title: "Marketing Analytics", desc: "Track campaigns, spend, and ROI across channels." },
   { to: "/seo", icon: Search, title: "SEO Dashboard", desc: "Technical SEO, keyword tracking, and site health." },
@@ -68,13 +66,23 @@ export default function MainDashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-10 px-4 py-12 animate-fade-in">
-      {/* Welcome */}
+      {/* Leads & Sales Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Welcome back, {firstName}
         </h1>
-        <p className="text-muted-foreground">What would you like to do today?</p>
+        <p className="text-muted-foreground">Your leads & sales at a glance</p>
       </div>
+
+      {/* Jobber KPI Strip */}
+      {jSummary && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <KpiCard icon={Users} label="Total Clients" value={jSummary.totalClients} />
+          <KpiCard icon={ClipboardList} label="Open Requests" value={jSummary.openRequests} />
+          <KpiCard icon={Briefcase} label="Active Jobs" value={jSummary.activeJobs} />
+          <KpiCard icon={DollarSign} label="Revenue" value={jSummary.totalRevenue} isCurrency />
+        </div>
+      )}
 
       {/* AI Chat Input */}
       <div className="mx-auto max-w-2xl">
@@ -86,7 +94,7 @@ export default function MainDashboardPage() {
       </div>
 
       {/* Action Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {actionCards.map((card) => (
           <Link key={card.to} to={card.to} className="group">
             <Card className="h-full border-border transition-all hover:border-primary/30 hover:shadow-md">
@@ -106,49 +114,33 @@ export default function MainDashboardPage() {
 
       {/* Bottom Info Panels */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Recent Activity / Jobber Leads */}
-        <Card>
+        {/* Recent Leads from Jobber */}
+        <Card className="md:col-span-2">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-4">
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Recent Leads</h2>
+              <span className="ml-auto text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">via Jobber</span>
             </div>
-            <div className="space-y-3">
-              {jobberLeads && jobberLeads.clients.length > 0 ? (
-                jobberLeads.clients.slice(0, 4).map((client) => (
-                  <div key={client.id} className="flex items-start gap-2">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{client.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(client.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </p>
+            {jobberLeads && jobberLeads.clients.length > 0 ? (
+              <div className="space-y-2.5">
+                {jobberLeads.clients.slice(0, 5).map((client) => (
+                  <div key={client.id} className="flex items-center justify-between border-b border-border/50 pb-2 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{client.name}</p>
+                        <p className="text-xs text-muted-foreground">{client.phones?.[0]?.number || "No phone"}</p>
+                      </div>
                     </div>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(client.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
                   </div>
-                ))
-              ) : (
-                <p className="text-xs text-muted-foreground">No recent leads. Connect Jobber to see lead activity.</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Jobber Pipeline */}
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold text-foreground">Jobber Pipeline</h2>
-            </div>
-            {jSummary ? (
-              <div className="space-y-3">
-                <InfoRow label="Total Clients" value={jSummary.totalClients} />
-                <InfoRow label="Open Requests" value={jSummary.openRequests} />
-                <InfoRow label="Active Jobs" value={jSummary.activeJobs} />
-                <InfoRow label="Revenue" value={`$${jSummary.totalRevenue.toLocaleString()}`} />
+                ))}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">Connect Jobber to view your pipeline.</p>
+              <p className="text-xs text-muted-foreground">No recent leads. Connect Jobber to see lead activity.</p>
             )}
           </CardContent>
         </Card>
@@ -162,7 +154,7 @@ export default function MainDashboardPage() {
             </div>
             <div className="space-y-3">
               <InfoRow label="AI Interactions" value={s.aiCalls} />
-              <InfoRow label="Total Bookings" value={s.totalBookings} />
+              <InfoRow label="Bookings" value={s.totalBookings} />
               <InfoRow label="Confirmed" value={s.booked} />
               <InfoRow label="SEO Clients" value={s.clientProfiles} />
             </div>
@@ -179,5 +171,26 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className="text-sm font-bold text-foreground">{String(value)}</span>
     </div>
+  );
+}
+
+function KpiCard({ icon: Icon, label, value, isCurrency }: { icon: any; label: string; value: number; isCurrency?: boolean }) {
+  const display = isCurrency
+    ? `$${value.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    : value.toLocaleString();
+
+  return (
+    <Card>
+      <CardContent className="p-4 flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        <div>
+          <p className="text-lg font-bold text-foreground leading-none">{display}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
+        </div>
+        <span className="ml-auto text-[9px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">Jobber</span>
+      </CardContent>
+    </Card>
   );
 }

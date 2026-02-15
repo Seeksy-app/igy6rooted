@@ -31,8 +31,6 @@ interface NavItem {
 const mainNav: NavItem[] = [
   { to: "/ai-control", icon: Bot, label: "AI Control Center" },
   { to: "/ai-chat", icon: MessageSquare, label: "AI Assistant" },
-  { to: "/ai-booking", icon: Calendar, label: "Booking Assistant" },
-  { to: "/ai-voice-content", icon: Mic, label: "AI Voice Content" },
   { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
 ];
 
@@ -119,6 +117,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="border-t border-sidebar-border px-2 py-2 space-y-0.5">
+        <SidebarLink item={{ to: "/ai-voice-content", icon: Mic, label: "AI Voice Content" }} />
         <NavLink
           to="/settings"
           className={({ isActive }) =>
