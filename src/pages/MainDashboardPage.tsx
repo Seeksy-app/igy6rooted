@@ -3,15 +3,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Bot, Phone, Calendar, BarChart3, Search, Eye, Users, TrendingUp,
-  ArrowRight, Loader2, UserPlus, Megaphone, CheckCircle2, Clock,
-  MessageSquare, Zap, Globe,
+  ArrowRight, Loader2, UserPlus, Megaphone, CheckCircle2,
+  MessageSquare, Zap, Globe, BookOpen, Link2, MapPinned,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo.png";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -19,6 +17,25 @@ function getGreeting() {
   if (h < 17) return "Good afternoon";
   return "Good evening";
 }
+
+/* Quick-action chips shown below the welcome prompt */
+const quickActions = [
+  { to: "/ai-chat", icon: MessageSquare, label: "Chat with AI" },
+  { to: "/ai-calls", icon: Phone, label: "View AI Calls" },
+  { to: "/ai-booking", icon: Calendar, label: "Manage Bookings" },
+  { to: "/marketing", icon: BarChart3, label: "Marketing Analytics" },
+  { to: "/seo-onboarding", icon: UserPlus, label: "Onboard Client" },
+  { to: "/llm-presence", icon: Eye, label: "LLM Brand Scan" },
+  { to: "/integrations", icon: Link2, label: "Integrations" },
+];
+
+/* Feature cards shown below */
+const featureCards: { to: string; icon: React.ElementType; title: string; desc: string; accent: string }[] = [
+  { to: "/ai-control", icon: Bot, title: "AI Control Center", desc: "Manage your AI voice agent, scripts, and booking rules in one place.", accent: "bg-[hsl(142,40%,30%)]" },
+  { to: "/gtm", icon: MapPinned, title: "GTM Command Center", desc: "Market zones, lead scoring, and go-to-market strategy powered by AI.", accent: "bg-accent" },
+  { to: "/seo", icon: Search, title: "SEO Dashboard", desc: "Technical SEO overview, keyword tracking, and site health monitoring.", accent: "bg-warning" },
+  { to: "/ai-productivity", icon: TrendingUp, title: "AI Productivity", desc: "Track how your AI assistant is performing across calls and bookings.", accent: "bg-[hsl(142,40%,30%)]" },
+];
 
 export default function MainDashboardPage() {
   const { currentOrg } = useOrg();
@@ -32,19 +49,12 @@ export default function MainDashboardPage() {
         supabase.from("ai_bookings").select("status").eq("org_id", currentOrg.id),
         supabase.from("ai_tool_call_logs").select("id").eq("org_id", currentOrg.id),
         supabase.from("followups").select("status").eq("org_id", currentOrg.id),
-        supabase.from("seo_client_profiles").select("id, brand_name, domain, onboarding_completed").eq("org_id", currentOrg.id) as any,
+        supabase.from("seo_client_profiles").select("id").eq("org_id", currentOrg.id) as any,
         supabase.from("llm_brand_scans").select("overall_brand_score, status").eq("org_id", currentOrg.id).order("created_at", { ascending: false }).limit(1) as any,
       ]);
       const openFollowups = followups.data?.filter((f: any) => f.status === "open" || f.status === "pending")?.length || 0;
       const booked = bookings.data?.filter((b: any) => b.status === "scheduled" || b.status === "confirmed")?.length || 0;
-      return {
-        totalBookings: bookings.data?.length || 0,
-        booked,
-        aiCalls: toolCalls.data?.length || 0,
-        openFollowups,
-        clientProfiles: profiles.data?.length || 0,
-        latestBrandScore: scans.data?.[0]?.overall_brand_score ?? null,
-      };
+      return { totalBookings: bookings.data?.length || 0, booked, aiCalls: toolCalls.data?.length || 0, openFollowups, clientProfiles: profiles.data?.length || 0, latestBrandScore: scans.data?.[0]?.overall_brand_score ?? null };
     },
     enabled: !!currentOrg,
   });
@@ -58,110 +68,70 @@ export default function MainDashboardPage() {
   }
 
   const s = stats || { totalBookings: 0, booked: 0, aiCalls: 0, openFollowups: 0, clientProfiles: 0, latestBrandScore: null };
+  const firstName = user?.email?.split("@")[0] || "there";
 
   return (
-    <div className="space-y-6 p-6 animate-fade-in">
-      {/* Welcome Banner */}
-      <div className="rounded-xl border-l-4 border-l-[hsl(142,40%,30%)] bg-[hsl(142,40%,30%)/0.05] p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <img src={logo} alt="Logo" className="h-10 w-auto" />
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
-                {getGreeting()}, {user?.email?.split("@")[0] || "there"}
-              </h1>
-              <p className="text-sm text-muted-foreground">{currentOrg?.name || "Your Organization"} — Command Center</p>
-            </div>
-          </div>
-          <div className="hidden md:flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" />
-              {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-            </span>
-          </div>
+    <div className="mx-auto max-w-3xl space-y-10 px-4 py-12 animate-fade-in">
+      {/* Central Welcome */}
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          {getGreeting()}, {firstName} 👋
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          What would you like to do today?
+        </p>
+      </div>
+
+      {/* Quick-action chips */}
+      <div className="flex flex-wrap justify-center gap-2">
+        {quickActions.map((a) => (
+          <Link
+            key={a.to}
+            to={a.to}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-[13px] font-medium text-foreground shadow-sm transition-all hover:border-[hsl(142,40%,30%)]/40 hover:shadow-md"
+          >
+            <a.icon className="h-3.5 w-3.5 text-[hsl(142,40%,30%)]" />
+            {a.label}
+          </Link>
+        ))}
+      </div>
+
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <KpiPill icon={Phone} label="AI Calls" value={s.aiCalls} />
+        <KpiPill icon={Calendar} label="Bookings" value={s.totalBookings} />
+        <KpiPill icon={CheckCircle2} label="Confirmed" value={s.booked} />
+        <KpiPill icon={Users} label="Clients" value={s.clientProfiles} />
+      </div>
+
+      {/* Feature cards */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">Popular features</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {featureCards.map((f) => (
+            <Link key={f.to} to={f.to} className="group">
+              <Card className="h-full transition-shadow hover:shadow-md border-border">
+                <CardContent className="flex items-start gap-3 p-4">
+                  <div className={cn("mt-0.5 rounded-md p-1.5", f.accent)}>
+                    <f.icon className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground group-hover:text-[hsl(142,40%,30%)] transition-colors">{f.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{f.desc}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 mt-1 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
       </div>
 
-      {/* KPI Row */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <KpiCard icon={Phone} label="AI Calls" value={s.aiCalls} />
-        <KpiCard icon={Calendar} label="Bookings" value={s.totalBookings} />
-        <KpiCard icon={CheckCircle2} label="Confirmed" value={s.booked} variant="success" />
-        <KpiCard icon={Clock} label="Open Follow-ups" value={s.openFollowups} variant={s.openFollowups > 0 ? "warning" : "default"} />
-        <KpiCard icon={Users} label="Client Profiles" value={s.clientProfiles} />
-      </div>
-
-      {/* Two Column Layout */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* AI Operations */}
-        <Card className="border-l-4 border-l-success/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Bot className="h-5 w-5 text-success" /> AI Operations
-            </CardTitle>
-            <CardDescription>Your AI assistant performance at a glance</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <QuickLink to="/ai-calls" icon={Phone} label="AI Call Dashboard" desc="View leads, transcripts & call intelligence" />
-            <QuickLink to="/ai-chat" icon={MessageSquare} label="AI Chat" desc="Chat with your AI assistant" />
-            <QuickLink to="/ai-booking" icon={Calendar} label="Booking Assistant" desc="Manage AI-assisted bookings" />
-            <QuickLink to="/ai-productivity" icon={TrendingUp} label="AI Productivity" desc="Track AI performance metrics" />
-          </CardContent>
-        </Card>
-
-        {/* SEO & Presence */}
-        <Card className="border-l-4 border-l-accent/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Globe className="h-5 w-5 text-accent" /> SEO & Brand Presence
-            </CardTitle>
-            <CardDescription>
-              {s.latestBrandScore !== null
-                ? `Latest brand health: ${Math.round(s.latestBrandScore)}/100`
-                : "No LLM scans yet — onboard a client to get started"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {s.latestBrandScore !== null && (
-              <div className="mb-3">
-                <div className="flex items-center justify-between text-sm mb-1">
-                  <span className="text-muted-foreground">Brand Health</span>
-                  <span className="font-semibold">{Math.round(s.latestBrandScore)}/100</span>
-                </div>
-                <Progress value={s.latestBrandScore} className="h-2" />
-              </div>
-            )}
-            <QuickLink to="/seo-onboarding" icon={UserPlus} label="SEO Client Onboarding" desc="Capture full marketing stack" />
-            <QuickLink to="/llm-presence" icon={Eye} label="LLM Search Presence" desc="Monitor AI brand mentions" />
-            <QuickLink to="/seo" icon={Search} label="SEO Dashboard" desc="Technical SEO overview" />
-          </CardContent>
-        </Card>
-
-        {/* Marketing */}
-        <Card className="border-l-4 border-l-warning/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Megaphone className="h-5 w-5 text-warning" /> Marketing
-            </CardTitle>
-            <CardDescription>Ad performance & campaign analytics</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <QuickLink to="/marketing" icon={BarChart3} label="Marketing Analytics" desc="Cross-channel performance" />
-            <QuickLink to="/google-ads-guide" icon={Search} label="Google Ads" desc="Campaign setup & optimization" />
-            <QuickLink to="/meta-ads-guide" icon={Megaphone} label="Meta Ads" desc="Facebook & Instagram campaigns" />
-            <QuickLink to="/gtm" icon={Zap} label="Go-To-Market" desc="Market zones & lead scoring" />
-          </CardContent>
-        </Card>
-
-        {/* Quick Setup */}
-        <Card className="border-l-4 border-l-primary/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Zap className="h-5 w-5 text-success" /> Quick Setup
-            </CardTitle>
-            <CardDescription>Get the most out of your platform</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
+      {/* Setup checklist */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">Getting started</h2>
+        <Card>
+          <CardContent className="p-3 space-y-0.5">
             <SetupItem done={s.aiCalls > 0} label="Configure AI Voice Agent" to="/ai-voice-content" />
             <SetupItem done={s.clientProfiles > 0} label="Onboard SEO Client" to="/seo-onboarding" />
             <SetupItem done={s.latestBrandScore !== null} label="Run LLM Brand Scan" to="/llm-presence" />
@@ -173,49 +143,23 @@ export default function MainDashboardPage() {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, variant = "default" }: { icon: any; label: string; value: number; variant?: "default" | "success" | "warning" }) {
-  const styles = {
-    default: { card: "bg-card", text: "text-muted-foreground", iconBg: "bg-muted", iconColor: "text-muted-foreground" },
-    success: { card: "bg-success/10 border-success/30", text: "text-success", iconBg: "bg-success/20", iconColor: "text-success" },
-    warning: { card: "bg-warning/10 border-warning/30", text: "text-warning", iconBg: "bg-warning/20", iconColor: "text-warning" },
-  };
-  const s = styles[variant];
-
+function KpiPill({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
   return (
-    <div className={cn("rounded-lg border p-4 transition-shadow hover:shadow-md", s.card)}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-3xl font-bold text-foreground">{value}</p>
-          <p className={cn("text-xs uppercase tracking-wide mt-1", variant === "default" ? "text-muted-foreground" : s.text)}>{label}</p>
-        </div>
-        <div className={cn("rounded-lg p-2", s.iconBg)}>
-          <Icon className={cn("h-5 w-5", s.iconColor)} />
-        </div>
+    <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2.5">
+      <Icon className="h-4 w-4 text-[hsl(142,40%,30%)]" />
+      <div>
+        <p className="text-lg font-bold text-foreground leading-none">{value}</p>
+        <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
       </div>
     </div>
   );
 }
 
-function QuickLink({ to, icon: Icon, label, desc }: { to: string; icon: any; label: string; desc: string }) {
-  return (
-    <Link to={to} className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50 group">
-      <div className="rounded-md bg-muted p-2 group-hover:bg-success/10">
-        <Icon className="h-4 w-4 text-muted-foreground group-hover:text-success" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        <p className="text-xs text-muted-foreground truncate">{desc}</p>
-      </div>
-      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-    </Link>
-  );
-}
-
 function SetupItem({ done, label, to }: { done: boolean; label: string; to: string }) {
   return (
-    <Link to={to} className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-colors">
-      <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center", done ? "border-success bg-success" : "border-border")}>
-        {done && <CheckCircle2 className="h-3 w-3 text-success-foreground" />}
+    <Link to={to} className="flex items-center gap-2.5 rounded-md px-2.5 py-2 hover:bg-muted/50 transition-colors">
+      <div className={cn("h-4.5 w-4.5 rounded-full border-2 flex items-center justify-center", done ? "border-[hsl(142,40%,30%)] bg-[hsl(142,40%,30%)]" : "border-border")}>
+        {done && <CheckCircle2 className="h-3 w-3 text-white" />}
       </div>
       <span className={cn("text-sm", done ? "text-muted-foreground line-through" : "text-foreground")}>{label}</span>
     </Link>
