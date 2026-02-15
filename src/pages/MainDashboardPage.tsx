@@ -10,14 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Bot, Phone, Calendar, BarChart3, Search, Eye, Users, TrendingUp,
-  ArrowRight, Loader2, UserPlus, Megaphone,
-  MessageSquare, Zap, Globe, BookOpen, Link2, MapPinned,
-  DollarSign, ClipboardList, Briefcase, Mic, Clock, Send,
-  Cloud, Sun, CloudRain, Snowflake, X,
+  Bot, BarChart3, Search, Users,
+  Loader2, MessageSquare, Zap, Link2, MapPinned,
+  DollarSign, ClipboardList, Briefcase, Send,
+  Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -39,7 +40,6 @@ function WeatherTimeWidget() {
   const now = useLocalTime();
   const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
   const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-
   return (
     <div className="flex items-center gap-3 text-white/80 text-sm">
       <Sun className="h-5 w-5 text-yellow-300" />
@@ -49,6 +49,65 @@ function WeatherTimeWidget() {
       </div>
     </div>
   );
+}
+
+type Msg = { role: "user" | "assistant"; content: string };
+
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/dashboard-chat`;
+
+async function streamChat({
+  messages, orgId, onDelta, onDone,
+}: {
+  messages: Msg[]; orgId: string;
+  onDelta: (t: string) => void; onDone: () => void;
+}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const resp = await fetch(CHAT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    },
+    body: JSON.stringify({ messages, org_id: orgId }),
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: "Unknown error" }));
+    throw new Error(err.error || `Error ${resp.status}`);
+  }
+  if (!resp.body) throw new Error("No response body");
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  let done = false;
+
+  while (!done) {
+    const { done: rd, value } = await reader.read();
+    if (rd) break;
+    buf += decoder.decode(value, { stream: true });
+
+    let ni: number;
+    while ((ni = buf.indexOf("\n")) !== -1) {
+      let line = buf.slice(0, ni);
+      buf = buf.slice(ni + 1);
+      if (line.endsWith("\r")) line = line.slice(0, -1);
+      if (line.startsWith(":") || line.trim() === "") continue;
+      if (!line.startsWith("data: ")) continue;
+      const json = line.slice(6).trim();
+      if (json === "[DONE]") { done = true; break; }
+      try {
+        const parsed = JSON.parse(json);
+        const c = parsed.choices?.[0]?.delta?.content;
+        if (c) onDelta(c);
+      } catch {
+        buf = line + "\n" + buf;
+        break;
+      }
+    }
+  }
+  onDone();
 }
 
 const actionCards: { to: string; icon: React.ElementType; title: string; desc: string }[] = [
@@ -65,8 +124,18 @@ export default function MainDashboardPage() {
   const { user } = useAuth();
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  const [chatMessages, setChatMessages] = useState<Msg[]>([]);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (chatOpen) setTimeout(() => inputRef.current?.focus(), 100);
+  }, [chatOpen]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["main-dashboard", currentOrg?.id],
@@ -87,19 +156,38 @@ export default function MainDashboardPage() {
 
   const { data: jobberLeads } = useJobberLeads(20);
 
-  const handleSendChat = useCallback(() => {
+  const handleSendChat = useCallback(async () => {
     const msg = chatInput.trim();
-    if (!msg) return;
-    setChatMessages((prev) => [...prev, { role: "user", text: msg }]);
+    if (!msg || isStreaming || !currentOrg) return;
+    const userMsg: Msg = { role: "user", content: msg };
     setChatInput("");
-    // Simulate AI response
-    setTimeout(() => {
-      setChatMessages((prev) => [
-        ...prev,
-        { role: "ai", text: "I'm your AI assistant. This feature is coming soon — I'll be able to answer questions about your leads, bookings, and campaigns." },
-      ]);
-    }, 800);
-  }, [chatInput]);
+    setChatMessages((prev) => [...prev, userMsg]);
+    setIsStreaming(true);
+
+    let assistantSoFar = "";
+    const upsert = (chunk: string) => {
+      assistantSoFar += chunk;
+      setChatMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant") {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+        }
+        return [...prev, { role: "assistant", content: assistantSoFar }];
+      });
+    };
+
+    try {
+      await streamChat({
+        messages: [...chatMessages, userMsg],
+        orgId: currentOrg.id,
+        onDelta: upsert,
+        onDone: () => setIsStreaming(false),
+      });
+    } catch (e: any) {
+      setIsStreaming(false);
+      toast.error(e.message || "Failed to get AI response");
+    }
+  }, [chatInput, isStreaming, currentOrg, chatMessages]);
 
   if (isLoading) {
     return (
@@ -183,7 +271,6 @@ export default function MainDashboardPage() {
 
       {/* Bottom Info Panels */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Recent Leads from Jobber */}
         <Card className="md:col-span-2">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -214,7 +301,6 @@ export default function MainDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Platform Stats */}
         <Card>
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -260,10 +346,24 @@ export default function MainDashboardPage() {
                           : "bg-muted text-foreground rounded-bl-md"
                       )}
                     >
-                      {msg.text}
+                      {msg.role === "assistant" ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        msg.content
+                      )}
                     </div>
                   </div>
                 ))}
+                {isStreaming && chatMessages[chatMessages.length - 1]?.role === "user" && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-2.5">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  </div>
+                )}
+                <div ref={scrollRef} />
               </div>
             )}
           </ScrollArea>
@@ -284,7 +384,7 @@ export default function MainDashboardPage() {
                 className="flex-1"
                 autoFocus
               />
-              <Button type="submit" size="icon" disabled={!chatInput.trim()}>
+              <Button type="submit" size="icon" disabled={!chatInput.trim() || isStreaming}>
                 <Send className="h-4 w-4" />
               </Button>
             </form>
