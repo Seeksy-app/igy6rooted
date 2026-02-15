@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import {
   Link2, CheckCircle2, AlertTriangle, XCircle, RefreshCw,
   Settings, Plus, Loader2, Shield, Clock, TestTube
 } from "lucide-react";
@@ -29,6 +30,21 @@ export default function IntegrationsPage() {
   const queryClient = useQueryClient();
   const isAdmin = userRole === "admin";
   const [testing, setTesting] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle OAuth callback results
+  useEffect(() => {
+    const jobberConnected = searchParams.get('jobber_connected');
+    const jobberError = searchParams.get('jobber_error');
+    if (jobberConnected === 'true') {
+      toast({ title: "Jobber Connected!", description: "Your Jobber account has been successfully connected." });
+      queryClient.invalidateQueries({ queryKey: ["jobber-connection"] });
+      setSearchParams({});
+    } else if (jobberError) {
+      toast({ variant: "destructive", title: "Connection Failed", description: jobberError });
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, toast, queryClient]);
 
   const { data: jobberConnection, isLoading: loadingJobber } = useQuery({
     queryKey: ["jobber-connection", currentOrg?.id],
@@ -60,13 +76,41 @@ export default function IntegrationsPage() {
   const googleAdsConnection = adAccounts?.find(a => a.provider === "google_ads");
   const metaAdsConnection = adAccounts?.find(a => a.provider === "meta_ads");
 
-  const startOAuth = (provider: string, path: string) => {
+  const startOAuth = async (provider: string, path: string) => {
     if (!currentOrg) {
       toast({ variant: "destructive", title: "Error", description: "No organization selected." });
       return;
     }
-    const redirectUri = `${window.location.origin}/integrations/${provider}/callback`;
-    window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${path}?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.access_token) {
+        toast({ variant: "destructive", title: "Error", description: "Please log in first." });
+        return;
+      }
+      const redirectUri = `${window.location.origin}/integrations`;
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${path}?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.session.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `OAuth start failed (${response.status})`);
+      }
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        // Fallback for functions that still do redirects
+        window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${path}?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      }
+    } catch (error) {
+      toast({ variant: "destructive", title: "Connection Error", description: (error as Error).message });
+    }
   };
 
   const testConnection = async (id: string) => {
