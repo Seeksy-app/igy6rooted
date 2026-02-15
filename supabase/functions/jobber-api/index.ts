@@ -380,6 +380,80 @@ const QUERIES = {
       }
     }
   `,
+
+  // Fetch clients (leads) with recent activity
+  getClients: `
+    query GetClients($first: Int!, $cursor: String) {
+      clients(first: $first, after: $cursor, sort: { key: CREATED_AT, direction: DESC }) {
+        nodes {
+          id
+          name
+          firstName
+          lastName
+          phones { number description }
+          emails { address description }
+          billingAddress { street1 street2 city province postalCode }
+          companyName
+          createdAt
+          updatedAt
+          isLead
+          isArchived
+          tags { nodes { label } }
+        }
+        pageInfo { hasNextPage endCursor }
+        totalCount
+      }
+    }
+  `,
+
+  // Fetch requests (leads/inquiries)
+  getRequests: `
+    query GetRequests($first: Int!, $cursor: String) {
+      requests(first: $first, after: $cursor, sort: { key: CREATED_AT, direction: DESC }) {
+        nodes {
+          id
+          title
+          status
+          createdAt
+          completedAt
+          client { id name }
+          customFields { nodes { label value { ... on CustomFieldValueText { value: valueText } } } }
+        }
+        pageInfo { hasNextPage endCursor }
+        totalCount
+      }
+    }
+  `,
+
+  // Fetch jobs
+  getJobs: `
+    query GetJobs($first: Int!, $cursor: String) {
+      jobs(first: $first, after: $cursor, sort: { key: CREATED_AT, direction: DESC }) {
+        nodes {
+          id
+          title
+          jobNumber
+          jobStatus
+          total
+          createdAt
+          startAt
+          endAt
+          client { id name }
+          visits(first: 5) {
+            nodes {
+              id
+              title
+              startAt
+              endAt
+              status
+            }
+          }
+        }
+        pageInfo { hasNextPage endCursor }
+        totalCount
+      }
+    }
+  `,
 };
 
 serve(async (req) => {
@@ -865,6 +939,61 @@ serve(async (req) => {
             { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
+      }
+
+      case "/leads": {
+        const accessToken = await getValidAccessToken(supabase, effectiveOrgId);
+        if (!accessToken) {
+          return new Response(
+            JSON.stringify({ error: "Jobber not connected", clients: [], requests: [], jobs: [], summary: null }),
+            { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 100);
+
+        // Fetch clients, requests, and jobs in parallel
+        const [clientsData, requestsData, jobsData] = await Promise.all([
+          jobberGraphQL(accessToken, QUERIES.getClients, { first: limit }),
+          jobberGraphQL(accessToken, QUERIES.getRequests, { first: limit }),
+          jobberGraphQL(accessToken, QUERIES.getJobs, { first: limit }),
+        ]);
+
+        const clients = clientsData?.clients?.nodes || [];
+        const requests = requestsData?.requests?.nodes || [];
+        const jobs = jobsData?.jobs?.nodes || [];
+
+        // Build summary stats
+        const activeLeads = clients.filter((c: any) => c.isLead && !c.isArchived).length;
+        const totalClients = clientsData?.clients?.totalCount || 0;
+        const totalRequests = requestsData?.requests?.totalCount || 0;
+        const totalJobs = jobsData?.jobs?.totalCount || 0;
+        const openRequests = requests.filter((r: any) => r.status === "PENDING" || r.status === "AWAITING_RESPONSE").length;
+        const activeJobs = jobs.filter((j: any) => j.jobStatus === "IN_PROGRESS" || j.jobStatus === "ACTIVE" || j.jobStatus === "REQUIRES_INVOICING").length;
+
+        // Calculate total revenue from jobs
+        const totalRevenue = jobs.reduce((sum: number, j: any) => sum + (parseFloat(j.total) || 0), 0);
+
+        const response = {
+          clients,
+          requests,
+          jobs,
+          summary: {
+            totalClients,
+            activeLeads,
+            totalRequests,
+            openRequests,
+            totalJobs,
+            activeJobs,
+            totalRevenue,
+          },
+        };
+
+        await logToolCall(supabase, effectiveOrgId, conversationId, "get_leads", { limit }, response.summary, "success", null);
+
+        return new Response(JSON.stringify(response), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       default:
