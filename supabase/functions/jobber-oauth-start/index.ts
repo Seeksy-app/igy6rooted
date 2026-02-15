@@ -89,13 +89,14 @@ serve(async (req) => {
 
     console.log('Redirecting to Jobber OAuth for org:', orgId);
 
-    return new Response(null, {
-      status: 302,
-      headers: {
-        ...corsHeaders,
-        'Location': jobberAuthUrl.toString(),
-      },
-    });
+    // Return the URL as JSON so the client can redirect (since browser redirects can't send auth headers)
+    return new Response(
+      JSON.stringify({ url: jobberAuthUrl.toString() }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('OAuth start error:', message);
