@@ -2,12 +2,15 @@ import { useOrg } from "@/contexts/OrgContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useJobberLeads } from "@/hooks/useJobberLeads";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Bot, Phone, Calendar, BarChart3, Search, Eye, Users, TrendingUp,
   ArrowRight, Loader2, UserPlus, Megaphone, CheckCircle2,
   MessageSquare, Zap, Globe, BookOpen, Link2, MapPinned,
+  DollarSign, ClipboardList, Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +21,6 @@ function getGreeting() {
   return "Good evening";
 }
 
-/* Quick-action chips shown below the welcome prompt */
 const quickActions = [
   { to: "/ai-chat", icon: MessageSquare, label: "Chat with AI" },
   { to: "/ai-calls", icon: Phone, label: "View AI Calls" },
@@ -29,7 +31,6 @@ const quickActions = [
   { to: "/integrations", icon: Link2, label: "Integrations" },
 ];
 
-/* Feature cards shown below */
 const featureCards: { to: string; icon: React.ElementType; title: string; desc: string; accent: string }[] = [
   { to: "/ai-control", icon: Bot, title: "AI Control Center", desc: "Manage your AI voice agent, scripts, and booking rules in one place.", accent: "bg-[hsl(142,40%,30%)]" },
   { to: "/gtm", icon: MapPinned, title: "GTM Command Center", desc: "Market zones, lead scoring, and go-to-market strategy powered by AI.", accent: "bg-accent" },
@@ -59,6 +60,8 @@ export default function MainDashboardPage() {
     enabled: !!currentOrg,
   });
 
+  const { data: jobberLeads, isLoading: leadsLoading } = useJobberLeads(20);
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -69,6 +72,7 @@ export default function MainDashboardPage() {
 
   const s = stats || { totalBookings: 0, booked: 0, aiCalls: 0, openFollowups: 0, clientProfiles: 0, latestBrandScore: null };
   const firstName = user?.email?.split("@")[0] || "there";
+  const jSummary = jobberLeads?.summary;
 
   return (
     <div className="mx-auto max-w-3xl space-y-10 px-4 py-12 animate-fade-in">
@@ -96,13 +100,68 @@ export default function MainDashboardPage() {
         ))}
       </div>
 
-      {/* KPI strip */}
+      {/* KPI strip — platform + Jobber */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <KpiPill icon={Phone} label="AI Calls" value={s.aiCalls} />
         <KpiPill icon={Calendar} label="Bookings" value={s.totalBookings} />
         <KpiPill icon={CheckCircle2} label="Confirmed" value={s.booked} />
         <KpiPill icon={Users} label="Clients" value={s.clientProfiles} />
       </div>
+
+      {/* Jobber Leads Strip */}
+      {jSummary && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-sm font-semibold text-muted-foreground">Jobber Pipeline</h2>
+            <Badge variant="outline" className="text-[11px] border-[hsl(142,40%,30%)]/30 text-[hsl(142,40%,30%)]">Live</Badge>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <KpiPill icon={Users} label="Total Clients" value={jSummary.totalClients} />
+            <KpiPill icon={ClipboardList} label="Open Requests" value={jSummary.openRequests} />
+            <KpiPill icon={Briefcase} label="Active Jobs" value={jSummary.activeJobs} />
+            <KpiPill icon={DollarSign} label="Revenue" value={jSummary.totalRevenue} isCurrency />
+          </div>
+        </div>
+      )}
+
+      {/* Recent Jobber Leads Table */}
+      {jobberLeads && jobberLeads.clients.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold text-muted-foreground mb-3">Recent Leads from Jobber</h2>
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Name</th>
+                      <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Phone</th>
+                      <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Type</th>
+                      <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {jobberLeads.clients.slice(0, 8).map((client) => (
+                      <tr key={client.id} className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-2.5 font-medium text-foreground">{client.name}</td>
+                        <td className="px-4 py-2.5 text-muted-foreground">{client.phones?.[0]?.number || "—"}</td>
+                        <td className="px-4 py-2.5">
+                          <Badge variant={client.isLead ? "default" : "secondary"} className="text-[11px]">
+                            {client.isLead ? "Lead" : "Client"}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-2.5 text-muted-foreground text-xs">
+                          {new Date(client.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Feature cards */}
       <div>
@@ -143,12 +202,16 @@ export default function MainDashboardPage() {
   );
 }
 
-function KpiPill({ icon: Icon, label, value }: { icon: any; label: string; value: number }) {
+function KpiPill({ icon: Icon, label, value, isCurrency }: { icon: any; label: string; value: number; isCurrency?: boolean }) {
+  const display = isCurrency
+    ? `$${value.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    : value.toLocaleString();
+
   return (
     <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card px-3 py-2.5">
       <Icon className="h-4 w-4 text-[hsl(142,40%,30%)]" />
       <div>
-        <p className="text-lg font-bold text-foreground leading-none">{value}</p>
+        <p className="text-lg font-bold text-foreground leading-none">{display}</p>
         <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
       </div>
     </div>
