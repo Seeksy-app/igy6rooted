@@ -151,8 +151,8 @@ export default function SalesLeadsPage() {
                     <p className="font-medium text-sm">{req.title}</p>
                     <p className="text-xs text-muted-foreground">{req.client?.name || "No client"}</p>
                   </div>
-                  <Badge variant={req.status === "pending" ? "destructive" : "secondary"}>
-                    {req.status}
+                  <Badge variant="secondary">
+                    request
                   </Badge>
                 </div>
               ))}
