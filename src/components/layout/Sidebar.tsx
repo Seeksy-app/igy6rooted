@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import {
   Bot,
-  MessageSquare,
   BookOpen,
   Link2,
   BarChart3,
@@ -14,6 +13,7 @@ import {
   MapPinned,
   UserPlus,
   Eye,
+  Users,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
@@ -30,9 +30,11 @@ interface NavItem {
 
 const mainNav: NavItem[] = [
   { to: "/dashboard", icon: BarChart3, label: "Dashboard" },
-  { to: "/ai-control", icon: Bot, label: "AI Control Center" },
-  { to: "/ai-chat", icon: MessageSquare, label: "AI Analytics" },
+];
+
+const salesNav: NavItem[] = [
   { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
+  { to: "/sales-leads", icon: Users, label: "Sales & Leads" },
 ];
 
 const marketingNav: NavItem[] = [
@@ -121,6 +123,11 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-1.5 space-y-0.5">
         {mainNav.map((item) => (
+          <SidebarLink key={item.to} item={item} />
+        ))}
+
+        <SectionLabel>Sales & Productivity</SectionLabel>
+        {salesNav.map((item) => (
           <SidebarLink key={item.to} item={item} />
         ))}
 
