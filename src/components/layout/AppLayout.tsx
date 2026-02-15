@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
+import { GlobalAIChat } from "./GlobalAIChat";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -14,6 +15,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {children}
         </div>
       </main>
+      <GlobalAIChat />
     </div>
   );
 }
