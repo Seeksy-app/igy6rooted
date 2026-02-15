@@ -58,10 +58,31 @@ serve(async (req) => {
       svc.from("gtm_profiles").select("business_name, business_type, industry, monthly_marketing_budget, current_monthly_leads, target_monthly_leads").eq("org_id", org_id).maybeSingle(),
     ]);
 
+    // Fetch live Jobber data (clients, requests, jobs) via internal edge function call
+    let jobberData: any = null;
+    try {
+      const jobberRes = await fetch(
+        `${supabaseUrl}/functions/v1/jobber-api/leads?org_id=${org_id}&limit=100`,
+        {
+          headers: {
+            Authorization: `Bearer ${serviceKey}`,
+            apikey: serviceKey,
+          },
+        }
+      );
+      if (jobberRes.ok) {
+        jobberData = await jobberRes.json();
+      } else {
+        console.log("Jobber data fetch returned status:", jobberRes.status);
+      }
+    } catch (e) {
+      console.log("Jobber data fetch failed (non-critical):", e);
+    }
+
     const businessName = agentRes.data?.business_name || profileRes.data?.business_name || "the business";
 
     const contextParts: string[] = [
-      `You are an AI business assistant for ${businessName}. Answer questions about the business data below. Be concise, helpful, and data-driven.`,
+      `You are an AI business assistant for ${businessName}. Today's date is ${new Date().toISOString().split("T")[0]}. Answer questions about the business data below. Be concise, helpful, and data-driven. When asked about time periods, filter the data by the relevant dates.`,
     ];
 
     if (agentRes.data) {
@@ -71,13 +92,51 @@ serve(async (req) => {
       contextParts.push(`GTM Profile: Type: ${profileRes.data.business_type}, Industry: ${profileRes.data.industry || "N/A"}, Monthly budget: $${profileRes.data.monthly_marketing_budget || 0}, Current leads/mo: ${profileRes.data.current_monthly_leads || 0}, Target leads/mo: ${profileRes.data.target_monthly_leads || 0}.`);
     }
     if (bookingsRes.data?.length) {
-      contextParts.push(`Recent Bookings (${bookingsRes.data.length}): ${JSON.stringify(bookingsRes.data)}`);
+      contextParts.push(`Recent AI Bookings (${bookingsRes.data.length}): ${JSON.stringify(bookingsRes.data)}`);
     }
     if (leadsRes.data?.length) {
-      contextParts.push(`Recent Leads (${leadsRes.data.length}): ${JSON.stringify(leadsRes.data)}`);
+      contextParts.push(`Marketing Leads (${leadsRes.data.length}): ${JSON.stringify(leadsRes.data)}`);
     }
     if (campaignsRes.data?.length) {
       contextParts.push(`Campaigns (${campaignsRes.data.length}): ${JSON.stringify(campaignsRes.data)}`);
+    }
+
+    // Add Jobber CRM data if available
+    if (jobberData) {
+      const { clients, requests, jobs, summary } = jobberData;
+      if (summary) {
+        contextParts.push(`Jobber CRM Summary: ${summary.totalClients} total clients, ${summary.activeLeads} active leads, ${summary.totalRequests} requests, ${summary.totalJobs} jobs, ${summary.activeJobs} active jobs, $${summary.totalRevenue.toLocaleString()} total revenue.`);
+      }
+      if (clients?.length) {
+        const clientSummary = clients.map((c: any) => ({
+          name: c.name,
+          isLead: c.isLead,
+          createdAt: c.createdAt,
+          tags: c.tags?.nodes?.map((t: any) => t.label) || [],
+          companyName: c.companyName,
+          city: c.billingAddress?.city,
+        }));
+        contextParts.push(`Jobber Clients (${clients.length}): ${JSON.stringify(clientSummary)}`);
+      }
+      if (requests?.length) {
+        const reqSummary = requests.map((r: any) => ({
+          title: r.title,
+          createdAt: r.createdAt,
+          client: r.client?.name,
+        }));
+        contextParts.push(`Jobber Requests (${requests.length}): ${JSON.stringify(reqSummary)}`);
+      }
+      if (jobs?.length) {
+        const jobSummary = jobs.map((j: any) => ({
+          title: j.title,
+          jobNumber: j.jobNumber,
+          status: j.jobStatus,
+          total: j.total,
+          createdAt: j.createdAt,
+          client: j.client?.name,
+        }));
+        contextParts.push(`Jobber Jobs (${jobs.length}): ${JSON.stringify(jobSummary)}`);
+      }
     }
 
     const systemPrompt = contextParts.join("\n\n");
