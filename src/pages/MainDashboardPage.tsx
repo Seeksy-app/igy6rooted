@@ -5,13 +5,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { useJobberLeads } from "@/hooks/useJobberLeads";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Bot, Phone, Calendar, BarChart3, Search, Eye, Users, TrendingUp,
   ArrowRight, Loader2, UserPlus, Megaphone,
   MessageSquare, Zap, Globe, BookOpen, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Mic, Clock, Send,
+  Cloud, Sun, CloudRain, Snowflake, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -20,8 +26,33 @@ function getGreeting() {
   return "Good evening";
 }
 
+function useLocalTime() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setTime(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+  return time;
+}
+
+function WeatherTimeWidget() {
+  const now = useLocalTime();
+  const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+
+  return (
+    <div className="flex items-center gap-3 text-white/80 text-sm">
+      <Sun className="h-5 w-5 text-yellow-300" />
+      <div className="text-right">
+        <p className="text-white font-semibold text-base leading-none">{timeStr}</p>
+        <p className="text-white/60 text-xs mt-0.5">{dateStr}</p>
+      </div>
+    </div>
+  );
+}
+
 const actionCards: { to: string; icon: React.ElementType; title: string; desc: string }[] = [
-  { to: "/ai-chat", icon: MessageSquare, title: "AI Assistant", desc: "Chat with AI, review calls, and manage bookings." },
+  { to: "/ai-chat", icon: BarChart3, title: "AI Analytics", desc: "Review call logs, chat sessions, and booking data." },
   { to: "/ai-control", icon: Bot, title: "AI Control Center", desc: "Configure your AI voice agent and booking rules." },
   { to: "/gtm", icon: MapPinned, title: "GTM Command Center", desc: "Market zones, lead scoring, and go-to-market strategy." },
   { to: "/marketing", icon: BarChart3, title: "Marketing Analytics", desc: "Track campaigns, spend, and ROI across channels." },
@@ -32,6 +63,10 @@ const actionCards: { to: string; icon: React.ElementType; title: string; desc: s
 export default function MainDashboardPage() {
   const { currentOrg } = useOrg();
   const { user } = useAuth();
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["main-dashboard", currentOrg?.id],
@@ -52,6 +87,20 @@ export default function MainDashboardPage() {
 
   const { data: jobberLeads } = useJobberLeads(20);
 
+  const handleSendChat = useCallback(() => {
+    const msg = chatInput.trim();
+    if (!msg) return;
+    setChatMessages((prev) => [...prev, { role: "user", text: msg }]);
+    setChatInput("");
+    // Simulate AI response
+    setTimeout(() => {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "ai", text: "I'm your AI assistant. This feature is coming soon — I'll be able to answer questions about your leads, bookings, and campaigns." },
+      ]);
+    }, 800);
+  }, [chatInput]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -66,14 +115,28 @@ export default function MainDashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 animate-fade-in">
+      {/* AI Agent Chat Button - Top Right */}
+      <div className="flex justify-end -mb-6">
+        <Button
+          onClick={() => setChatOpen(true)}
+          className="gap-2 bg-gradient-to-r from-[hsl(142,30%,25%)] to-[hsl(142,25%,38%)] text-white hover:opacity-90 shadow-md"
+        >
+          <MessageSquare className="h-4 w-4" />
+          AI Agent Chat
+        </Button>
+      </div>
+
       {/* Leads & Sales Header */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[hsl(142,30%,25%)] to-[hsl(142,25%,35%)] text-white p-8">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_70%_50%,white,transparent_70%)]" />
-        <div className="relative text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Welcome back, {firstName}
-          </h1>
-          <p className="text-white/70">Your leads & sales at a glance</p>
+        <div className="relative flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Welcome back, {firstName}
+            </h1>
+            <p className="text-white/70">Your leads & sales at a glance</p>
+          </div>
+          <WeatherTimeWidget />
         </div>
       </div>
 
@@ -87,13 +150,16 @@ export default function MainDashboardPage() {
         </div>
       )}
 
-      {/* AI Chat Input */}
+      {/* AI Chat Input - opens slide-out */}
       <div className="mx-auto max-w-2xl">
-        <Link to="/ai-chat" className="group flex items-center gap-3 rounded-full border border-border bg-card px-5 py-3.5 shadow-sm transition-all hover:border-primary/40 hover:shadow-md">
+        <button
+          onClick={() => setChatOpen(true)}
+          className="group flex w-full items-center gap-3 rounded-full border border-border bg-card px-5 py-3.5 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+        >
           <Zap className="h-5 w-5 text-primary" />
-          <span className="flex-1 text-sm text-muted-foreground">Ask me anything about your business, leads, or campaigns...</span>
+          <span className="flex-1 text-left text-sm text-muted-foreground">Ask me anything about your business, leads, or campaigns...</span>
           <Send className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-        </Link>
+        </button>
       </div>
 
       {/* Action Cards Grid */}
@@ -164,6 +230,67 @@ export default function MainDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Slide-out Chat Sheet */}
+      <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+        <SheetContent side="right" className="flex flex-col w-full sm:max-w-md p-0">
+          <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
+            <SheetTitle className="flex items-center gap-2 text-base">
+              <Bot className="h-5 w-5 text-primary" />
+              AI Agent Chat
+            </SheetTitle>
+          </SheetHeader>
+
+          <ScrollArea className="flex-1 px-5 py-4">
+            {chatMessages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                <Bot className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                <p className="text-sm text-muted-foreground font-medium">Ask me anything</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">About your leads, bookings, or campaigns</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {chatMessages.map((msg, i) => (
+                  <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+                    <div
+                      className={cn(
+                        "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm",
+                        msg.role === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-muted text-foreground rounded-bl-md"
+                      )}
+                    >
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+
+          <div className="border-t border-border px-4 py-3">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendChat();
+              }}
+              className="flex items-center gap-2"
+            >
+              <Input
+                ref={inputRef}
+                placeholder="Type a message..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                className="flex-1"
+                autoFocus
+              />
+              <Button type="submit" size="icon" disabled={!chatInput.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
