@@ -77,7 +77,7 @@ serve(async (req) => {
       headers: {
         'Authorization': `Bearer ${tokenData.access_token}`,
         'Content-Type': 'application/json',
-        'X-JOBBER-GRAPHQL-VERSION': '2024-09-16',
+        'X-JOBBER-GRAPHQL-VERSION': '2025-04-16',
       },
       body: JSON.stringify({
         query: `query { account { id name } }`,
