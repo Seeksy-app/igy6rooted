@@ -1,9 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
   Bot,
   MessageSquare,
-  Phone,
   Calendar,
   BookOpen,
   Link2,
@@ -21,26 +19,24 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo.png";
 
 interface NavItem {
   to: string;
   icon: React.ElementType;
   label: string;
+  accent?: boolean;
 }
 
 const mainNav: NavItem[] = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
   { to: "/ai-control", icon: Bot, label: "AI Control Center" },
-  { to: "/ai-chat", icon: MessageSquare, label: "AI Chat" },
-  { to: "/ai-calls", icon: Phone, label: "AI Calls" },
+  { to: "/ai-chat", icon: MessageSquare, label: "AI Assistant" },
   { to: "/ai-booking", icon: Calendar, label: "Booking Assistant" },
   { to: "/ai-voice-content", icon: Mic, label: "AI Voice Content" },
   { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
 ];
 
 const marketingNav: NavItem[] = [
-  { to: "/gtm", icon: MapPinned, label: "GTM Command Center" },
+  { to: "/gtm", icon: MapPinned, label: "GTM Command Center", accent: true },
   { to: "/gtm-onboarding", icon: UserPlus, label: "GTM Setup" },
   { to: "/marketing", icon: BarChart3, label: "Marketing Analytics" },
   { to: "/meta-ads-guide", icon: Megaphone, label: "Meta Ads" },
@@ -65,11 +61,12 @@ function SidebarLink({ item }: { item: NavItem }) {
       className={({ isActive }) =>
         cn(
           "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-          isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+          isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+          item.accent && !isActive && "text-primary font-medium"
         )
       }
     >
-      <item.icon className="h-4 w-4 shrink-0" />
+      <item.icon className={cn("h-4 w-4 shrink-0", item.accent && "text-primary")} />
       <span className="truncate">{item.label}</span>
     </NavLink>
   );
@@ -89,15 +86,15 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar">
-      {/* Org Switcher */}
-      <div className="flex items-center gap-2.5 px-3 py-3 border-b border-sidebar-border">
+      {/* Org header */}
+      <NavLink to="/dashboard" className="flex items-center gap-2.5 px-3 py-3 border-b border-sidebar-border hover:bg-sidebar-accent/50 transition-colors">
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(142,40%,30%)] text-white text-xs font-bold">
           {currentOrg?.name?.[0]?.toUpperCase() || "I"}
         </div>
         <span className="truncate text-sm font-semibold text-sidebar-foreground">
           {currentOrg?.name || "IGY6 Rooted"}
         </span>
-      </div>
+      </NavLink>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-1.5 space-y-0.5">
