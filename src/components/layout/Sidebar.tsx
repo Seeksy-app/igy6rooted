@@ -29,6 +29,7 @@ interface NavItem {
 }
 
 const mainNav: NavItem[] = [
+  { to: "/dashboard", icon: BarChart3, label: "Dashboard" },
   { to: "/ai-control", icon: Bot, label: "AI Control Center" },
   { to: "/ai-chat", icon: MessageSquare, label: "AI Assistant" },
   { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
