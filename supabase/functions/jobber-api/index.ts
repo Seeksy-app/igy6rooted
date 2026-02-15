@@ -384,7 +384,7 @@ const QUERIES = {
   // Fetch clients (leads) with recent activity
   getClients: `
     query GetClients($first: Int!, $cursor: String) {
-      clients(first: $first, after: $cursor, sort: { key: CREATED_AT, direction: DESC }) {
+      clients(first: $first, after: $cursor) {
         nodes {
           id
           name
@@ -409,15 +409,12 @@ const QUERIES = {
   // Fetch requests (leads/inquiries)
   getRequests: `
     query GetRequests($first: Int!, $cursor: String) {
-      requests(first: $first, after: $cursor, sort: { key: CREATED_AT, direction: DESC }) {
+      requests(first: $first, after: $cursor) {
         nodes {
           id
           title
-          status
           createdAt
-          completedAt
           client { id name }
-          customFields { nodes { label value { ... on CustomFieldValueText { value: valueText } } } }
         }
         pageInfo { hasNextPage endCursor }
         totalCount
@@ -428,7 +425,7 @@ const QUERIES = {
   // Fetch jobs
   getJobs: `
     query GetJobs($first: Int!, $cursor: String) {
-      jobs(first: $first, after: $cursor, sort: { key: CREATED_AT, direction: DESC }) {
+      jobs(first: $first, after: $cursor) {
         nodes {
           id
           title
@@ -445,7 +442,6 @@ const QUERIES = {
               title
               startAt
               endAt
-              status
             }
           }
         }
@@ -968,7 +964,7 @@ serve(async (req) => {
         const totalClients = clientsData?.clients?.totalCount || 0;
         const totalRequests = requestsData?.requests?.totalCount || 0;
         const totalJobs = jobsData?.jobs?.totalCount || 0;
-        const openRequests = requests.filter((r: any) => r.status === "PENDING" || r.status === "AWAITING_RESPONSE").length;
+        const openRequests = requests.length; // status field not available in current API version
         const activeJobs = jobs.filter((j: any) => j.jobStatus === "IN_PROGRESS" || j.jobStatus === "ACTIVE" || j.jobStatus === "REQUIRES_INVOICING").length;
 
         // Calculate total revenue from jobs
