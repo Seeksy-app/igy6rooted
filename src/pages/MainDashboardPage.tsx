@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   Bot, Phone, Calendar, BarChart3, Search, Eye, Users, TrendingUp,
@@ -67,22 +65,22 @@ export default function MainDashboardPage() {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         <KpiCard icon={Phone} label="AI Calls" value={s.aiCalls} />
         <KpiCard icon={Calendar} label="Bookings" value={s.totalBookings} />
-        <KpiCard icon={CheckCircle2} label="Confirmed" value={s.booked} accent />
-        <KpiCard icon={Clock} label="Open Follow-ups" value={s.openFollowups} />
+        <KpiCard icon={CheckCircle2} label="Confirmed" value={s.booked} variant="success" />
+        <KpiCard icon={Clock} label="Open Follow-ups" value={s.openFollowups} variant={s.openFollowups > 0 ? "warning" : "default"} />
         <KpiCard icon={Users} label="Client Profiles" value={s.clientProfiles} />
       </div>
 
       {/* Two Column Layout */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* AI Operations */}
-        <Card>
+        <Card className="border-l-4 border-l-success/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Bot className="h-5 w-5 text-accent" /> AI Operations
+              <Bot className="h-5 w-5 text-success" /> AI Operations
             </CardTitle>
             <CardDescription>Your AI assistant performance at a glance</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-1">
             <QuickLink to="/ai-calls" icon={Phone} label="AI Call Dashboard" desc="View leads, transcripts & call intelligence" />
             <QuickLink to="/ai-chat" icon={MessageSquare} label="AI Chat" desc="Chat with your AI assistant" />
             <QuickLink to="/ai-booking" icon={Calendar} label="Booking Assistant" desc="Manage AI-assisted bookings" />
@@ -91,7 +89,7 @@ export default function MainDashboardPage() {
         </Card>
 
         {/* SEO & Presence */}
-        <Card>
+        <Card className="border-l-4 border-l-accent/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Globe className="h-5 w-5 text-accent" /> SEO & Brand Presence
@@ -102,7 +100,7 @@ export default function MainDashboardPage() {
                 : "No LLM scans yet — onboard a client to get started"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-1">
             {s.latestBrandScore !== null && (
               <div className="mb-3">
                 <div className="flex items-center justify-between text-sm mb-1">
@@ -119,14 +117,14 @@ export default function MainDashboardPage() {
         </Card>
 
         {/* Marketing */}
-        <Card>
+        <Card className="border-l-4 border-l-warning/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Megaphone className="h-5 w-5 text-accent" /> Marketing
+              <Megaphone className="h-5 w-5 text-warning" /> Marketing
             </CardTitle>
             <CardDescription>Ad performance & campaign analytics</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-1">
             <QuickLink to="/marketing" icon={BarChart3} label="Marketing Analytics" desc="Cross-channel performance" />
             <QuickLink to="/google-ads-guide" icon={Search} label="Google Ads" desc="Campaign setup & optimization" />
             <QuickLink to="/meta-ads-guide" icon={Megaphone} label="Meta Ads" desc="Facebook & Instagram campaigns" />
@@ -135,14 +133,14 @@ export default function MainDashboardPage() {
         </Card>
 
         {/* Quick Setup */}
-        <Card>
+        <Card className="border-l-4 border-l-primary/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Zap className="h-5 w-5 text-accent" /> Quick Setup
+              <Zap className="h-5 w-5 text-success" /> Quick Setup
             </CardTitle>
             <CardDescription>Get the most out of your platform</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             <SetupItem done={s.aiCalls > 0} label="Configure AI Voice Agent" to="/ai-voice-content" />
             <SetupItem done={s.clientProfiles > 0} label="Onboard SEO Client" to="/seo-onboarding" />
             <SetupItem done={s.latestBrandScore !== null} label="Run LLM Brand Scan" to="/llm-presence" />
@@ -154,16 +152,23 @@ export default function MainDashboardPage() {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: number; accent?: boolean }) {
+function KpiCard({ icon: Icon, label, value, variant = "default" }: { icon: any; label: string; value: number; variant?: "default" | "success" | "warning" }) {
+  const styles = {
+    default: { card: "bg-card", text: "text-muted-foreground", iconBg: "bg-muted", iconColor: "text-muted-foreground" },
+    success: { card: "bg-success/10 border-success/30", text: "text-success", iconBg: "bg-success/20", iconColor: "text-success" },
+    warning: { card: "bg-warning/10 border-warning/30", text: "text-warning", iconBg: "bg-warning/20", iconColor: "text-warning" },
+  };
+  const s = styles[variant];
+
   return (
-    <div className={cn("rounded-lg border p-4", accent ? "bg-accent text-accent-foreground" : "bg-card")}>
+    <div className={cn("rounded-lg border p-4 transition-shadow hover:shadow-md", s.card)}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-3xl font-bold">{value}</p>
-          <p className={cn("text-xs uppercase tracking-wide", accent ? "opacity-90" : "text-muted-foreground")}>{label}</p>
+          <p className="text-3xl font-bold text-foreground">{value}</p>
+          <p className={cn("text-xs uppercase tracking-wide mt-1", variant === "default" ? "text-muted-foreground" : s.text)}>{label}</p>
         </div>
-        <div className={cn("rounded-lg p-2", accent ? "bg-white/20" : "bg-muted")}>
-          <Icon className={cn("h-5 w-5", !accent && "text-muted-foreground")} />
+        <div className={cn("rounded-lg p-2", s.iconBg)}>
+          <Icon className={cn("h-5 w-5", s.iconColor)} />
         </div>
       </div>
     </div>
@@ -173,8 +178,8 @@ function KpiCard({ icon: Icon, label, value, accent }: { icon: any; label: strin
 function QuickLink({ to, icon: Icon, label, desc }: { to: string; icon: any; label: string; desc: string }) {
   return (
     <Link to={to} className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50 group">
-      <div className="rounded-md bg-muted p-2 group-hover:bg-accent/10">
-        <Icon className="h-4 w-4 text-muted-foreground group-hover:text-accent" />
+      <div className="rounded-md bg-muted p-2 group-hover:bg-success/10">
+        <Icon className="h-4 w-4 text-muted-foreground group-hover:text-success" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">{label}</p>
@@ -188,8 +193,8 @@ function QuickLink({ to, icon: Icon, label, desc }: { to: string; icon: any; lab
 function SetupItem({ done, label, to }: { done: boolean; label: string; to: string }) {
   return (
     <Link to={to} className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50 transition-colors">
-      <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center", done ? "border-accent bg-accent" : "border-border")}>
-        {done && <CheckCircle2 className="h-3 w-3 text-accent-foreground" />}
+      <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center", done ? "border-success bg-success" : "border-border")}>
+        {done && <CheckCircle2 className="h-3 w-3 text-success-foreground" />}
       </div>
       <span className={cn("text-sm", done ? "text-muted-foreground line-through" : "text-foreground")}>{label}</span>
     </Link>
