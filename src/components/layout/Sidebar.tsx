@@ -1,8 +1,7 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   Bot,
   MessageSquare,
-  Calendar,
   BookOpen,
   Link2,
   BarChart3,
@@ -19,7 +18,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
 import { cn } from "@/lib/utils";
-import profileImg from "@/assets/craig-orner.avif";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavItem {
   to: string;
@@ -50,6 +50,7 @@ const seoNav: NavItem[] = [
 
 const resourceNav: NavItem[] = [
   { to: "/knowledge-base", icon: BookOpen, label: "Knowledge Base" },
+  { to: "/ai-voice-content", icon: Mic, label: "AI Voice Content" },
   { to: "/integrations", icon: Link2, label: "Integrations" },
 ];
 
@@ -83,11 +84,34 @@ export function Sidebar() {
   const { user, signOut } = useAuth();
   const { currentOrg } = useOrg();
 
+  const { data: profile } = useQuery({
+    queryKey: ["sidebar-profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("avatar_url, display_name")
+        .eq("user_id", user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const avatarUrl = profile?.avatar_url;
+  const displayName = profile?.display_name;
+
   return (
     <aside className="flex h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Org header */}
       <NavLink to="/dashboard" className="flex items-center gap-2.5 px-3 py-3 border-b border-sidebar-border hover:bg-sidebar-accent/50 transition-colors">
-        <img src={profileImg} alt="Profile" className="h-7 w-7 rounded-md object-cover" />
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="Profile" className="h-7 w-7 rounded-md object-cover" />
+        ) : (
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-bold">
+            {(displayName?.[0] || user?.email?.[0] || "U").toUpperCase()}
+          </div>
+        )}
         <span className="truncate text-sm font-semibold text-sidebar-foreground">
           {currentOrg?.name || "IGY6 Rooted"}
         </span>
@@ -117,7 +141,6 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="border-t border-sidebar-border px-2 py-2 space-y-0.5">
-        <SidebarLink item={{ to: "/ai-voice-content", icon: Mic, label: "AI Voice Content" }} />
         <NavLink
           to="/settings"
           className={({ isActive }) =>
@@ -132,9 +155,15 @@ export function Sidebar() {
         </NavLink>
 
         <div className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5">
-          <img src={profileImg} alt="Profile" className="h-6 w-6 rounded-full object-cover" />
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profile" className="h-6 w-6 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">
+              {(displayName?.[0] || user?.email?.[0] || "U").toUpperCase()}
+            </div>
+          )}
           <span className="flex-1 truncate text-[12px] text-muted-foreground">
-            {user?.email}
+            {displayName || user?.email}
           </span>
           <button
             onClick={() => signOut()}
