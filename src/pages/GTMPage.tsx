@@ -755,8 +755,8 @@ export default function GTMPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-xl bg-[#1565c0] text-white p-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1565c0] to-[#1976d2]" />
+      <div className="relative overflow-hidden rounded-xl text-white p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(142,30%,25%)] to-[hsl(142,25%,38%)]" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/30">

@@ -65,13 +65,16 @@ export default function MainDashboardPage() {
   const jSummary = jobberLeads?.summary;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 px-4 py-12 animate-fade-in">
+    <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 animate-fade-in">
       {/* Leads & Sales Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Welcome back, {firstName}
-        </h1>
-        <p className="text-muted-foreground">Your leads & sales at a glance</p>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[hsl(142,30%,25%)] to-[hsl(142,25%,35%)] text-white p-8">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_70%_50%,white,transparent_70%)]" />
+        <div className="relative text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, {firstName}
+          </h1>
+          <p className="text-white/70">Your leads & sales at a glance</p>
+        </div>
       </div>
 
       {/* Jobber KPI Strip */}
