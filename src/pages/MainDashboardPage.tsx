@@ -1,4 +1,5 @@
 import { useOrg } from "@/contexts/OrgContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -12,8 +13,16 @@ import {
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
 
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 export default function MainDashboardPage() {
   const { currentOrg } = useOrg();
+  const { user } = useAuth();
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["main-dashboard", currentOrg?.id],
@@ -52,12 +61,24 @@ export default function MainDashboardPage() {
 
   return (
     <div className="space-y-6 p-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <img src={logo} alt="Logo" className="h-10 w-auto" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">{currentOrg?.name || "Your Organization"} — Command Center Overview</p>
+      {/* Welcome Banner */}
+      <div className="rounded-xl border-l-4 border-l-[hsl(142,40%,30%)] bg-[hsl(142,40%,30%)/0.05] p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <img src={logo} alt="Logo" className="h-10 w-auto" />
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground">
+                {getGreeting()}, {user?.email?.split("@")[0] || "there"}
+              </h1>
+              <p className="text-sm text-muted-foreground">{currentOrg?.name || "Your Organization"} — Command Center</p>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
+              {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </span>
+          </div>
         </div>
       </div>
 

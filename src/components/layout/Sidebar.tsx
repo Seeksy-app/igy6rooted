@@ -95,10 +95,10 @@ function NavGroupSection({ group }: { group: NavGroup }) {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                cn("nav-item", isActive && "active")
+                cn("nav-item text-[13px]", isActive && "active")
               }
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-4 w-4" />
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -133,7 +133,7 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         <NavLink
           to="/dashboard"
-          className={({ isActive }) => cn("nav-item mb-2", isActive && "active")}
+          className={({ isActive }) => cn("nav-item mb-2 text-sm font-medium", isActive && "active")}
         >
           <LayoutDashboard className="h-5 w-5" />
           <span>Dashboard</span>
