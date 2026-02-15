@@ -103,6 +103,7 @@ export default function IntegrationsPage() {
   const integrations: Integration[] = [
     { id: "jobber", name: "Jobber", description: "Scheduling, jobs & client data", category: "Core", status: jobberConnection?.status === "connected" ? "connected" : jobberConnection ? "pending" : "disconnected", icon: "📋", configPath: "/integrations/jobber", lastSync: jobberConnection?.updated_at },
     { id: "elevenlabs", name: "ElevenLabs", description: "Conversational AI voice agent", category: "AI", status: "connected", icon: "🎙️" },
+    { id: "semrush", name: "Semrush", description: "SEO analytics • Per-client domain tracking", category: "SEO & Analytics", status: "connected", icon: "🔍", configPath: "/seo-onboarding" },
     { id: "google-ads", name: "Google Ads", description: "Ad performance & ROI tracking", category: "Marketing", status: getAdStatus(googleAdsConnection), icon: "🎯", lastSync: googleAdsConnection?.updated_at },
     { id: "meta-ads", name: "Meta Ads", description: "Facebook & Instagram campaigns", category: "Marketing", status: getAdStatus(metaAdsConnection), icon: "📱", lastSync: metaAdsConnection?.updated_at },
     { id: "google-analytics", name: "Google Analytics", description: "Website & conversion tracking", category: "Analytics", status: "coming_soon", icon: "📊" },
