@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
 import { cn } from "@/lib/utils";
+import profileImg from "@/assets/craig-orner.avif";
 
 interface NavItem {
   to: string;
@@ -88,9 +89,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Org header */}
       <NavLink to="/dashboard" className="flex items-center gap-2.5 px-3 py-3 border-b border-sidebar-border hover:bg-sidebar-accent/50 transition-colors">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(142,40%,30%)] text-white text-xs font-bold">
-          {currentOrg?.name?.[0]?.toUpperCase() || "I"}
-        </div>
+        <img src={profileImg} alt="Profile" className="h-7 w-7 rounded-md object-cover" />
         <span className="truncate text-sm font-semibold text-sidebar-foreground">
           {currentOrg?.name || "IGY6 Rooted"}
         </span>
@@ -134,9 +133,7 @@ export function Sidebar() {
         </NavLink>
 
         <div className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">
-            {user?.email?.[0].toUpperCase() || "U"}
-          </div>
+          <img src={profileImg} alt="Profile" className="h-6 w-6 rounded-full object-cover" />
           <span className="flex-1 truncate text-[12px] text-muted-foreground">
             {user?.email}
           </span>
