@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const JOBBER_GRAPHQL_URL = "https://api.getjobber.com/api/graphql";
-const JOBBER_GRAPHQL_VERSION = "2024-09-16";
+const JOBBER_GRAPHQL_VERSION = "2025-04-16";
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // HMAC-SHA256 verification
