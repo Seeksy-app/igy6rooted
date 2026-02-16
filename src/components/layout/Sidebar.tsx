@@ -14,6 +14,7 @@ import {
   UserPlus,
   Eye,
   Users,
+  Mail,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
@@ -35,6 +36,7 @@ const mainNav: NavItem[] = [
 const salesNav: NavItem[] = [
   { to: "/ai-productivity", icon: TrendingUp, label: "AI Productivity" },
   { to: "/sales-leads", icon: Users, label: "Sales & Leads" },
+  { to: "/mailers", icon: Mail, label: "Mailers" },
 ];
 
 const marketingNav: NavItem[] = [
