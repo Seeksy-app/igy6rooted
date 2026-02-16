@@ -37,9 +37,9 @@ export function TeamSection() {
   const queryClient = useQueryClient();
 
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<string>("agent");
+  const [inviteRole, setInviteRole] = useState<string>("sales");
   const [inviteOpen, setInviteOpen] = useState(false);
-
+  const [addingMember, setAddingMember] = useState(false);
   const isAdmin = userRole === "admin";
 
   const { data: teamMembers, isLoading } = useQuery({
@@ -101,26 +101,46 @@ export function TeamSection() {
 
   const addMemberMutation = useMutation({
     mutationFn: async ({ email, role }: { email: string; role: string }) => {
-      // Look up user by email via a simple approach: 
-      // We'll need the user to have already signed up. 
-      // For now, we check auth.users isn't accessible client-side,
-      // so we add by user_id lookup through profiles or team_members.
-      // A practical approach: use the service role in an edge function.
-      // For MVP, we'll inform the user the member must sign up first.
-      toast({
-        title: "Invite sent",
-        description: `When ${email} signs up, they'll need to be added by user ID. Full email invites coming soon.`,
-      });
+      setAddingMember(true);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/team-add-member`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ org_id: currentOrg?.id, email, role }),
+        }
+      );
+
+      const result = await resp.json();
+      if (!resp.ok) {
+        throw new Error(result.message || result.error || "Failed to add member");
+      }
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["team-members"] });
+      toast({ title: "Member added", description: `${data.email} has been added as ${data.role}.` });
       setInviteOpen(false);
       setInviteEmail("");
+      setAddingMember(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      setAddingMember(false);
     },
   });
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case "admin": return "bg-primary/15 text-primary";
+      case "sales": return "bg-orange-500/15 text-orange-600";
       case "agent": return "bg-accent/15 text-accent";
       default: return "bg-muted text-muted-foreground";
     }
@@ -162,11 +182,13 @@ export function TeamSection() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
                       <SelectItem value="agent">Agent</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
                     <strong>Admin</strong> — Full access to all settings and data.{" "}
+                    <strong>Sales</strong> — Field reps for canvassing and door-knocking.{" "}
                     <strong>Agent</strong> — Can view data and manage assigned tasks.
                   </p>
                 </div>
@@ -177,9 +199,9 @@ export function TeamSection() {
                 </DialogClose>
                 <Button
                   onClick={() => addMemberMutation.mutate({ email: inviteEmail, role: inviteRole })}
-                  disabled={!inviteEmail}
+                  disabled={!inviteEmail || addingMember}
                 >
-                  Add Member
+                  {addingMember ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Adding...</> : "Add Member"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -246,6 +268,7 @@ export function TeamSection() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="sales">Sales</SelectItem>
                               <SelectItem value="agent">Agent</SelectItem>
                             </SelectContent>
                           </Select>

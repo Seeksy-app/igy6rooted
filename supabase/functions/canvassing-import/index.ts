@@ -113,7 +113,9 @@ serve(async (req) => {
       });
     }
 
-    const assignableMembers = teamMembers || [];
+    // Only assign to sales role members for canvassing
+    const assignableMembers = (teamMembers || []).filter((m: any) => m.role === "sales");
+    console.log(`Found ${assignableMembers.length} sales team members for round-robin`);
 
     // Extract addresses from neighbor mailings and build canvassing leads
     // SendJim neighbor mailings contain recipients with address data
