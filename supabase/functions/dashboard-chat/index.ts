@@ -58,26 +58,22 @@ serve(async (req) => {
       svc.from("gtm_profiles").select("business_name, business_type, industry, monthly_marketing_budget, current_monthly_leads, target_monthly_leads").eq("org_id", org_id).maybeSingle(),
     ]);
 
-    // Fetch live Jobber data (clients, requests, jobs) via internal edge function call
+    // Fetch live Jobber data and SendJim data in parallel
     let jobberData: any = null;
-    try {
-      const jobberRes = await fetch(
-        `${supabaseUrl}/functions/v1/jobber-api/leads?org_id=${org_id}&limit=100`,
-        {
-          headers: {
-            Authorization: `Bearer ${serviceKey}`,
-            apikey: serviceKey,
-          },
-        }
-      );
-      if (jobberRes.ok) {
-        jobberData = await jobberRes.json();
-      } else {
-        console.log("Jobber data fetch returned status:", jobberRes.status);
-      }
-    } catch (e) {
-      console.log("Jobber data fetch failed (non-critical):", e);
-    }
+    let sendjimData: any = null;
+    
+    const internalHeaders = {
+      Authorization: `Bearer ${serviceKey}`,
+      apikey: serviceKey,
+    };
+
+    const [jobberResult, sendjimResult] = await Promise.allSettled([
+      fetch(`${supabaseUrl}/functions/v1/jobber-api/leads?org_id=${org_id}&limit=100`, { headers: internalHeaders }).then(r => r.ok ? r.json() : null),
+      fetch(`${supabaseUrl}/functions/v1/sendjim-api/summary?org_id=${org_id}`, { headers: internalHeaders }).then(r => r.ok ? r.json() : null),
+    ]);
+
+    if (jobberResult.status === "fulfilled") jobberData = jobberResult.value;
+    if (sendjimResult.status === "fulfilled") sendjimData = sendjimResult.value;
 
     const businessName = agentRes.data?.business_name || profileRes.data?.business_name || "the business";
 
@@ -136,6 +132,19 @@ serve(async (req) => {
           client: j.client?.name,
         }));
         contextParts.push(`Jobber Jobs (${jobs.length}): ${JSON.stringify(jobSummary)}`);
+      }
+    }
+
+    // Add SendJim direct mail data if available
+    if (sendjimData) {
+      if (sendjimData.contacts) {
+        contextParts.push(`SendJim Contacts (postcard recipients): ${JSON.stringify(sendjimData.contacts)}`);
+      }
+      if (sendjimData.mailings) {
+        contextParts.push(`SendJim Quick Send Mailings (postcards sent): ${JSON.stringify(sendjimData.mailings)}`);
+      }
+      if (sendjimData.neighborMailings) {
+        contextParts.push(`SendJim Neighbor Mailings: ${JSON.stringify(sendjimData.neighborMailings)}`);
       }
     }
 

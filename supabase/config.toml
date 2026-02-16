@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.semrush-api]
 verify_jwt = false
+
+[functions.sendjim-api]
+verify_jwt = false
