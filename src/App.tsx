@@ -46,6 +46,7 @@ import MarketingAnalyticsPage from "@/pages/MarketingAnalyticsPage";
 import AIProductivityPage from "@/pages/AIProductivityPage";
 import SalesLeadsPage from "@/pages/SalesLeadsPage";
 import MailersPage from "@/pages/MailersPage";
+import CanvassingPage from "@/pages/CanvassingPage";
 import MetaAdsGuidePage from "@/pages/MetaAdsGuidePage";
 import GoogleAdsGuidePage from "@/pages/GoogleAdsGuidePage";
 import SettingsPage from "@/pages/SettingsPage";
@@ -175,6 +176,7 @@ function AppRoutes() {
       <Route path="/ai-productivity" element={<ProtectedRoute><AIProductivityPage /></ProtectedRoute>} />
       <Route path="/sales-leads" element={<ProtectedRoute><SalesLeadsPage /></ProtectedRoute>} />
       <Route path="/mailers" element={<ProtectedRoute><MailersPage /></ProtectedRoute>} />
+      <Route path="/canvassing" element={<ProtectedRoute><CanvassingPage /></ProtectedRoute>} />
       <Route path="/gtm" element={<ProtectedRoute><GTMPage /></ProtectedRoute>} />
       <Route path="/gtm-onboarding" element={<ProtectedRoute><GTMOnboardingPage /></ProtectedRoute>} />
       <Route path="/seo" element={<ProtectedRoute><SEODashboardPage /></ProtectedRoute>} />
