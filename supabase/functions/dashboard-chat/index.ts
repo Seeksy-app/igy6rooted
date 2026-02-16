@@ -73,7 +73,9 @@ serve(async (req) => {
     ]);
 
     if (jobberResult.status === "fulfilled") jobberData = jobberResult.value;
+    else console.error("Jobber fetch failed:", jobberResult.reason);
     if (sendjimResult.status === "fulfilled") sendjimData = sendjimResult.value;
+    else console.error("SendJim fetch failed:", sendjimResult.reason);
 
     const businessName = agentRes.data?.business_name || profileRes.data?.business_name || "the business";
 

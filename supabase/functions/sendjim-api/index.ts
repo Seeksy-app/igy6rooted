@@ -11,6 +11,7 @@ const SENDJIM_BASE = "https://api.sendjim.com/api";
 async function sendjimFetch(path: string, token: string, page = 1) {
   const sep = path.includes("?") ? "&" : "?";
   const url = `${SENDJIM_BASE}${path}${sep}page=${page}`;
+  console.log("SendJim fetch:", url);
   const resp = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -19,6 +20,7 @@ async function sendjimFetch(path: string, token: string, page = 1) {
   });
   if (!resp.ok) {
     const text = await resp.text();
+    console.error("SendJim API error:", resp.status, text);
     throw new Error(`SendJim API ${resp.status}: ${text}`);
   }
   return resp.json();
@@ -47,41 +49,45 @@ serve(async (req) => {
       });
     }
 
+    const token = authHeader.replace("Bearer ", "");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // If the token IS the service role key, skip user auth (internal call from dashboard-chat)
+    const isServiceCall = token === serviceKey;
+
+    if (!isServiceCall) {
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
       });
+
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const reqUrl = new URL(req.url);
+      const orgId = reqUrl.searchParams.get("org_id");
+      if (orgId) {
+        const { data: isMember } = await supabase.rpc("is_org_member", { _org_id: orgId });
+        if (!isMember) {
+          return new Response(JSON.stringify({ error: "Not a member of this org" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
     }
 
     const url = new URL(req.url);
     const path = url.pathname.replace("/sendjim-api", "");
-    const orgId = url.searchParams.get("org_id");
-
-    if (!orgId) {
-      return new Response(JSON.stringify({ error: "org_id required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Verify org membership
-    const { data: isMember } = await supabase.rpc("is_org_member", { _org_id: orgId });
-    if (!isMember) {
-      return new Response(JSON.stringify({ error: "Not a member of this org" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const page = parseInt(url.searchParams.get("page") || "1");
+
+    console.log("sendjim-api path:", path, "page:", page);
 
     switch (path) {
       case "/contacts": {
@@ -113,13 +119,13 @@ serve(async (req) => {
       }
 
       case "/summary": {
-        // Fetch contacts + mailings in parallel for a summary view
         const [contacts, mailings, neighborMailings] = await Promise.all([
           sendjimFetch("/contacts", SENDJIM_API_KEY, 1),
           sendjimFetch("/contact_quick_send_mailings", SENDJIM_API_KEY, 1),
           sendjimFetch("/neighbor_mailings", SENDJIM_API_KEY, 1),
         ]);
 
+        console.log("SendJim summary fetched successfully");
         return new Response(JSON.stringify({
           contacts,
           mailings,
