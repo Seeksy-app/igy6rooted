@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Mail, Users, Send, MapPin } from "lucide-react";
+import { Loader2, Mail, Users, Send, FileText } from "lucide-react";
 
 function useSendJimData() {
   const { currentOrg } = useOrg();
@@ -31,7 +31,6 @@ export default function MailersPage() {
   const { data, isLoading, error } = useSendJimData();
   const { currentOrg } = useOrg();
 
-  // Also fetch marketing_leads with channel = direct_mail
   const { data: dmLeads } = useQuery({
     queryKey: ["direct-mail-leads", currentOrg?.id],
     queryFn: async () => {
@@ -57,12 +56,14 @@ export default function MailersPage() {
   }
 
   const contacts = data?.contacts;
-  const mailings = data?.mailings;
-  const neighborMailings = data?.neighborMailings;
+  const quicksends = data?.quicksends;
 
-  const contactCount = contacts?.data?.length ?? contacts?.meta?.total ?? 0;
-  const mailingCount = mailings?.data?.length ?? mailings?.meta?.total ?? 0;
-  const neighborCount = neighborMailings?.data?.length ?? neighborMailings?.meta?.total ?? 0;
+  // Handle both array and object with nested data
+  const contactList = Array.isArray(contacts) ? contacts : (contacts?.data || contacts?.Contacts || []);
+  const quicksendList = quicksends?.QuickSends || (Array.isArray(quicksends) ? quicksends : []);
+
+  const contactCount = contactList.length || contacts?.meta?.total || 0;
+  const quicksendCount = quicksendList.length;
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 animate-fade-in">
@@ -82,46 +83,45 @@ export default function MailersPage() {
       ) : (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <KpiCard icon={Users} label="Contacts" value={contactCount} />
-            <KpiCard icon={Send} label="Mailings Sent" value={mailingCount} />
-            <KpiCard icon={MapPin} label="Neighbor Mailings" value={neighborCount} />
+            <KpiCard icon={FileText} label="Quick Sends" value={quicksendCount} />
             <KpiCard icon={Mail} label="QR Leads" value={dmLeads?.length ?? 0} />
           </div>
 
-          {/* Recent Mailings */}
+          {/* Quick Sends / Templates */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Send className="h-4 w-4 text-primary" />
-                Recent Mailings
+                Quick Send Templates
                 <Badge variant="outline" className="ml-auto text-[10px]">via SendJim</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {mailings?.data?.length > 0 ? (
+              {quicksendList.length > 0 ? (
                 <div className="space-y-2.5">
-                  {mailings.data.slice(0, 10).map((m: any, i: number) => (
-                    <div key={m.id || i} className="flex items-center justify-between border-b border-border/50 pb-2 last:border-0 last:pb-0">
+                  {quicksendList.slice(0, 10).map((qs: any, i: number) => (
+                    <div key={qs.QuickSendID || i} className="flex items-center justify-between border-b border-border/50 pb-2 last:border-0 last:pb-0">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
                         <div>
                           <p className="text-sm font-medium text-foreground">
-                            {m.contact?.first_name || m.first_name || "Contact"} {m.contact?.last_name || m.last_name || ""}
+                            {qs.Name || "Unnamed"}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {m.template_name || m.mailing_type || "Postcard"}
+                            {qs.QuickSendSequences?.[0]?.QuickSendType || "Postcard"} · {qs.TotalCreditCost ?? 0} credits
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {m.created_at ? new Date(m.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
-                      </span>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {qs.NumberInSequence > 1 ? `${qs.NumberInSequence} steps` : "Single"}
+                      </Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground">No mailings found.</p>
+                <p className="text-xs text-muted-foreground">No quick send templates found.</p>
               )}
             </CardContent>
           </Card>
@@ -174,17 +174,20 @@ export default function MailersPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {contacts?.data?.length > 0 ? (
+              {contactList.length > 0 ? (
                 <div className="space-y-2.5">
-                  {contacts.data.slice(0, 10).map((c: any, i: number) => (
-                    <div key={c.id || i} className="flex items-center justify-between border-b border-border/50 pb-2 last:border-0 last:pb-0">
+                  {contactList.slice(0, 10).map((c: any, i: number) => (
+                    <div key={c.ContactID || c.id || i} className="flex items-center justify-between border-b border-border/50 pb-2 last:border-0 last:pb-0">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-full bg-primary/70 shrink-0" />
                         <div>
                           <p className="text-sm font-medium text-foreground">
-                            {c.first_name || ""} {c.last_name || ""}
+                            {c.FirstName || c.first_name || ""} {c.LastName || c.last_name || ""}
                           </p>
-                          <p className="text-xs text-muted-foreground">{c.address_1 || c.city || "No address"}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {c.City || c.city || c.StreetAddress || c.address_1 || "No address"}
+                            {(c.State || c.state) ? `, ${c.State || c.state}` : ""}
+                          </p>
                         </div>
                       </div>
                     </div>
