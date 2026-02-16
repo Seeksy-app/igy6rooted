@@ -93,10 +93,76 @@ serve(async (req) => {
       body = await req.json();
     }
 
+    const action = body.action;
     const orgId = body.org_id || url.searchParams.get("org_id");
     const timestamp = new Date().toISOString();
 
-    console.log(`[${timestamp}] ${req.method} ${path} - org: ${orgId}`);
+    console.log(`[${timestamp}] ${req.method} ${path} - org: ${orgId} action: ${action}`);
+
+    // Handle public referral lead submission (no auth required, no org_id needed)
+    if (action === "submit_referral_lead") {
+      const { customer_name, customer_phone, customer_email, address, notes, referral_source, campaign, offer } = body;
+
+      if (!customer_name || !customer_phone) {
+        return new Response(
+          JSON.stringify({ error: "Name and phone are required" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+
+      // Validate input lengths
+      if (customer_name.length > 100 || customer_phone.length > 20) {
+        return new Response(
+          JSON.stringify({ error: "Input too long" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+
+      // Find the default org (first org, or you can hardcode if single-tenant)
+      const { data: orgs } = await supabase.from("orgs").select("id").limit(1);
+      const defaultOrgId = orgs?.[0]?.id;
+
+      if (!defaultOrgId) {
+        return new Response(
+          JSON.stringify({ error: "No organization configured" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+
+      const source = [referral_source, campaign, offer].filter(Boolean).join(" | ");
+
+      const { error: insertError } = await supabase.from("marketing_leads").insert({
+        org_id: defaultOrgId,
+        channel: "direct_mail",
+        source: source || "sendjim-postcard",
+        customer_name: customer_name.slice(0, 100),
+        customer_phone: customer_phone.slice(0, 20),
+        customer_email: customer_email?.slice(0, 255) || null,
+        zip_code: null,
+        status: "new",
+        notes: [
+          address ? `Address: ${address}` : null,
+          notes || null,
+          `Referral: ${referral_source || "postcard"}`,
+          campaign ? `Campaign: ${campaign}` : null,
+          offer ? `Offer: ${offer}` : null,
+        ].filter(Boolean).join("\n"),
+        lead_score: 70, // High intent - they scanned a QR code
+      });
+
+      if (insertError) {
+        console.error("Failed to insert referral lead:", insertError);
+        return new Response(
+          JSON.stringify({ error: "Failed to save lead" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ status: "ok", message: "Lead submitted successfully" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Route handling
     switch (path) {
