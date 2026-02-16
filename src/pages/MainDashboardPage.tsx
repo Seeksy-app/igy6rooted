@@ -4,14 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useJobberLeads } from "@/hooks/useJobberLeads";
 import { Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Bot, BarChart3, Search, Users,
   Loader2, Zap, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Send,
-  Sun,
+  Sun, Mail, TrendingUp,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -76,6 +77,59 @@ export default function MainDashboardPage() {
 
   const { data: jobberLeads } = useJobberLeads(20);
 
+  // Marketing metrics for chart
+  const { data: metricsData } = useQuery({
+    queryKey: ["dashboard-metrics", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data } = await supabase
+        .from("marketing_metrics")
+        .select("channel, leads, spend, conversions, metric_date")
+        .eq("org_id", currentOrg.id)
+        .order("metric_date", { ascending: false })
+        .limit(90);
+      return data || [];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Leads by channel for pie chart
+  const { data: leadsData } = useQuery({
+    queryKey: ["dashboard-leads-channel", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data } = await supabase
+        .from("marketing_leads")
+        .select("channel")
+        .eq("org_id", currentOrg.id);
+      return data || [];
+    },
+    enabled: !!currentOrg,
+  });
+
+  const channelChartData = useMemo(() => {
+    if (!metricsData?.length) return [];
+    const byChannel: Record<string, { leads: number; spend: number; conversions: number }> = {};
+    metricsData.forEach((m: any) => {
+      if (!byChannel[m.channel]) byChannel[m.channel] = { leads: 0, spend: 0, conversions: 0 };
+      byChannel[m.channel].leads += m.leads;
+      byChannel[m.channel].spend += Number(m.spend);
+      byChannel[m.channel].conversions += m.conversions;
+    });
+    return Object.entries(byChannel).map(([channel, vals]) => ({ channel, ...vals }));
+  }, [metricsData]);
+
+  const COLORS = ["hsl(142,30%,35%)", "hsl(200,60%,50%)", "hsl(35,80%,55%)", "hsl(280,50%,55%)", "hsl(0,60%,55%)"];
+
+  const leadsPieData = useMemo(() => {
+    if (!leadsData?.length) return [];
+    const counts: Record<string, number> = {};
+    leadsData.forEach((l: any) => {
+      counts[l.channel] = (counts[l.channel] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [leadsData]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -131,6 +185,68 @@ export default function MainDashboardPage() {
             </Card>
           </Link>
         ))}
+      </div>
+
+      {/* Analytics Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Leads by Channel
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {channelChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={channelChartData}>
+                  <XAxis dataKey="channel" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Bar dataKey="leads" fill="hsl(142,30%,35%)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-xs text-muted-foreground py-8 text-center">No marketing metrics data yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <Mail className="h-4 w-4 text-primary" />
+              Lead Sources
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {leadsPieData.length > 0 ? (
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width="50%" height={200}>
+                  <PieChart>
+                    <Pie data={leadsPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={40}>
+                      {leadsPieData.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="space-y-1.5">
+                  {leadsPieData.map((item, i) => (
+                    <div key={item.name} className="flex items-center gap-2 text-xs">
+                      <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      <span className="text-muted-foreground">{item.name}</span>
+                      <span className="font-semibold text-foreground ml-auto">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground py-8 text-center">No lead data yet.</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Bottom Info Panels */}
