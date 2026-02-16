@@ -15,7 +15,7 @@ async function sendjimFetch(path: string, token: string, page = 1) {
   const resp = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
-      API_VERSION: "3",
+      API_VERSION: "4",
     },
   });
   if (!resp.ok) {
@@ -97,47 +97,37 @@ serve(async (req) => {
         });
       }
 
-      case "/mailings": {
-        const data = await sendjimFetch("/contact_quick_send_mailings", SENDJIM_API_KEY, page);
+      case "/quicksends": {
+        const data = await sendjimFetch("/quicksends", SENDJIM_API_KEY);
         return new Response(JSON.stringify(data), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      case "/neighbor-mailings": {
-        const data = await sendjimFetch("/neighbor_mailings", SENDJIM_API_KEY, page);
-        return new Response(JSON.stringify(data), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      case "/tags": {
-        const data = await sendjimFetch("/tags", SENDJIM_API_KEY, page);
+      case "/user": {
+        const data = await sendjimFetch("/user", SENDJIM_API_KEY);
         return new Response(JSON.stringify(data), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
       case "/summary": {
-        const [contactsResult, mailingsResult, neighborResult] = await Promise.allSettled([
+        // Only contacts and quicksends are available as GET endpoints in SendJim API v4
+        const [contactsResult, quicksendsResult] = await Promise.allSettled([
           sendjimFetch("/contacts", SENDJIM_API_KEY, 1),
-          sendjimFetch("/contact_quick_send_mailings", SENDJIM_API_KEY, 1),
-          sendjimFetch("/neighbor_mailings", SENDJIM_API_KEY, 1),
+          sendjimFetch("/quicksends", SENDJIM_API_KEY),
         ]);
 
-        const contacts = contactsResult.status === "fulfilled" ? contactsResult.value : { data: [] };
-        const mailings = mailingsResult.status === "fulfilled" ? mailingsResult.value : { data: [] };
-        const neighborMailings = neighborResult.status === "fulfilled" ? neighborResult.value : { data: [] };
+        const contacts = contactsResult.status === "fulfilled" ? contactsResult.value : null;
+        const quicksends = quicksendsResult.status === "fulfilled" ? quicksendsResult.value : null;
 
         if (contactsResult.status === "rejected") console.error("Contacts fetch failed:", contactsResult.reason);
-        if (mailingsResult.status === "rejected") console.error("Mailings fetch failed:", mailingsResult.reason);
-        if (neighborResult.status === "rejected") console.error("Neighbor mailings fetch failed:", neighborResult.reason);
+        if (quicksendsResult.status === "rejected") console.error("Quick sends fetch failed:", quicksendsResult.reason);
 
-        console.log("SendJim summary fetched (partial OK)");
+        console.log("SendJim summary fetched");
         return new Response(JSON.stringify({
           contacts,
-          mailings,
-          neighborMailings,
+          quicksends,
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
