@@ -19,6 +19,7 @@ import HomePage from "@/pages/public/HomePage";
 import AboutPage from "@/pages/public/AboutPage";
 import ServicesPage from "@/pages/public/ServicesPage";
 import ContactPage from "@/pages/public/ContactPage";
+import ReferralLandingPage from "@/pages/public/ReferralLandingPage";
 import {
   TreeRemovalPage,
   TreeTrimmingPage,
@@ -138,6 +139,7 @@ function AppRoutes() {
       <Route path="/about" element={<PublicLayout><AboutPage /></PublicLayout>} />
       <Route path="/services" element={<PublicLayout><ServicesPage /></PublicLayout>} />
       <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
+      <Route path="/offer" element={<PublicLayout><ReferralLandingPage /></PublicLayout>} />
       <Route path="/services/tree-removal" element={<PublicLayout><TreeRemovalPage /></PublicLayout>} />
       <Route path="/services/tree-trimming" element={<PublicLayout><TreeTrimmingPage /></PublicLayout>} />
       <Route path="/services/tree-pruning" element={<PublicLayout><TreePruningPage /></PublicLayout>} />
