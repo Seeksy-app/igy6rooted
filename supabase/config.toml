@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.sendjim-api]
 verify_jwt = false
+
+[functions.canvassing-import]
+verify_jwt = false
+
+[functions.dashboard-chat]
+verify_jwt = false

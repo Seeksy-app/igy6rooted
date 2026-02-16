@@ -478,6 +478,74 @@ export type Database = {
           },
         ]
       }
+      canvassing_leads: {
+        Row: {
+          address: string
+          assigned_to: string | null
+          assigned_to_name: string | null
+          city: string | null
+          created_at: string
+          id: string
+          knocked_at: string | null
+          notes: string | null
+          org_id: string
+          outcome_at: string | null
+          property_type: string | null
+          sendjim_code: string | null
+          sendjim_mailing_date: string | null
+          state: string | null
+          status: string
+          updated_at: string
+          zip: string | null
+        }
+        Insert: {
+          address: string
+          assigned_to?: string | null
+          assigned_to_name?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          knocked_at?: string | null
+          notes?: string | null
+          org_id: string
+          outcome_at?: string | null
+          property_type?: string | null
+          sendjim_code?: string | null
+          sendjim_mailing_date?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Update: {
+          address?: string
+          assigned_to?: string | null
+          assigned_to_name?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          knocked_at?: string | null
+          notes?: string | null
+          org_id?: string
+          outcome_at?: string | null
+          property_type?: string | null
+          sendjim_code?: string | null
+          sendjim_mailing_date?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canvassing_leads_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitor_analyses: {
         Row: {
           competitor_name: string
