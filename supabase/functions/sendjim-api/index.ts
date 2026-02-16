@@ -119,13 +119,21 @@ serve(async (req) => {
       }
 
       case "/summary": {
-        const [contacts, mailings, neighborMailings] = await Promise.all([
+        const [contactsResult, mailingsResult, neighborResult] = await Promise.allSettled([
           sendjimFetch("/contacts", SENDJIM_API_KEY, 1),
           sendjimFetch("/contact_quick_send_mailings", SENDJIM_API_KEY, 1),
           sendjimFetch("/neighbor_mailings", SENDJIM_API_KEY, 1),
         ]);
 
-        console.log("SendJim summary fetched successfully");
+        const contacts = contactsResult.status === "fulfilled" ? contactsResult.value : { data: [] };
+        const mailings = mailingsResult.status === "fulfilled" ? mailingsResult.value : { data: [] };
+        const neighborMailings = neighborResult.status === "fulfilled" ? neighborResult.value : { data: [] };
+
+        if (contactsResult.status === "rejected") console.error("Contacts fetch failed:", contactsResult.reason);
+        if (mailingsResult.status === "rejected") console.error("Mailings fetch failed:", mailingsResult.reason);
+        if (neighborResult.status === "rejected") console.error("Neighbor mailings fetch failed:", neighborResult.reason);
+
+        console.log("SendJim summary fetched (partial OK)");
         return new Response(JSON.stringify({
           contacts,
           mailings,
