@@ -8,12 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
-  MapPin, Navigation, Loader2, List, ChevronRight,
+  MapPin, Navigation, Loader2, ChevronRight,
   CheckCircle2, XCircle, HelpCircle, Clock, Star, Phone,
-  Map, StickyNote, Search, Save,
+  Search, Save, ArrowLeft, Filter,
 } from "lucide-react";
 
 const STATUSES = [
@@ -43,86 +42,64 @@ function parseMapboxFeature(feature: any): ParsedAddress {
   };
 }
 
-type KnockView = "detect" | "detail";
-
 export default function KnockPage() {
   const { user } = useAuth();
   const { currentOrg } = useOrg();
   const queryClient = useQueryClient();
-  const [view, setView] = useState<KnockView>("detect");
-  const [activeTab, setActiveTab] = useState("leads");
-  const [detecting, setDetecting] = useState(false);
-  const [detectedAddress, setDetectedAddress] = useState<ParsedAddress | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedLead, setSelectedLead] = useState<any | null>(null);
   const [notes, setNotes] = useState("");
-
-  // Address search state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [detecting, setDetecting] = useState(false);
+  const [detectedAddress, setDetectedAddress] = useState<ParsedAddress | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+
+  // Address search for new leads
+  const [addressSearchQuery, setAddressSearchQuery] = useState("");
+  const [addressSearchResults, setAddressSearchResults] = useState<any[]>([]);
+  const [addressSearching, setAddressSearching] = useState(false);
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Fetch mapbox token once
   useEffect(() => {
     supabase.functions.invoke("mapbox-token").then(({ data }) => {
       if (data?.token) setMapboxToken(data.token);
     });
   }, []);
 
-  // Debounced address search
+  // Debounced address search for new leads
   useEffect(() => {
-    if (!searchQuery || searchQuery.length < 3 || !mapboxToken) {
-      setSearchResults([]);
+    if (!addressSearchQuery || addressSearchQuery.length < 3 || !mapboxToken) {
+      setAddressSearchResults([]);
       return;
     }
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(async () => {
-      setSearching(true);
+      setAddressSearching(true);
       try {
         const resp = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?types=address&country=US&limit=5&access_token=${mapboxToken}`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(addressSearchQuery)}.json?types=address&country=US&limit=5&access_token=${mapboxToken}`
         );
         const geo = await resp.json();
-        setSearchResults(geo.features || []);
+        setAddressSearchResults(geo.features || []);
       } catch {
-        setSearchResults([]);
+        setAddressSearchResults([]);
       } finally {
-        setSearching(false);
+        setAddressSearching(false);
       }
     }, 350);
     return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
-  }, [searchQuery, mapboxToken]);
+  }, [addressSearchQuery, mapboxToken]);
 
-  // Fetch assigned leads
-  const { data: assignedLeads, isLoading: leadsLoading } = useQuery({
-    queryKey: ["knock-assigned", currentOrg?.id, user?.id],
-    queryFn: async () => {
-      if (!currentOrg || !user) return [];
-      const { data, error } = await supabase
-        .from("canvassing_leads")
-        .select("*")
-        .eq("org_id", currentOrg.id)
-        .eq("assigned_to", user.id)
-        .order("address", { ascending: true });
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!currentOrg && !!user,
-  });
-
-  const { data: allLeads } = useQuery({
-    queryKey: ["knock-all", currentOrg?.id],
+  // Fetch ALL canvassing leads for this org
+  const { data: allLeads = [], isLoading } = useQuery({
+    queryKey: ["knock-all-leads", currentOrg?.id],
     queryFn: async () => {
       if (!currentOrg) return [];
       const { data, error } = await supabase
         .from("canvassing_leads")
         .select("*")
         .eq("org_id", currentOrg.id)
-        .in("status", ["unvisited"])
-        .is("assigned_to", null)
-        .order("address", { ascending: true })
-        .limit(50);
+        .order("address", { ascending: true });
       if (error) throw error;
       return data || [];
     },
@@ -135,8 +112,7 @@ export default function KnockPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knock-assigned"] });
-      queryClient.invalidateQueries({ queryKey: ["knock-all"] });
+      queryClient.invalidateQueries({ queryKey: ["knock-all-leads"] });
       toast.success("Lead updated!");
     },
     onError: (e: any) => toast.error(e.message),
@@ -160,12 +136,12 @@ export default function KnockPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["knock-assigned"] });
+      queryClient.invalidateQueries({ queryKey: ["knock-all-leads"] });
       toast.success("Lead saved!");
       setDetectedAddress(null);
       setNotes("");
-      setSearchQuery("");
-      setSearchResults([]);
+      setAddressSearchQuery("");
+      setAddressSearchResults([]);
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -182,35 +158,24 @@ export default function KnockPage() {
       const token = mapboxToken || (await supabase.functions.invoke("mapbox-token")).data?.token;
       if (!token) throw new Error("Could not load map service");
       if (!mapboxToken) setMapboxToken(token);
-
       const resp = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?types=address&access_token=${token}`
       );
       const geo = await resp.json();
-
       if (geo.features?.length > 0) {
         setDetectedAddress(parseMapboxFeature(geo.features[0]));
-        setSearchQuery("");
-        setSearchResults([]);
+        setAddressSearchQuery("");
+        setAddressSearchResults([]);
       } else {
         toast.error("Couldn't detect address. Try searching instead.");
       }
     } catch (err: any) {
-      if (err.code === 1) {
-        toast.error("Location access denied. Enable GPS or search manually.");
-      } else {
-        toast.error(err.message || "GPS detection failed");
-      }
+      if (err.code === 1) toast.error("Location access denied. Enable GPS or search manually.");
+      else toast.error(err.message || "GPS detection failed");
     } finally {
       setDetecting(false);
     }
   }, [mapboxToken]);
-
-  const selectSearchResult = (feature: any) => {
-    setDetectedAddress(parseMapboxFeature(feature));
-    setSearchQuery("");
-    setSearchResults([]);
-  };
 
   const handleStatusTap = (status: string) => {
     if (selectedLead) {
@@ -221,25 +186,35 @@ export default function KnockPage() {
       updateLeadMutation.mutate({ id: selectedLead.id, updates });
       setSelectedLead(null);
       setNotes("");
-      setView("detect");
-      setActiveTab("leads");
     } else if (detectedAddress) {
       createLeadMutation.mutate({ ...detectedAddress, status, notes });
     }
   };
 
-  const handleSaveAsLead = () => {
-    if (!detectedAddress) return;
-    createLeadMutation.mutate({ ...detectedAddress, status: "unvisited", notes });
-  };
+  // Filter leads
+  const filtered = allLeads.filter((l: any) => {
+    if (filterStatus !== "all" && l.status !== filterStatus) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return l.address?.toLowerCase().includes(q) ||
+        l.city?.toLowerCase().includes(q) ||
+        l.zip?.includes(q);
+    }
+    return true;
+  });
+
+  const statusCounts = STATUSES.map((s) => ({
+    ...s,
+    count: allLeads.filter((l: any) => l.status === s.value).length,
+  }));
 
   // Detail view for a specific lead
-  if (view === "detail" && selectedLead) {
+  if (selectedLead) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <header className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3 flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => { setSelectedLead(null); setView("detect"); setActiveTab("leads"); }}>
-            ← Back
+        <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-3 flex items-center gap-3">
+          <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={() => { setSelectedLead(null); setNotes(""); }}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> Back
           </Button>
           <span className="text-sm font-semibold truncate">{selectedLead.address}</span>
         </header>
@@ -256,12 +231,20 @@ export default function KnockPage() {
                   </p>
                 </div>
               </div>
-              {selectedLead.sendjim_code && (
-                <p className="text-xs text-muted-foreground">Mailing: {selectedLead.sendjim_code}</p>
-              )}
               {selectedLead.mailing_name && (
                 <p className="text-xs text-muted-foreground">Campaign: {selectedLead.mailing_name}</p>
               )}
+              {selectedLead.estimated_delivery_date && (
+                <p className="text-xs text-muted-foreground">
+                  Est. Delivery: {new Date(selectedLead.estimated_delivery_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </p>
+              )}
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-xs text-muted-foreground">Current:</span>
+                <Badge className={`${(STATUSES.find(s => s.value === selectedLead.status) || STATUSES[0]).color} text-[10px] border-0`}>
+                  {(STATUSES.find(s => s.value === selectedLead.status) || STATUSES[0]).label}
+                </Badge>
+              </div>
             </CardContent>
           </Card>
 
@@ -272,7 +255,7 @@ export default function KnockPage() {
             className="min-h-[80px]"
           />
 
-          <p className="text-sm font-semibold text-center text-muted-foreground">What happened?</p>
+          <p className="text-sm font-semibold text-center text-muted-foreground">Update Status</p>
           <div className="grid grid-cols-2 gap-3">
             {STATUSES.filter(s => s.value !== "unvisited").map((s) => {
               const Icon = s.icon;
@@ -294,62 +277,56 @@ export default function KnockPage() {
     );
   }
 
-  const myLeads = assignedLeads || [];
-  const unassignedLeads = allLeads || [];
-  const leadsWithNotes = [...myLeads, ...unassignedLeads].filter((l: any) => l.notes);
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-lg font-bold">🚪 IGY6 Sales</h1>
-          <Button variant="outline" size="sm" onClick={detectAddress} disabled={detecting} className="gap-1">
-            {detecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
-            {detecting ? "Detecting..." : "Detect GPS"}
-          </Button>
+      <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-3 space-y-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-bold">🚪 Sales Dashboard</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={detectAddress} disabled={detecting} className="gap-1 text-xs">
+              {detecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
+              GPS
+            </Button>
+          </div>
         </div>
 
-        {/* Address Search */}
+        {/* Search within existing leads */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-foreground/50" />
           <Input
-            placeholder="Search address..."
+            placeholder="Search addresses..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-8 h-9 text-sm"
+            className="pl-9 h-9 text-sm bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
           />
-          {searching && (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-          )}
         </div>
-
-        {/* Search Results Dropdown */}
-        {searchResults.length > 0 && (
-          <div className="absolute left-0 right-0 top-full z-50 mx-4 rounded-b-lg border border-t-0 border-border bg-background shadow-lg max-h-60 overflow-auto">
-            {searchResults.map((feature: any) => {
-              const parsed = parseMapboxFeature(feature);
-              return (
-                <button
-                  key={feature.id}
-                  onClick={() => selectSearchResult(feature)}
-                  className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left hover:bg-muted/50 active:bg-muted transition-colors border-b border-border last:border-0"
-                >
-                  <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{parsed.address}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {[parsed.city, parsed.state, parsed.zip].filter(Boolean).join(", ")}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
       </header>
 
-      {/* Selected address banner */}
+      {/* Status filter chips */}
+      <div className="px-3 py-2 flex gap-2 overflow-x-auto bg-muted/30 border-b border-border">
+        <button
+          onClick={() => setFilterStatus("all")}
+          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+            filterStatus === "all" ? "bg-primary text-primary-foreground" : "bg-background border border-border text-foreground"
+          }`}
+        >
+          All ({allLeads.length})
+        </button>
+        {statusCounts.map((s) => (
+          <button
+            key={s.value}
+            onClick={() => setFilterStatus(filterStatus === s.value ? "all" : s.value)}
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              filterStatus === s.value ? "bg-primary text-primary-foreground" : "bg-background border border-border text-foreground"
+            }`}
+          >
+            {s.label} ({s.count})
+          </button>
+        ))}
+      </div>
+
+      {/* Detected address banner */}
       {detectedAddress && (
         <div className="bg-primary/10 border-b border-primary/20 px-4 py-3 space-y-3">
           <div className="flex items-start gap-2">
@@ -360,9 +337,7 @@ export default function KnockPage() {
                 {[detectedAddress.city, detectedAddress.state, detectedAddress.zip].filter(Boolean).join(", ")}
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { setDetectedAddress(null); setNotes(""); }} className="text-xs shrink-0">
-              ✕
-            </Button>
+            <Button variant="ghost" size="sm" onClick={() => { setDetectedAddress(null); setNotes(""); }} className="text-xs shrink-0">✕</Button>
           </div>
           <Textarea
             placeholder="Notes (optional)..."
@@ -370,18 +345,6 @@ export default function KnockPage() {
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[50px] text-sm"
           />
-          <div className="flex gap-2">
-            <Button
-              onClick={handleSaveAsLead}
-              disabled={createLeadMutation.isPending}
-              className="flex-1 gap-1.5"
-              size="sm"
-            >
-              {createLeadMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Save as Lead
-            </Button>
-          </div>
-          <p className="text-[11px] text-muted-foreground text-center font-medium">Or set a status:</p>
           <div className="grid grid-cols-3 gap-2">
             {STATUSES.filter(s => s.value !== "unvisited").slice(0, 6).map((s) => {
               const Icon = s.icon;
@@ -401,129 +364,50 @@ export default function KnockPage() {
         </div>
       )}
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="w-full rounded-none border-b border-border bg-background h-11 px-2">
-          <TabsTrigger value="leads" className="flex-1 gap-1.5 text-xs data-[state=active]:shadow-none">
-            <List className="h-4 w-4" /> Leads
-          </TabsTrigger>
-          <TabsTrigger value="map" className="flex-1 gap-1.5 text-xs data-[state=active]:shadow-none">
-            <Map className="h-4 w-4" /> Map
-          </TabsTrigger>
-          <TabsTrigger value="notes" className="flex-1 gap-1.5 text-xs data-[state=active]:shadow-none">
-            <StickyNote className="h-4 w-4" /> Notes
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Leads Tab */}
-        <TabsContent value="leads" className="flex-1 m-0 overflow-auto">
-          {leadsLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {myLeads.length > 0 && (
-                <>
-                  <p className="px-4 py-2 text-xs font-semibold text-muted-foreground bg-muted/50 uppercase tracking-wider">
-                    My Leads ({myLeads.length})
-                  </p>
-                  {myLeads.map((lead: any) => (
-                    <LeadRow key={lead.id} lead={lead} onTap={() => { setSelectedLead(lead); setNotes(lead.notes || ""); setView("detail"); }} />
-                  ))}
-                </>
-              )}
-              {unassignedLeads.length > 0 && (
-                <>
-                  <p className="px-4 py-2 text-xs font-semibold text-muted-foreground bg-muted/50 uppercase tracking-wider">
-                    Unassigned ({unassignedLeads.length})
-                  </p>
-                  {unassignedLeads.map((lead: any) => (
-                    <LeadRow key={lead.id} lead={lead} onTap={() => { setSelectedLead(lead); setNotes(lead.notes || ""); setView("detail"); }} />
-                  ))}
-                </>
-              )}
-              {myLeads.length === 0 && unassignedLeads.length === 0 && (
-                <div className="py-16 text-center">
-                  <MapPin className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">No leads yet</p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">Use GPS or search to add addresses</p>
-                </div>
-              )}
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Map Tab */}
-        <TabsContent value="map" className="flex-1 m-0">
-          <div className="flex flex-col items-center justify-center h-full py-16 px-6 text-center">
-            <Map className="h-12 w-12 text-muted-foreground/30 mb-4" />
-            <h3 className="font-semibold text-foreground mb-1">Route Map</h3>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Map view coming soon — see all your assigned addresses plotted on a map with optimized routing.
-            </p>
-            {myLeads.length > 0 && (
-              <div className="mt-4 space-y-1">
-                <p className="text-xs text-muted-foreground font-medium">{myLeads.length} addresses to visit</p>
-                <p className="text-xs text-muted-foreground">
-                  {myLeads.filter((l: any) => l.status === "unvisited").length} unvisited
-                </p>
-              </div>
-            )}
+      {/* Leads list */}
+      <div className="flex-1 overflow-auto">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        </TabsContent>
-
-        {/* Notes Tab */}
-        <TabsContent value="notes" className="flex-1 m-0 overflow-auto">
-          {leadsWithNotes.length === 0 ? (
-            <div className="py-16 text-center">
-              <StickyNote className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No notes yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Notes will appear here when you add them to leads</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {leadsWithNotes.map((lead: any) => (
-                <div key={lead.id} className="px-4 py-3 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+        ) : filtered.length === 0 ? (
+          <div className="py-16 text-center">
+            <MapPin className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground font-medium">
+              {allLeads.length === 0 ? "No leads yet" : "No leads match your search"}
+            </p>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              {allLeads.length === 0 ? "Use GPS or sync from admin to add addresses" : "Try a different filter or search"}
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            <p className="px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30">
+              {filtered.length} address{filtered.length !== 1 ? "es" : ""}
+            </p>
+            {filtered.map((lead: any) => {
+              const status = STATUSES.find(s => s.value === lead.status) || STATUSES[0];
+              return (
+                <button
+                  key={lead.id}
+                  onClick={() => { setSelectedLead(lead); setNotes(lead.notes || ""); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/30 active:bg-muted/50 transition-colors"
+                >
+                  <MapPin className="h-4 w-4 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{lead.address}</p>
-                    <Badge className={`${(STATUSES.find(s => s.value === lead.status) || STATUSES[0]).color} text-[9px] border-0 shrink-0 ml-auto`}>
-                      {(STATUSES.find(s => s.value === lead.status) || STATUSES[0]).label}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground pl-5">{lead.notes}</p>
-                  {lead.knocked_at && (
-                    <p className="text-[10px] text-muted-foreground/60 pl-5">
-                      Knocked {new Date(lead.knocked_at).toLocaleDateString()}
+                    <p className="text-xs text-muted-foreground">
+                      {[lead.city, lead.state, lead.zip].filter(Boolean).join(", ")}
                     </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
-
-function LeadRow({ lead, onTap }: { lead: any; onTap: () => void }) {
-  const status = STATUSES.find(s => s.value === lead.status) || STATUSES[0];
-  return (
-    <button
-      onClick={onTap}
-      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/30 active:bg-muted/50 transition-colors"
-    >
-      <MapPin className="h-4 w-4 text-primary shrink-0" />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{lead.address}</p>
-        <p className="text-xs text-muted-foreground">
-          {[lead.city, lead.state, lead.zip].filter(Boolean).join(", ")}
-        </p>
+                  </div>
+                  <Badge className={`${status.color} text-[10px] border-0 shrink-0`}>{status.label}</Badge>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
-      <Badge className={`${status.color} text-[10px] border-0 shrink-0`}>{status.label}</Badge>
-      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-    </button>
+    </div>
   );
 }
