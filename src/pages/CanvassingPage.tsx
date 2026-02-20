@@ -484,6 +484,18 @@ export default function CanvassingPage() {
                   </ol>
                 </div>
               </div>
+
+              <div className="flex flex-col items-center gap-2 pt-2 pb-1">
+                <p className="text-sm font-medium text-foreground">Scan to install</p>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(installUrl)}&bgcolor=ffffff&color=000000&format=svg`}
+                  alt="QR code to install the Sales App"
+                  className="rounded-lg border bg-white p-2"
+                  width={180}
+                  height={180}
+                />
+                <p className="text-xs text-muted-foreground">Point your phone camera at the code</p>
+              </div>
             </CardContent>
           )}
         </Card>
