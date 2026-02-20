@@ -17,6 +17,7 @@ import {
   Mail,
   ClipboardList,
   FileText,
+  Rocket,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
@@ -166,6 +167,18 @@ export function Sidebar() {
         >
           <Settings className="h-4 w-4" />
           <span>Settings</span>
+        </NavLink>
+        <NavLink
+          to="/onboarding"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+              isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+            )
+          }
+        >
+          <Rocket className="h-4 w-4" />
+          <span>Onboarding</span>
         </NavLink>
 
         <div className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5">
