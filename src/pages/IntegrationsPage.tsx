@@ -173,7 +173,7 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in p-6">
+    <div className="space-y-8 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -398,13 +398,20 @@ function SalesAppSection() {
             <div className="flex flex-col items-center">
               <div className="relative w-[280px] h-[560px] rounded-[2rem] border-4 border-foreground/20 bg-background shadow-xl overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-foreground/20 rounded-b-xl z-10" />
-                <iframe
-                  src="/knock"
-                  className="w-full h-full border-0"
-                  title="IGY6 Sales App Preview"
-                />
+                <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 p-6 text-center">
+                  <Smartphone className="h-12 w-12 text-primary mb-4" />
+                  <h3 className="text-sm font-bold text-foreground mb-1">IGY6 Sales App</h3>
+                  <p className="text-xs text-muted-foreground mb-4">Door knocking PWA for your field team</p>
+                  <div className="space-y-2 text-left w-full px-2">
+                    {["📍 GPS address detection", "🚪 One-tap door knock", "📝 Field notes", "💾 Save new leads"].map((f) => (
+                      <div key={f} className="text-xs text-foreground/80 flex items-center gap-2 bg-background rounded-lg px-3 py-2 border">
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">Live preview of the Sales App</p>
+              <p className="text-xs text-muted-foreground mt-3">Send the install link to your sales team</p>
             </div>
 
             {/* Right: Install Link + Features */}
