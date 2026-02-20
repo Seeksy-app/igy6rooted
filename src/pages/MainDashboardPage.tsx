@@ -154,7 +154,8 @@ export default function MainDashboardPage() {
     return <Navigate to="/knock" replace />;
   }
 
-  if (isLoading) {
+  // Wait for both role check and stats to load
+  if (isLoading || (!!currentOrg && !!user && dbRole === undefined)) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
