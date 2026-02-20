@@ -130,7 +130,6 @@ export default function CanvassingPage() {
   }));
 
   const installUrl = `${window.location.origin}/install`;
-  const knockUrl = `${window.location.origin}/knock`;
 
   const copyInstallLink = () => {
     navigator.clipboard.writeText(installUrl);
@@ -160,69 +159,6 @@ export default function CanvassingPage() {
         </Button>
       </div>
 
-      {/* Phone Preview + App Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Phone Mockup */}
-        <div className="flex flex-col items-center">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-            Live App Preview
-          </p>
-          <div className="relative mx-auto w-[260px]">
-            {/* Phone frame */}
-            <div className="rounded-[2.5rem] border-[6px] border-foreground/80 bg-background shadow-2xl overflow-hidden">
-              {/* Notch */}
-              <div className="mx-auto mt-2 mb-1 h-5 w-24 rounded-full bg-foreground/80" />
-              {/* Screen */}
-              <div className="h-[460px] overflow-hidden">
-                <iframe
-                  src={knockUrl}
-                  className="w-[390px] h-[844px] origin-top-left border-0"
-                  style={{ transform: "scale(0.545)", pointerEvents: "none" }}
-                  title="Door Knocker App Preview"
-                />
-              </div>
-              {/* Home indicator */}
-              <div className="mx-auto my-2 h-1 w-28 rounded-full bg-foreground/30" />
-            </div>
-          </div>
-        </div>
-
-        {/* App Details */}
-        <div className="lg:col-span-2 space-y-4">
-          <Card className="border-primary/30 bg-primary/5">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Smartphone className="h-5 w-5 text-primary" />
-                IGY6 Door Knocker App
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Install on your agents' phones to log door knocks with GPS address detection in real-time.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {/* Share install link */}
-              <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
-                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-                <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
-                <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
-                  <Copy className="h-3.5 w-3.5" /> Copy
-                </Button>
-              </div>
-
-              {/* Feature list */}
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">✅ Auto-detect address via GPS</li>
-                <li className="flex items-center gap-2">✅ Log door knock with one tap</li>
-                <li className="flex items-center gap-2">✅ Set status (Knocked, Interested, etc.)</li>
-                <li className="flex items-center gap-2">✅ Browse their assigned route</li>
-                <li className="flex items-center gap-2">✅ Add notes per address</li>
-                <li className="flex items-center gap-2">✅ Works offline-ready on mobile</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
       {/* Status Summary Strip */}
       <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
         {statusCounts.map((s) => (
@@ -238,6 +174,7 @@ export default function CanvassingPage() {
           </button>
         ))}
       </div>
+
 
       {/* Filters */}
       <div className="flex items-center gap-3">
@@ -430,6 +367,49 @@ export default function CanvassingPage() {
           })}
         </div>
       )}
+
+      {/* Sales App Features */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Smartphone className="h-5 w-5 text-primary" />
+            IGY6 Sales App
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Your field team's mobile command center — install on any phone to start knocking doors.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Share install link */}
+          <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+            <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
+            <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
+              <Copy className="h-3.5 w-3.5" /> Copy
+            </Button>
+          </div>
+
+          {/* Custom Feature Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[
+              { icon: "📍", title: "GPS Address Detection", desc: "Auto-detect the nearest address or search manually" },
+              { icon: "🚪", title: "One-Tap Door Knock", desc: "Log a knock and set status instantly" },
+              { icon: "📝", title: "Field Notes", desc: "Add notes to any lead while on the doorstep" },
+              { icon: "🗺️", title: "Leads & Map View", desc: "Browse assigned leads and plan your route" },
+              { icon: "🔍", title: "Address Search", desc: "Type-ahead search to find any address nearby" },
+              { icon: "💾", title: "Save as Lead", desc: "Capture new addresses not in your list yet" },
+            ].map((f) => (
+              <div key={f.title} className="rounded-lg border bg-background p-3 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{f.icon}</span>
+                  <h4 className="text-sm font-semibold text-foreground">{f.title}</h4>
+                </div>
+                <p className="text-xs text-muted-foreground">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Installation Instructions — Collapsible at Bottom */}
       <Card>
