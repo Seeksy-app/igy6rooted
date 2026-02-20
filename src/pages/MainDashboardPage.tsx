@@ -3,7 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useJobberLeads } from "@/hooks/useJobberLeads";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Bot, BarChart3, Search, Users,
@@ -57,6 +58,24 @@ const actionCards: { to: string; icon: React.ElementType; title: string; desc: s
 export default function MainDashboardPage() {
   const { currentOrg } = useOrg();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
+
+  // Check actual DB role (includes "sales" which isn't in typed userRole)
+  const { data: dbRole } = useQuery({
+    queryKey: ["user-db-role", currentOrg?.id, user?.id],
+    queryFn: async () => {
+      if (!currentOrg || !user) return null;
+      const { data } = await supabase
+        .from("team_members")
+        .select("role")
+        .eq("org_id", currentOrg.id)
+        .eq("user_id", user.id)
+        .single();
+      return data?.role || null;
+    },
+    enabled: !!currentOrg && !!user,
+  });
+
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["main-dashboard", currentOrg?.id],
@@ -129,6 +148,11 @@ export default function MainDashboardPage() {
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [leadsData]);
+
+  // Sales role on mobile → redirect to Sales Dashboard
+  if (isMobile && dbRole === "sales") {
+    return <Navigate to="/knock" replace />;
+  }
 
   if (isLoading) {
     return (
