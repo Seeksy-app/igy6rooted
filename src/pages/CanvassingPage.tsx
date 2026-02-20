@@ -13,7 +13,7 @@ import {
   Loader2, RefreshCw, MapPin, User, Clock,
   ChevronDown, ChevronUp, MessageSquare,
   Smartphone, Share, MoreVertical, Copy, ExternalLink,
-  CalendarDays, Truck,
+  CalendarDays, Truck, Zap,
 } from "lucide-react";
 
 const STATUSES = [
@@ -367,6 +367,68 @@ export default function CanvassingPage() {
           })}
         </div>
       )}
+
+      {/* Zapier Webhook Integration */}
+      <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-900/10">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Zap className="h-5 w-5 text-amber-500" />
+            Zapier Integration
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Connect SendJim to this webhook via Zapier to automatically import mailing recipients as canvassing leads.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">Webhook URL</p>
+            <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+              <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+              <code className="flex-1 text-xs text-foreground truncate">
+                {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapier-canvassing-webhook?org_id=${currentOrg?.id || "YOUR_ORG_ID"}`}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapier-canvassing-webhook?org_id=${currentOrg?.id || ""}`
+                  );
+                  toast.success("Webhook URL copied!");
+                }}
+                className="gap-1.5 shrink-0"
+              >
+                <Copy className="h-3.5 w-3.5" /> Copy
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-lg border bg-background p-4 space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">Zapier Setup Steps</h4>
+            <ol className="space-y-2">
+              {[
+                <>In Zapier, create a new Zap with <strong>SendJim</strong> as the trigger (e.g. "New Order" or use SendJim's "Export CSV" → Google Sheets → Zapier)</>,
+                <>Add a <strong>Webhooks by Zapier</strong> action → choose <strong>POST</strong></>,
+                <>Paste the webhook URL above into the <strong>URL</strong> field</>,
+                <>Set <strong>Payload Type</strong> to <strong>JSON</strong></>,
+                <>Map SendJim fields: <code className="bg-muted px-1 rounded text-xs">address</code>, <code className="bg-muted px-1 rounded text-xs">city</code>, <code className="bg-muted px-1 rounded text-xs">state</code>, <code className="bg-muted px-1 rounded text-xs">zip</code>, <code className="bg-muted px-1 rounded text-xs">sent_date</code>, <code className="bg-muted px-1 rounded text-xs">mailing_name</code></>,
+                <>Test and turn on your Zap — leads will appear here automatically!</>,
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-amber-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 space-y-1">
+            <p className="font-medium">Accepted fields in each lead:</p>
+            <p><code>address</code> (required), <code>city</code>, <code>state</code>, <code>zip</code>, <code>sent_date</code>, <code>mailing_name</code>, <code>order_type</code>, <code>property_type</code>, <code>estimated_delivery_date</code></p>
+            <p className="mt-1">Send a single lead or <code>{`{ "leads": [...] }`}</code> for batch import.</p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Sales App Features */}
       <Card className="border-primary/30 bg-primary/5">
