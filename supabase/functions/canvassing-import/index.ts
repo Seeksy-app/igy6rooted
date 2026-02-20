@@ -118,15 +118,29 @@ serve(async (req) => {
     console.log(`Found ${assignableMembers.length} sales team members for round-robin`);
 
     // Extract addresses from neighbor mailings and build canvassing leads
-    // SendJim neighbor mailings contain recipients with address data
     const leads: any[] = [];
     let assignIndex = 0;
 
     for (const mailing of allRecipients) {
-      // Each neighbor mailing may have recipients or be a single address
       const recipients = mailing.recipients || [mailing];
-      const mailingDate = mailing.schedule_date || mailing.created_at;
+      const mailingDate = mailing.schedule_date || mailing.sent_date || mailing.created_at;
       const code = mailing.tracking_code || mailing.id?.toString();
+      const mailingName = mailing.name || mailing.mailing_name || null;
+
+      // Estimate delivery: typically 5-10 business days after sent date
+      // SendJim may provide estimated_delivery or delivery_date
+      const deliveryDate = mailing.estimated_delivery_date
+        || mailing.delivery_date
+        || mailing.estimated_delivery
+        || null;
+
+      // If no delivery date from API, estimate ~7 days after mailing date
+      let estimatedDelivery = deliveryDate;
+      if (!estimatedDelivery && mailingDate) {
+        const sent = new Date(mailingDate);
+        sent.setDate(sent.getDate() + 7);
+        estimatedDelivery = sent.toISOString().split("T")[0];
+      }
 
       for (const r of recipients) {
         const address = r.address || r.address_1 || r.street || "";
@@ -145,6 +159,8 @@ serve(async (req) => {
           property_type: r.property_type || null,
           sendjim_code: code,
           sendjim_mailing_date: mailingDate ? mailingDate.split("T")[0] : null,
+          estimated_delivery_date: estimatedDelivery || null,
+          mailing_name: mailingName,
           assigned_to: assignedMember?.user_id || null,
           assigned_to_name: assignedMember ? (memberNames[assignedMember.user_id] || "Team Member") : null,
           status: "unvisited",
@@ -160,7 +176,6 @@ serve(async (req) => {
     let imported = 0;
     let skipped = 0;
 
-    // Batch insert, skip conflicts
     for (let i = 0; i < leads.length; i += 50) {
       const batch = leads.slice(i, i + 50);
       const { data: inserted, error: insertError } = await svc

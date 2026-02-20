@@ -485,8 +485,10 @@ export type Database = {
           assigned_to_name: string | null
           city: string | null
           created_at: string
+          estimated_delivery_date: string | null
           id: string
           knocked_at: string | null
+          mailing_name: string | null
           notes: string | null
           org_id: string
           outcome_at: string | null
@@ -504,8 +506,10 @@ export type Database = {
           assigned_to_name?: string | null
           city?: string | null
           created_at?: string
+          estimated_delivery_date?: string | null
           id?: string
           knocked_at?: string | null
+          mailing_name?: string | null
           notes?: string | null
           org_id: string
           outcome_at?: string | null
@@ -523,8 +527,10 @@ export type Database = {
           assigned_to_name?: string | null
           city?: string | null
           created_at?: string
+          estimated_delivery_date?: string | null
           id?: string
           knocked_at?: string | null
+          mailing_name?: string | null
           notes?: string | null
           org_id?: string
           outcome_at?: string | null

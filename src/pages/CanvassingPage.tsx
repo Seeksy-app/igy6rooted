@@ -13,6 +13,7 @@ import {
   Loader2, Download, MapPin, User, Clock,
   ChevronDown, ChevronUp, MessageSquare,
   Smartphone, Share, MoreVertical, Copy, ExternalLink,
+  CalendarDays, Truck,
 } from "lucide-react";
 
 const STATUSES = [
@@ -338,7 +339,19 @@ export default function CanvassingPage() {
                       {[lead.city, lead.state, lead.zip].filter(Boolean).join(", ")}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0">
+                    {lead.sendjim_mailing_date && (
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1" title="Sent date">
+                        <CalendarDays className="h-3 w-3" />
+                        {new Date(lead.sendjim_mailing_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    )}
+                    {lead.estimated_delivery_date && (
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1" title="Est. delivery">
+                        <Truck className="h-3 w-3" />
+                        {new Date(lead.estimated_delivery_date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    )}
                     {lead.assigned_to_name && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <User className="h-3 w-3" />
@@ -352,15 +365,25 @@ export default function CanvassingPage() {
 
                 {isExpanded && (
                   <div className="border-t border-border px-4 py-3 bg-muted/10 space-y-3">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">Mailing Name</span>
+                        <p className="font-medium text-foreground">{lead.mailing_name || "—"}</p>
+                      </div>
                       <div>
                         <span className="text-muted-foreground">Mailing Code</span>
                         <p className="font-medium text-foreground">{lead.sendjim_code || "—"}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Mailed On</span>
+                        <span className="text-muted-foreground">Sent Date</span>
                         <p className="font-medium text-foreground">
-                          {lead.sendjim_mailing_date ? new Date(lead.sendjim_mailing_date).toLocaleDateString() : "—"}
+                          {lead.sendjim_mailing_date ? new Date(lead.sendjim_mailing_date + "T00:00:00").toLocaleDateString() : "—"}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Est. Arrival</span>
+                        <p className="font-medium text-foreground">
+                          {lead.estimated_delivery_date ? new Date(lead.estimated_delivery_date + "T00:00:00").toLocaleDateString() : "—"}
                         </p>
                       </div>
                       <div>
@@ -369,6 +392,9 @@ export default function CanvassingPage() {
                           {lead.knocked_at ? new Date(lead.knocked_at).toLocaleString() : "Not yet"}
                         </p>
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-xs">
                       <div>
                         <span className="text-muted-foreground">Property Type</span>
                         <p className="font-medium text-foreground">{lead.property_type || "—"}</p>
