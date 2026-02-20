@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Loader2, RefreshCw, MapPin, User, Clock,
   ChevronDown, ChevronUp, MessageSquare,
-  CalendarDays, Truck,
+  CalendarDays, Truck, Smartphone, ExternalLink, Copy, Share, MoreVertical,
 } from "lucide-react";
 
 const STATUSES = [
@@ -173,7 +173,6 @@ export default function CanvassingPage() {
           </button>
         ))}
       </div>
-
 
       {/* Filters */}
       <div className="flex items-center gap-3">
@@ -367,6 +366,128 @@ export default function CanvassingPage() {
         </div>
       )}
 
+      {/* Sales App Section */}
+      <div className="space-y-3 mt-8">
+        <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-accent/10 to-primary/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Smartphone className="h-5 w-5 text-primary" />
+              IGY6 Sales App
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Your field team's mobile command center — install on any phone to start knocking doors.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="flex flex-col items-center">
+                <div className="relative w-[280px] h-[560px] rounded-[2rem] border-4 border-foreground/20 bg-background shadow-xl overflow-hidden">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-foreground/20 rounded-b-xl z-10" />
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-muted/30 p-6 text-center">
+                    <Smartphone className="h-12 w-12 text-primary mb-4" />
+                    <h3 className="text-sm font-bold text-foreground mb-1">IGY6 Sales App</h3>
+                    <p className="text-xs text-muted-foreground mb-4">Door knocking PWA for your field team</p>
+                    <div className="space-y-2 text-left w-full px-2">
+                      {["📍 GPS address detection", "🚪 One-tap door knock", "📝 Field notes", "💾 Save new leads"].map((f) => (
+                        <div key={f} className="text-xs text-foreground/80 flex items-center gap-2 bg-background rounded-lg px-3 py-2 border">
+                          {f}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">Send the install link to your sales team</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+                  <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
+                  <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
+                    <Copy className="h-3.5 w-3.5" /> Copy
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { icon: "📍", title: "GPS Address Detection", desc: "Auto-detect the nearest address or search manually" },
+                    { icon: "🚪", title: "One-Tap Door Knock", desc: "Log a knock and set status instantly" },
+                    { icon: "📝", title: "Field Notes", desc: "Add notes to any lead while on the doorstep" },
+                    { icon: "🗺️", title: "Leads & Map View", desc: "Browse assigned leads and plan your route" },
+                    { icon: "🔍", title: "Address Search", desc: "Type-ahead search to find any address nearby" },
+                    { icon: "💾", title: "Save as Lead", desc: "Capture new addresses not in your list yet" },
+                  ].map((f) => (
+                    <div key={f.title} className="rounded-lg border bg-background p-3 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{f.icon}</span>
+                        <h4 className="text-sm font-semibold text-foreground">{f.title}</h4>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{f.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <button
+            className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+            onClick={() => setShowInstall(!showInstall)}
+          >
+            <span className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-primary" />
+              Installation Instructions (iOS & Android)
+            </span>
+            {showInstall ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </button>
+          {showInstall && (
+            <CardContent className="pt-0 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-lg border bg-background p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🍎</span>
+                    <h3 className="font-semibold text-sm">Install on iPhone / iPad</h3>
+                  </div>
+                  <ol className="space-y-2">
+                    {[
+                      <>Open the install link in <strong>Safari</strong> (required for iOS)</>,
+                      <>Tap the <Share className="h-4 w-4 inline align-text-bottom" /> <strong>Share</strong> button</>,
+                      <>Scroll down and tap <strong>"Add to Home Screen"</strong></>,
+                      <>Tap <strong>"Add"</strong> — the app icon appears on your home screen</>,
+                    ].map((step, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm">
+                        <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <div className="rounded-lg border bg-background p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🤖</span>
+                    <h3 className="font-semibold text-sm">Install on Android</h3>
+                  </div>
+                  <ol className="space-y-2">
+                    {[
+                      <>Open the install link in <strong>Chrome</strong></>,
+                      <>Tap the <MoreVertical className="h-4 w-4 inline align-text-bottom" /> <strong>menu</strong> (three dots)</>,
+                      <>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong></>,
+                      <>Confirm — the app appears on your home screen</>,
+                    ].map((step, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm">
+                        <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
