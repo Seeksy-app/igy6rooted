@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
-  Loader2, Download, MapPin, User, Clock,
+  Loader2, RefreshCw, MapPin, User, Clock,
   ChevronDown, ChevronUp, MessageSquare,
   Smartphone, Share, MoreVertical, Copy, ExternalLink,
   CalendarDays, Truck,
@@ -38,6 +38,7 @@ export default function CanvassingPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterAssignee, setFilterAssignee] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showInstall, setShowInstall] = useState(false);
 
   const { data: leads, isLoading } = useQuery({
     queryKey: ["canvassing-leads", currentOrg?.id],
@@ -75,7 +76,7 @@ export default function CanvassingPage() {
     enabled: !!currentOrg,
   });
 
-  const importMutation = useMutation({
+  const syncMutation = useMutation({
     mutationFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const resp = await fetch(
@@ -91,13 +92,13 @@ export default function CanvassingPage() {
         }
       );
       if (!resp.ok) {
-        const err = await resp.json().catch(() => ({ error: "Import failed" }));
-        throw new Error(err.error || "Import failed");
+        const err = await resp.json().catch(() => ({ error: "Sync failed" }));
+        throw new Error(err.error || "Sync failed");
       }
       return resp.json();
     },
     onSuccess: (data) => {
-      toast.success(`Imported ${data.imported} leads (${data.skipped} duplicates skipped)`);
+      toast.success(`Synced ${data.imported} leads from SendJim API (${data.skipped} duplicates skipped)`);
       queryClient.invalidateQueries({ queryKey: ["canvassing-leads"] });
     },
     onError: (e: any) => toast.error(e.message),
@@ -123,17 +124,17 @@ export default function CanvassingPage() {
     return true;
   });
 
-  // Stats
   const statusCounts = STATUSES.map((s) => ({
     ...s,
     count: (leads || []).filter((l: any) => l.status === s.value).length,
   }));
 
   const installUrl = `${window.location.origin}/install`;
+  const knockUrl = `${window.location.origin}/knock`;
 
   const copyInstallLink = () => {
     navigator.clipboard.writeText(installUrl);
-    toast.success("Install link copied to clipboard!");
+    toast.success("Install link copied!");
   };
 
   return (
@@ -146,117 +147,81 @@ export default function CanvassingPage() {
           </p>
         </div>
         <Button
-          onClick={() => importMutation.mutate()}
-          disabled={importMutation.isPending}
+          onClick={() => syncMutation.mutate()}
+          disabled={syncMutation.isPending}
           className="gap-2"
         >
-          {importMutation.isPending ? (
+          {syncMutation.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <Download className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4" />
           )}
-          Import from SendJim
+          Sync from SendJim
         </Button>
       </div>
 
-      {/* PWA Door Knocker App Section */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Smartphone className="h-5 w-5 text-primary" />
-            IGY6 Door Knocker App
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Install the mobile app on your agents' phones to log door knocks with GPS address detection in real-time.
+      {/* Phone Preview + App Info */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Phone Mockup */}
+        <div className="flex flex-col items-center">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            Live App Preview
           </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Share install link */}
-          <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
-            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-            <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
-            <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
-              <Copy className="h-3.5 w-3.5" /> Copy Link
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Send this link to your sales agents — they'll open it on their phone browser and follow the steps to install.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* iOS Instructions */}
-            <div className="rounded-lg border bg-background p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🍎</span>
-                <h3 className="font-semibold text-sm">Install on iPhone / iPad</h3>
+          <div className="relative mx-auto w-[260px]">
+            {/* Phone frame */}
+            <div className="rounded-[2.5rem] border-[6px] border-foreground/80 bg-background shadow-2xl overflow-hidden">
+              {/* Notch */}
+              <div className="mx-auto mt-2 mb-1 h-5 w-24 rounded-full bg-foreground/80" />
+              {/* Screen */}
+              <div className="h-[460px] overflow-hidden">
+                <iframe
+                  src={knockUrl}
+                  className="w-[390px] h-[844px] origin-top-left border-0"
+                  style={{ transform: "scale(0.545)", pointerEvents: "none" }}
+                  title="Door Knocker App Preview"
+                />
               </div>
-              <ol className="space-y-2.5">
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
-                  <span>Open the install link in <strong>Safari</strong> (required for iOS)</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
-                  <span>Tap the <Share className="h-4 w-4 inline align-text-bottom" /> <strong>Share</strong> button at the bottom of Safari</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
-                  <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
-                  <span>Tap <strong>"Add"</strong> — the app icon appears on your home screen</span>
-                </li>
-              </ol>
-            </div>
-
-            {/* Android Instructions */}
-            <div className="rounded-lg border bg-background p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🤖</span>
-                <h3 className="font-semibold text-sm">Install on Android</h3>
-              </div>
-              <ol className="space-y-2.5">
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
-                  <span>Open the install link in <strong>Chrome</strong></span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
-                  <span>Tap the <MoreVertical className="h-4 w-4 inline align-text-bottom" /> <strong>menu</strong> (three dots) in Chrome</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
-                  <span>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong></span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm">
-                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
-                  <span>Confirm — the app will appear on your home screen</span>
-                </li>
-              </ol>
+              {/* Home indicator */}
+              <div className="mx-auto my-2 h-1 w-28 rounded-full bg-foreground/30" />
             </div>
           </div>
+        </div>
 
-          {/* What agents see */}
-          <div className="rounded-lg border bg-background p-4">
-            <h3 className="font-semibold text-sm mb-2">What agents can do in the app:</h3>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">✅ Auto-detect address via GPS</li>
-              <li className="flex items-center gap-2">✅ Log door knock with one tap</li>
-              <li className="flex items-center gap-2">✅ Set status (Knocked, Interested, etc.)</li>
-              <li className="flex items-center gap-2">✅ Browse their assigned route</li>
-              <li className="flex items-center gap-2">✅ Add notes per address</li>
-              <li className="flex items-center gap-2">✅ Works offline-ready on mobile</li>
-            </ul>
-          </div>
+        {/* App Details */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Smartphone className="h-5 w-5 text-primary" />
+                IGY6 Door Knocker App
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Install on your agents' phones to log door knocks with GPS address detection in real-time.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* Share install link */}
+              <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+                <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
+                <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
+                  <Copy className="h-3.5 w-3.5" /> Copy
+                </Button>
+              </div>
 
-          <Button variant="outline" size="sm" asChild>
-            <a href="/install" target="_blank" rel="noopener noreferrer" className="gap-2">
-              <ExternalLink className="h-4 w-4" /> Preview Install Page
-            </a>
-          </Button>
-        </CardContent>
-      </Card>
+              {/* Feature list */}
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">✅ Auto-detect address via GPS</li>
+                <li className="flex items-center gap-2">✅ Log door knock with one tap</li>
+                <li className="flex items-center gap-2">✅ Set status (Knocked, Interested, etc.)</li>
+                <li className="flex items-center gap-2">✅ Browse their assigned route</li>
+                <li className="flex items-center gap-2">✅ Add notes per address</li>
+                <li className="flex items-center gap-2">✅ Works offline-ready on mobile</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Status Summary Strip */}
       <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
@@ -318,7 +283,7 @@ export default function CanvassingPage() {
               {leads?.length === 0 ? "No canvassing leads yet" : "No leads match filters"}
             </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
-              {leads?.length === 0 ? "Click 'Import from SendJim' to pull in postcard addresses" : "Try adjusting your filters"}
+              {leads?.length === 0 ? "Click 'Sync from SendJim' to pull in postcard addresses" : "Try adjusting your filters"}
             </p>
           </CardContent>
         </Card>
@@ -465,6 +430,66 @@ export default function CanvassingPage() {
           })}
         </div>
       )}
+
+      {/* Installation Instructions — Collapsible at Bottom */}
+      <Card>
+        <button
+          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+          onClick={() => setShowInstall(!showInstall)}
+        >
+          <span className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Smartphone className="h-4 w-4 text-primary" />
+            Installation Instructions (iOS & Android)
+          </span>
+          {showInstall ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+        {showInstall && (
+          <CardContent className="pt-0 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* iOS */}
+              <div className="rounded-lg border bg-background p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🍎</span>
+                  <h3 className="font-semibold text-sm">Install on iPhone / iPad</h3>
+                </div>
+                <ol className="space-y-2">
+                  {[
+                    <>Open the install link in <strong>Safari</strong> (required for iOS)</>,
+                    <>Tap the <Share className="h-4 w-4 inline align-text-bottom" /> <strong>Share</strong> button</>,
+                    <>Scroll down and tap <strong>"Add to Home Screen"</strong></>,
+                    <>Tap <strong>"Add"</strong> — the app icon appears on your home screen</>,
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm">
+                      <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              {/* Android */}
+              <div className="rounded-lg border bg-background p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🤖</span>
+                  <h3 className="font-semibold text-sm">Install on Android</h3>
+                </div>
+                <ol className="space-y-2">
+                  {[
+                    <>Open the install link in <strong>Chrome</strong></>,
+                    <>Tap the <MoreVertical className="h-4 w-4 inline align-text-bottom" /> <strong>menu</strong> (three dots)</>,
+                    <>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong></>,
+                    <>Confirm — the app appears on your home screen</>,
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm">
+                      <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
     </div>
   );
 }
