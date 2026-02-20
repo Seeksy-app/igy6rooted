@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Loader2, UserPlus, Trash2, Mail } from "lucide-react";
+import { Users, Loader2, UserPlus, Trash2, Mail, RefreshCw, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,11 @@ interface TeamMemberRow {
   email?: string;
 }
 
+interface MemberStatus {
+  confirmed: boolean;
+  email: string;
+}
+
 export function TeamSection() {
   const { currentOrg, userRole } = useOrg();
   const { user } = useAuth();
@@ -52,7 +57,6 @@ export function TeamSection() {
         .eq("org_id", currentOrg.id);
       if (error) throw error;
 
-      // Fetch profiles for all team members
       const userIds = data.map((m: any) => m.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
@@ -69,6 +73,34 @@ export function TeamSection() {
       })) as TeamMemberRow[];
     },
     enabled: !!currentOrg,
+  });
+
+  // Fetch invite statuses (confirmed vs pending)
+  const { data: memberStatuses } = useQuery({
+    queryKey: ["team-member-statuses", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return {};
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) return {};
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/team-add-member`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ org_id: currentOrg.id, action: "get-statuses" }),
+        }
+      );
+
+      if (!resp.ok) return {};
+      const result = await resp.json();
+      return (result.statuses || {}) as Record<string, MemberStatus>;
+    },
+    enabled: !!currentOrg && isAdmin,
   });
 
   const updateRoleMutation = useMutation({
@@ -126,10 +158,11 @@ export function TeamSection() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["team-members"] });
+      queryClient.invalidateQueries({ queryKey: ["team-member-statuses"] });
       if (data.invited) {
-        toast({ 
-          title: "Invite sent!", 
-          description: `An invitation email has been sent to ${data.email}. They'll be added as ${data.role} once they accept.` 
+        toast({
+          title: "Invite sent!",
+          description: `An invitation email has been sent to ${data.email}. They'll be added as ${data.role} once they accept.`,
         });
       } else {
         toast({ title: "Member added", description: `${data.email} has been added as ${data.role}.` });
@@ -144,6 +177,43 @@ export function TeamSection() {
     },
   });
 
+  const resendInviteMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/team-add-member`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            org_id: currentOrg?.id,
+            action: "resend-invite",
+            user_id: userId,
+            role,
+          }),
+        }
+      );
+
+      const result = await resp.json();
+      if (!resp.ok) {
+        throw new Error(result.message || result.error || "Failed to resend invite");
+      }
+      return result;
+    },
+    onSuccess: (data) => {
+      toast({ title: "Invite resent", description: data.message });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case "admin": return "bg-primary/15 text-primary";
@@ -151,6 +221,13 @@ export function TeamSection() {
       case "agent": return "bg-accent/15 text-accent";
       default: return "bg-muted text-muted-foreground";
     }
+  };
+
+  const getStatusInfo = (userId: string) => {
+    if (!memberStatuses) return null;
+    const status = memberStatuses[userId];
+    if (!status) return null;
+    return status;
   };
 
   return (
@@ -231,74 +308,113 @@ export function TeamSection() {
             <TableRow>
               <TableHead>Member</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Joined</TableHead>
-              {isAdmin && <TableHead className="w-40">Actions</TableHead>}
+              {isAdmin && <TableHead className="w-48">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {teamMembers?.map((member) => (
-              <TableRow key={member.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-sm font-medium">
-                      {member.profile?.display_name?.[0]?.toUpperCase() || member.user_id.slice(0, 1).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">
-                        {member.profile?.display_name || "Unnamed"}
-                        {member.user_id === user?.id && (
-                          <span className="ml-2 rounded bg-primary/15 px-1.5 py-0.5 text-xs text-primary">You</span>
-                        )}
-                      </p>
-                      <p className="text-xs text-muted-foreground font-mono">
-                        {member.user_id.slice(0, 8)}...
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${getRoleBadgeClass(member.role)}`}>
-                    {member.role}
-                  </span>
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {new Date(member.created_at).toLocaleDateString()}
-                </TableCell>
-                {isAdmin && (
+            {teamMembers?.map((member) => {
+              const statusInfo = getStatusInfo(member.user_id);
+              const isPending = statusInfo ? !statusInfo.confirmed : false;
+
+              return (
+                <TableRow key={member.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      {member.user_id !== user?.id && (
-                        <>
-                          <Select
-                            value={member.role}
-                            onValueChange={(role) =>
-                              updateRoleMutation.mutate({ memberId: member.id, role })
-                            }
-                          >
-                            <SelectTrigger className="h-8 w-24">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="sales">Sales</SelectItem>
-                              <SelectItem value="agent">Agent</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => removeMemberMutation.mutate(member.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-sm font-medium">
+                        {member.profile?.display_name?.[0]?.toUpperCase() || member.user_id.slice(0, 1).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {member.profile?.display_name || statusInfo?.email || "Unnamed"}
+                          {member.user_id === user?.id && (
+                            <span className="ml-2 rounded bg-primary/15 px-1.5 py-0.5 text-xs text-primary">You</span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {statusInfo?.email || `${member.user_id.slice(0, 8)}...`}
+                        </p>
+                      </div>
                     </div>
                   </TableCell>
-                )}
-              </TableRow>
-            ))}
+                  <TableCell>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${getRoleBadgeClass(member.role)}`}>
+                      {member.role}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {statusInfo ? (
+                      isPending ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-medium text-warning">
+                          <Clock className="h-3 w-3" />
+                          Invited
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-medium text-success">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Active
+                        </span>
+                      )
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {new Date(member.created_at).toLocaleDateString()}
+                  </TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {member.user_id !== user?.id && (
+                          <>
+                            {isPending && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs"
+                                disabled={resendInviteMutation.isPending}
+                                onClick={() => resendInviteMutation.mutate({ userId: member.user_id, role: member.role })}
+                              >
+                                {resendInviteMutation.isPending ? (
+                                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                                ) : (
+                                  <RefreshCw className="mr-1 h-3 w-3" />
+                                )}
+                                Resend
+                              </Button>
+                            )}
+                            <Select
+                              value={member.role}
+                              onValueChange={(role) =>
+                                updateRoleMutation.mutate({ memberId: member.id, role })
+                              }
+                            >
+                              <SelectTrigger className="h-8 w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="sales">Sales</SelectItem>
+                                <SelectItem value="agent">Agent</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              onClick={() => removeMemberMutation.mutate(member.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}
