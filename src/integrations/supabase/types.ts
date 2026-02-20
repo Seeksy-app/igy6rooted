@@ -1481,6 +1481,92 @@ export type Database = {
           },
         ]
       }
+      seo_pages: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          h1_override: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image_alt: string | null
+          og_image_url: string | null
+          og_title: string | null
+          org_id: string
+          page_name: string
+          robots: string
+          route_path: string
+          seo_score: number | null
+          status: string
+          structured_data: Json | null
+          twitter_card: string | null
+          twitter_description: string | null
+          twitter_image_alt: string | null
+          twitter_image_url: string | null
+          twitter_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          h1_override?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_alt?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          org_id: string
+          page_name: string
+          robots?: string
+          route_path: string
+          seo_score?: number | null
+          status?: string
+          structured_data?: Json | null
+          twitter_card?: string | null
+          twitter_description?: string | null
+          twitter_image_alt?: string | null
+          twitter_image_url?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          h1_override?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_alt?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          org_id?: string
+          page_name?: string
+          robots?: string
+          route_path?: string
+          seo_score?: number | null
+          status?: string
+          structured_data?: Json | null
+          twitter_card?: string | null
+          twitter_description?: string | null
+          twitter_image_alt?: string | null
+          twitter_image_url?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_pages_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_catalog: {
         Row: {
           active: boolean

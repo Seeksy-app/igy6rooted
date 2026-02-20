@@ -16,6 +16,7 @@ import {
   Users,
   Mail,
   ClipboardList,
+  FileText,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrg } from "@/contexts/OrgContext";
@@ -50,6 +51,7 @@ const marketingNav: NavItem[] = [
 ];
 
 const seoNav: NavItem[] = [
+  { to: "/seo-manager", icon: FileText, label: "SEO Manager" },
   { to: "/seo", icon: Search, label: "SEO Dashboard" },
   { to: "/seo-onboarding", icon: UserPlus, label: "SEO Onboarding" },
   { to: "/llm-presence", icon: Eye, label: "LLM Presence" },
