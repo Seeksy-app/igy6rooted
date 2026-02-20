@@ -1,9 +1,10 @@
+import { useMemo } from "react";
 import { useOrg } from "@/contexts/OrgContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Mail, Users, Send, FileText } from "lucide-react";
+import { Loader2, Mail, Users, Send, FileText, MapPin } from "lucide-react";
 
 function useSendJimData() {
   const { currentOrg } = useOrg();
@@ -47,6 +48,37 @@ export default function MailersPage() {
     enabled: !!currentOrg,
   });
 
+  const { data: mailingCampaigns } = useQuery({
+    queryKey: ["mailing-campaigns", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const { data } = await supabase
+        .from("canvassing_leads")
+        .select("sendjim_code, sendjim_mailing_date, address, city, state, zip, status")
+        .eq("org_id", currentOrg.id)
+        .not("sendjim_code", "is", null)
+        .order("sendjim_mailing_date", { ascending: false });
+      return data || [];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Group canvassing leads by sendjim_code to create campaign summaries
+  const campaignSummaries = useMemo(() => {
+    if (!mailingCampaigns?.length) return [];
+    const grouped: Record<string, { code: string; date: string | null; total: number; statuses: Record<string, number>; cities: Set<string> }> = {};
+    for (const lead of mailingCampaigns) {
+      const code = lead.sendjim_code!;
+      if (!grouped[code]) {
+        grouped[code] = { code, date: lead.sendjim_mailing_date, total: 0, statuses: {}, cities: new Set() };
+      }
+      grouped[code].total++;
+      grouped[code].statuses[lead.status] = (grouped[code].statuses[lead.status] || 0) + 1;
+      if (lead.city) grouped[code].cities.add(lead.city);
+    }
+    return Object.values(grouped);
+  }, [mailingCampaigns]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -83,11 +115,60 @@ export default function MailersPage() {
       ) : (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <KpiCard icon={MapPin} label="Postcard Campaigns" value={campaignSummaries.length} />
             <KpiCard icon={Users} label="Contacts" value={contactCount} />
             <KpiCard icon={FileText} label="Quick Sends" value={quicksendCount} />
             <KpiCard icon={Mail} label="QR Leads" value={dmLeads?.length ?? 0} />
           </div>
+
+          {/* Postcard Campaign Summary */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
+                Postcard Campaigns Sent
+                <Badge variant="outline" className="ml-auto text-[10px]">from canvassing data</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {campaignSummaries.length > 0 ? (
+                <div className="space-y-3">
+                  {campaignSummaries.map((campaign) => {
+                    const converted = campaign.statuses["converted"] || 0;
+                    const interested = campaign.statuses["interested"] || 0;
+                    const responseRate = campaign.total > 0 ? Math.round(((converted + interested) / campaign.total) * 100) : 0;
+                    return (
+                      <div key={campaign.code} className="rounded-lg border border-border/50 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-foreground">Mailing #{campaign.code}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {campaign.date ? new Date(campaign.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "No date"}
+                              {campaign.cities.size > 0 && ` · ${[...campaign.cities].slice(0, 3).join(", ")}`}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-foreground">{campaign.total} addresses</p>
+                            <p className="text-xs text-muted-foreground">{responseRate}% response</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {Object.entries(campaign.statuses).map(([status, count]) => (
+                            <Badge key={status} variant="secondary" className="text-[10px]">
+                              {status}: {count}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No postcard campaigns found. Import leads from SendJim on the Canvassing page to see campaign data here.</p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Quick Sends / Templates */}
           <Card>
