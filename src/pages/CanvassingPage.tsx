@@ -430,7 +430,7 @@ export default function CanvassingPage() {
         </CardContent>
       </Card>
 
-      {/* Sales App Features */}
+      {/* Sales App — Two Column: Live Preview + Features & Install */}
       <Card className="border-primary/30 bg-primary/5">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -441,34 +441,52 @@ export default function CanvassingPage() {
             Your field team's mobile command center — install on any phone to start knocking doors.
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Share install link */}
-          <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
-            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-            <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
-            <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
-              <Copy className="h-3.5 w-3.5" /> Copy
-            </Button>
-          </div>
-
-          {/* Custom Feature Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[
-              { icon: "📍", title: "GPS Address Detection", desc: "Auto-detect the nearest address or search manually" },
-              { icon: "🚪", title: "One-Tap Door Knock", desc: "Log a knock and set status instantly" },
-              { icon: "📝", title: "Field Notes", desc: "Add notes to any lead while on the doorstep" },
-              { icon: "🗺️", title: "Leads & Map View", desc: "Browse assigned leads and plan your route" },
-              { icon: "🔍", title: "Address Search", desc: "Type-ahead search to find any address nearby" },
-              { icon: "💾", title: "Save as Lead", desc: "Capture new addresses not in your list yet" },
-            ].map((f) => (
-              <div key={f.title} className="rounded-lg border bg-background p-3 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">{f.icon}</span>
-                  <h4 className="text-sm font-semibold text-foreground">{f.title}</h4>
-                </div>
-                <p className="text-xs text-muted-foreground">{f.desc}</p>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left: Live App Preview */}
+            <div className="flex flex-col items-center">
+              <div className="relative w-[280px] h-[560px] rounded-[2rem] border-4 border-foreground/20 bg-background shadow-xl overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-foreground/20 rounded-b-xl z-10" />
+                <iframe
+                  src="/knock"
+                  className="w-full h-full border-0"
+                  title="IGY6 Sales App Preview"
+                />
               </div>
-            ))}
+              <p className="text-xs text-muted-foreground mt-3">Live preview of the Sales App</p>
+            </div>
+
+            {/* Right: Install Link + Features */}
+            <div className="space-y-4">
+              {/* Share install link */}
+              <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+                <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
+                <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
+                  <Copy className="h-3.5 w-3.5" /> Copy
+                </Button>
+              </div>
+
+              {/* Feature Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { icon: "📍", title: "GPS Address Detection", desc: "Auto-detect the nearest address or search manually" },
+                  { icon: "🚪", title: "One-Tap Door Knock", desc: "Log a knock and set status instantly" },
+                  { icon: "📝", title: "Field Notes", desc: "Add notes to any lead while on the doorstep" },
+                  { icon: "🗺️", title: "Leads & Map View", desc: "Browse assigned leads and plan your route" },
+                  { icon: "🔍", title: "Address Search", desc: "Type-ahead search to find any address nearby" },
+                  { icon: "💾", title: "Save as Lead", desc: "Capture new addresses not in your list yet" },
+                ].map((f) => (
+                  <div key={f.title} className="rounded-lg border bg-background p-3 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{f.icon}</span>
+                      <h4 className="text-sm font-semibold text-foreground">{f.title}</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{f.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
