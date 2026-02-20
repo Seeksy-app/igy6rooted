@@ -44,6 +44,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    setLoading(true);
     try {
       // Get user's team memberships
       const { data: memberships, error: memberError } = await supabase
