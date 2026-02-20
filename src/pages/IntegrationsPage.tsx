@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Link2, CheckCircle2, AlertTriangle, XCircle, RefreshCw,
-  Settings, Plus, Loader2, Shield, Clock, TestTube
+  Settings, Plus, Loader2, Shield, Clock, TestTube, Zap,
+  Copy, ExternalLink, Smartphone, Share, MoreVertical,
+  ChevronDown, ChevronUp,
 } from "lucide-react";
+import { toast as sonnerToast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -212,6 +215,12 @@ export default function IntegrationsPage() {
           </div>
         </div>
       ))}
+
+      {/* Zapier Integration */}
+      <ZapierIntegrationSection orgId={currentOrg?.id} />
+
+      {/* Sales App */}
+      <SalesAppSection />
     </div>
   );
 }
@@ -294,5 +303,200 @@ function IntegrationCard({ integration, isAdmin, testing, onConnect, onTest }: {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function ZapierIntegrationSection({ orgId }: { orgId?: string }) {
+  return (
+    <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-900/10">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Zap className="h-5 w-5 text-amber-500" />
+          Zapier Integration
+        </CardTitle>
+        <CardDescription>
+          Connect SendJim to this webhook via Zapier to automatically import mailing recipients as canvassing leads.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">Webhook URL</p>
+          <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+            <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+            <code className="flex-1 text-xs text-foreground truncate">
+              {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapier-canvassing-webhook?org_id=${orgId || "YOUR_ORG_ID"}`}
+            </code>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zapier-canvassing-webhook?org_id=${orgId || ""}`
+                );
+                sonnerToast.success("Webhook URL copied!");
+              }}
+              className="gap-1.5 shrink-0"
+            >
+              <Copy className="h-3.5 w-3.5" /> Copy
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-background p-4 space-y-3">
+          <h4 className="text-sm font-semibold text-foreground">Zapier Setup Steps</h4>
+          <ol className="space-y-2">
+            {[
+              <>In Zapier, create a new Zap with <strong>SendJim</strong> as the trigger (e.g. "New Order" or use SendJim's "Export CSV" → Google Sheets → Zapier)</>,
+              <>Add a <strong>Webhooks by Zapier</strong> action → choose <strong>POST</strong></>,
+              <>Paste the webhook URL above into the <strong>URL</strong> field</>,
+              <>Set <strong>Payload Type</strong> to <strong>JSON</strong></>,
+              <>Map SendJim fields: <code className="bg-muted px-1 rounded text-xs">address</code>, <code className="bg-muted px-1 rounded text-xs">city</code>, <code className="bg-muted px-1 rounded text-xs">state</code>, <code className="bg-muted px-1 rounded text-xs">zip</code>, <code className="bg-muted px-1 rounded text-xs">sent_date</code>, <code className="bg-muted px-1 rounded text-xs">mailing_name</code></>,
+              <>Test and turn on your Zap — leads will appear here automatically!</>,
+            ].map((step, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm">
+                <span className="bg-amber-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 space-y-1">
+          <p className="font-medium">Accepted fields in each lead:</p>
+          <p><code>address</code> (required), <code>city</code>, <code>state</code>, <code>zip</code>, <code>sent_date</code>, <code>mailing_name</code>, <code>order_type</code>, <code>property_type</code>, <code>estimated_delivery_date</code></p>
+          <p className="mt-1">Send a single lead or <code>{`{ "leads": [...] }`}</code> for batch import.</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SalesAppSection() {
+  const [showInstall, setShowInstall] = useState(false);
+  const installUrl = `${window.location.origin}/install`;
+
+  const copyInstallLink = () => {
+    navigator.clipboard.writeText(installUrl);
+    sonnerToast.success("Install link copied!");
+  };
+
+  return (
+    <div className="space-y-3">
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Smartphone className="h-5 w-5 text-primary" />
+            IGY6 Sales App
+          </CardTitle>
+          <CardDescription>
+            Your field team's mobile command center — install on any phone to start knocking doors.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left: Live App Preview */}
+            <div className="flex flex-col items-center">
+              <div className="relative w-[280px] h-[560px] rounded-[2rem] border-4 border-foreground/20 bg-background shadow-xl overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-foreground/20 rounded-b-xl z-10" />
+                <iframe
+                  src="/knock"
+                  className="w-full h-full border-0"
+                  title="IGY6 Sales App Preview"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">Live preview of the Sales App</p>
+            </div>
+
+            {/* Right: Install Link + Features */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+                <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+                <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
+                <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
+                  <Copy className="h-3.5 w-3.5" /> Copy
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { icon: "📍", title: "GPS Address Detection", desc: "Auto-detect the nearest address or search manually" },
+                  { icon: "🚪", title: "One-Tap Door Knock", desc: "Log a knock and set status instantly" },
+                  { icon: "📝", title: "Field Notes", desc: "Add notes to any lead while on the doorstep" },
+                  { icon: "🗺️", title: "Leads & Map View", desc: "Browse assigned leads and plan your route" },
+                  { icon: "🔍", title: "Address Search", desc: "Type-ahead search to find any address nearby" },
+                  { icon: "💾", title: "Save as Lead", desc: "Capture new addresses not in your list yet" },
+                ].map((f) => (
+                  <div key={f.title} className="rounded-lg border bg-background p-3 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{f.icon}</span>
+                      <h4 className="text-sm font-semibold text-foreground">{f.title}</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{f.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Installation Instructions — Collapsible */}
+      <Card>
+        <button
+          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+          onClick={() => setShowInstall(!showInstall)}
+        >
+          <span className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Smartphone className="h-4 w-4 text-primary" />
+            Installation Instructions (iOS & Android)
+          </span>
+          {showInstall ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        </button>
+        {showInstall && (
+          <CardContent className="pt-0 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-lg border bg-background p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🍎</span>
+                  <h3 className="font-semibold text-sm">Install on iPhone / iPad</h3>
+                </div>
+                <ol className="space-y-2">
+                  {[
+                    <>Open the install link in <strong>Safari</strong> (required for iOS)</>,
+                    <>Tap the <Share className="h-4 w-4 inline align-text-bottom" /> <strong>Share</strong> button</>,
+                    <>Scroll down and tap <strong>"Add to Home Screen"</strong></>,
+                    <>Tap <strong>"Add"</strong> — the app icon appears on your home screen</>,
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm">
+                      <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="rounded-lg border bg-background p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🤖</span>
+                  <h3 className="font-semibold text-sm">Install on Android</h3>
+                </div>
+                <ol className="space-y-2">
+                  {[
+                    <>Open the install link in <strong>Chrome</strong></>,
+                    <>Tap the <MoreVertical className="h-4 w-4 inline align-text-bottom" /> <strong>menu</strong> (three dots)</>,
+                    <>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong></>,
+                    <>Confirm — the app appears on your home screen</>,
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-sm">
+                      <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+    </div>
   );
 }
