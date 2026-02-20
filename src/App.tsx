@@ -70,6 +70,10 @@ import MetaAdsCallbackPage from "@/pages/integrations/MetaAdsCallbackPage";
 import KnockPage from "@/pages/KnockPage";
 import InstallPage from "@/pages/InstallPage";
 
+// SEO Manager
+import SEOManagerPage from "@/pages/SEOManagerPage";
+import SEOPageEditorPage from "@/pages/SEOPageEditorPage";
+
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -201,6 +205,8 @@ function AppRoutes() {
       <Route path="/canvassing" element={<ProtectedRoute><CanvassingPage /></ProtectedRoute>} />
       <Route path="/gtm" element={<ProtectedRoute><GTMPage /></ProtectedRoute>} />
       <Route path="/gtm-onboarding" element={<ProtectedRoute><GTMOnboardingPage /></ProtectedRoute>} />
+      <Route path="/seo-manager" element={<ProtectedRoute><SEOManagerPage /></ProtectedRoute>} />
+      <Route path="/seo-manager/:id" element={<ProtectedRoute><SEOPageEditorPage /></ProtectedRoute>} />
       <Route path="/seo" element={<ProtectedRoute><SEODashboardPage /></ProtectedRoute>} />
       <Route path="/seo-onboarding" element={<ProtectedRoute><SEOOnboardingPage /></ProtectedRoute>} />
       <Route path="/llm-presence" element={<ProtectedRoute><LLMPresencePage /></ProtectedRoute>} />
