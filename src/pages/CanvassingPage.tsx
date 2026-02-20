@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import {
   Loader2, Download, MapPin, User, Clock,
   ChevronDown, ChevronUp, MessageSquare,
+  Smartphone, Share, MoreVertical, Copy, ExternalLink,
 } from "lucide-react";
 
 const STATUSES = [
@@ -127,6 +128,13 @@ export default function CanvassingPage() {
     count: (leads || []).filter((l: any) => l.status === s.value).length,
   }));
 
+  const installUrl = `${window.location.origin}/install`;
+
+  const copyInstallLink = () => {
+    navigator.clipboard.writeText(installUrl);
+    toast.success("Install link copied to clipboard!");
+  };
+
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -149,6 +157,105 @@ export default function CanvassingPage() {
           Import from SendJim
         </Button>
       </div>
+
+      {/* PWA Door Knocker App Section */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Smartphone className="h-5 w-5 text-primary" />
+            IGY6 Door Knocker App
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Install the mobile app on your agents' phones to log door knocks with GPS address detection in real-time.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Share install link */}
+          <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
+            <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+            <code className="flex-1 text-sm text-foreground truncate">{installUrl}</code>
+            <Button variant="outline" size="sm" onClick={copyInstallLink} className="gap-1.5 shrink-0">
+              <Copy className="h-3.5 w-3.5" /> Copy Link
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Send this link to your sales agents — they'll open it on their phone browser and follow the steps to install.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* iOS Instructions */}
+            <div className="rounded-lg border bg-background p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🍎</span>
+                <h3 className="font-semibold text-sm">Install on iPhone / iPad</h3>
+              </div>
+              <ol className="space-y-2.5">
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+                  <span>Open the install link in <strong>Safari</strong> (required for iOS)</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+                  <span>Tap the <Share className="h-4 w-4 inline align-text-bottom" /> <strong>Share</strong> button at the bottom of Safari</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+                  <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
+                  <span>Tap <strong>"Add"</strong> — the app icon appears on your home screen</span>
+                </li>
+              </ol>
+            </div>
+
+            {/* Android Instructions */}
+            <div className="rounded-lg border bg-background p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🤖</span>
+                <h3 className="font-semibold text-sm">Install on Android</h3>
+              </div>
+              <ol className="space-y-2.5">
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+                  <span>Open the install link in <strong>Chrome</strong></span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+                  <span>Tap the <MoreVertical className="h-4 w-4 inline align-text-bottom" /> <strong>menu</strong> (three dots) in Chrome</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+                  <span>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong></span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm">
+                  <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
+                  <span>Confirm — the app will appear on your home screen</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          {/* What agents see */}
+          <div className="rounded-lg border bg-background p-4">
+            <h3 className="font-semibold text-sm mb-2">What agents can do in the app:</h3>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2">✅ Auto-detect address via GPS</li>
+              <li className="flex items-center gap-2">✅ Log door knock with one tap</li>
+              <li className="flex items-center gap-2">✅ Set status (Knocked, Interested, etc.)</li>
+              <li className="flex items-center gap-2">✅ Browse their assigned route</li>
+              <li className="flex items-center gap-2">✅ Add notes per address</li>
+              <li className="flex items-center gap-2">✅ Works offline-ready on mobile</li>
+            </ul>
+          </div>
+
+          <Button variant="outline" size="sm" asChild>
+            <a href="/install" target="_blank" rel="noopener noreferrer" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Preview Install Page
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Status Summary Strip */}
       <div className="grid grid-cols-3 md:grid-cols-7 gap-2">

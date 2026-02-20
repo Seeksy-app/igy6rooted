@@ -219,7 +219,6 @@ function AppRoutes() {
       {/* PWA Door Knocker - protected but full-screen (no sidebar) */}
       <Route path="/knock" element={<MobileProtectedRoute><KnockPage /></MobileProtectedRoute>} />
       <Route path="/install" element={<InstallPage />} />
-      <Route path="/install" element={<InstallPage />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
