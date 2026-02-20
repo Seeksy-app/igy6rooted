@@ -66,6 +66,10 @@ import ToolCallLogsPage from "@/pages/admin/ToolCallLogsPage";
 import GoogleAdsCallbackPage from "@/pages/integrations/GoogleAdsCallbackPage";
 import MetaAdsCallbackPage from "@/pages/integrations/MetaAdsCallbackPage";
 
+// PWA pages
+import KnockPage from "@/pages/KnockPage";
+import InstallPage from "@/pages/InstallPage";
+
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -133,6 +137,24 @@ function OnboardingRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function MobileProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
+  const { currentOrg, loading: orgLoading } = useOrg();
+
+  if (authLoading || orgLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) return <Navigate to="/login" replace />;
+  if (!currentOrg) return <Navigate to="/onboarding" replace />;
+
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -187,6 +209,11 @@ function AppRoutes() {
 
       {/* Voice Agent Test - Public route */}
       <Route path="/voice-agent-test" element={<VoiceAgentTestPage />} />
+
+      {/* PWA Door Knocker - protected but full-screen (no sidebar) */}
+      <Route path="/knock" element={<MobileProtectedRoute><KnockPage /></MobileProtectedRoute>} />
+      <Route path="/install" element={<InstallPage />} />
+      <Route path="/install" element={<InstallPage />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
