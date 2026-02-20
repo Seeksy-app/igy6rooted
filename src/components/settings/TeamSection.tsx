@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Loader2, UserPlus, Trash2 } from "lucide-react";
+import { Users, Loader2, UserPlus, Trash2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -126,7 +126,14 @@ export function TeamSection() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["team-members"] });
-      toast({ title: "Member added", description: `${data.email} has been added as ${data.role}.` });
+      if (data.invited) {
+        toast({ 
+          title: "Invite sent!", 
+          description: `An invitation email has been sent to ${data.email}. They'll be added as ${data.role} once they accept.` 
+        });
+      } else {
+        toast({ title: "Member added", description: `${data.email} has been added as ${data.role}.` });
+      }
       setInviteOpen(false);
       setInviteEmail("");
       setAddingMember(false);
@@ -157,13 +164,16 @@ export function TeamSection() {
           <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add Member
+                <Mail className="mr-2 h-4 w-4" />
+                Invite Member
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Team Member</DialogTitle>
+                <DialogTitle>Invite Team Member</DialogTitle>
+                <p className="text-sm text-muted-foreground">
+                  Enter their email address. If they don't have an account yet, they'll receive an invitation email to join.
+                </p>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -201,7 +211,9 @@ export function TeamSection() {
                   onClick={() => addMemberMutation.mutate({ email: inviteEmail, role: inviteRole })}
                   disabled={!inviteEmail || addingMember}
                 >
-                  {addingMember ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Adding...</> : "Add Member"}
+                  {addingMember ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</> : <>
+                    <Mail className="mr-2 h-4 w-4" />Invite
+                  </>}
                 </Button>
               </DialogFooter>
             </DialogContent>

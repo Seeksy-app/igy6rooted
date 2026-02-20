@@ -54,8 +54,12 @@ serve(async (req) => {
       });
     }
 
-    // Use service role to look up user by email
+    // Get org name for the invite
     const svc = createClient(supabaseUrl, serviceKey);
+    const { data: orgData } = await svc.from("orgs").select("name").eq("id", org_id).single();
+    const orgName = orgData?.name || "the team";
+
+    // Look up user by email
     const { data: { users }, error: listError } = await svc.auth.admin.listUsers();
     
     if (listError) {
@@ -68,38 +72,57 @@ serve(async (req) => {
 
     const targetUser = users?.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
 
-    if (!targetUser) {
-      return new Response(JSON.stringify({ 
-        error: "not_found",
-        message: `No account found for ${email}. They need to sign up first, then you can add them.`
-      }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    let userId: string;
+    let invited = false;
 
-    // Check if already a member
-    const { data: existing } = await svc
-      .from("team_members")
-      .select("id")
-      .eq("org_id", org_id)
-      .eq("user_id", targetUser.id)
-      .maybeSingle();
+    if (targetUser) {
+      // User exists — check if already a member
+      const { data: existing } = await svc
+        .from("team_members")
+        .select("id")
+        .eq("org_id", org_id)
+        .eq("user_id", targetUser.id)
+        .maybeSingle();
 
-    if (existing) {
-      return new Response(JSON.stringify({ 
-        error: "already_member",
-        message: `${email} is already a member of this organization.`
-      }), {
-        status: 409,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (existing) {
+        return new Response(JSON.stringify({ 
+          error: "already_member",
+          message: `${email} is already a member of this organization.`
+        }), {
+          status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      userId = targetUser.id;
+    } else {
+      // User does NOT exist — send an invite email
+      const { data: inviteData, error: inviteError } = await svc.auth.admin.inviteUserByEmail(email, {
+        data: {
+          invited_to_org: org_id,
+          invited_role: role,
+          org_name: orgName,
+        },
       });
+
+      if (inviteError) {
+        console.error("Invite error:", inviteError);
+        return new Response(JSON.stringify({ 
+          error: "invite_failed",
+          message: `Failed to send invite to ${email}: ${inviteError.message}`
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      userId = inviteData.user.id;
+      invited = true;
     }
 
     // Add as team member
     const { error: insertError } = await svc
       .from("team_members")
-      .insert({ org_id, user_id: targetUser.id, role });
+      .insert({ org_id, user_id: userId, role });
 
     if (insertError) {
       console.error("Insert error:", insertError);
@@ -113,21 +136,22 @@ serve(async (req) => {
     const { data: existingProfile } = await svc
       .from("profiles")
       .select("id")
-      .eq("user_id", targetUser.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (!existingProfile) {
       await svc.from("profiles").insert({
-        user_id: targetUser.id,
-        display_name: targetUser.user_metadata?.display_name || email.split("@")[0],
+        user_id: userId,
+        display_name: email.split("@")[0],
       });
     }
 
     return new Response(JSON.stringify({ 
       success: true,
-      user_id: targetUser.id,
-      email: targetUser.email,
+      user_id: userId,
+      email,
       role,
+      invited,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
