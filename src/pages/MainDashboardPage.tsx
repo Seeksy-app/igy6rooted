@@ -149,8 +149,8 @@ export default function MainDashboardPage() {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [leadsData]);
 
-  // Sales role on mobile → redirect to Sales Dashboard
-  if (isMobile && dbRole === "sales") {
+  // Sales role → redirect to Sales Dashboard
+  if (dbRole === "sales") {
     return <Navigate to="/knock" replace />;
   }
 
