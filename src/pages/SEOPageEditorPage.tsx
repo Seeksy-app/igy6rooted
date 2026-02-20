@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Save, Loader2, CheckCircle2, AlertCircle, XCircle, Globe, Twitter,
+  ArrowLeft, Save, Loader2, CheckCircle2, AlertCircle, XCircle, Globe, Twitter, Sparkles,
 } from "lucide-react";
 
 interface SeoForm {
@@ -111,6 +111,37 @@ export default function SEOPageEditorPage() {
   const isNew = id === "new";
 
   const [form, setForm] = useState<SeoForm>({ ...defaultForm });
+  const [generating, setGenerating] = useState(false);
+
+  const generateWithAI = async () => {
+    if (!form.page_name && !form.route_path) {
+      toast.error("Enter a page name and route path first");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("seo-ai-generate", {
+        body: { page_name: form.page_name, route_path: form.route_path, business_name: "IGY6 Rooted" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setForm(f => ({
+        ...f,
+        meta_title: data.meta_title || f.meta_title,
+        meta_description: data.meta_description || f.meta_description,
+        h1_override: data.h1_override || f.h1_override,
+        og_title: data.og_title || f.og_title,
+        og_description: data.og_description || f.og_description,
+        twitter_title: data.twitter_title || f.twitter_title,
+        twitter_description: data.twitter_description || f.twitter_description,
+      }));
+      toast.success("SEO content generated! Review and save.");
+    } catch (e: any) {
+      toast.error(e.message || "AI generation failed");
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const { data: existing, isLoading } = useQuery({
     queryKey: ["seo-page", id],
@@ -224,6 +255,10 @@ export default function SEOPageEditorPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={generateWithAI} disabled={generating} className="gap-2">
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Generate with AI
+            </Button>
             <Button variant="outline" onClick={toggleStatus}>
               {form.status === "published" ? "Revert to Draft" : "Publish"}
             </Button>
