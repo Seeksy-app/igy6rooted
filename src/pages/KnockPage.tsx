@@ -12,7 +12,8 @@ import { toast } from "sonner";
 import {
   MapPin, Navigation, Loader2, ChevronRight,
   CheckCircle2, XCircle, HelpCircle, Clock, Star, Phone,
-  Search, Save, ArrowLeft, Filter,
+  Search, ArrowLeft, Plus, Home, User, List,
+  LocateFixed, ChevronDown,
 } from "lucide-react";
 
 const STATUSES = [
@@ -42,22 +43,27 @@ function parseMapboxFeature(feature: any): ParsedAddress {
   };
 }
 
+type Tab = "leads" | "new" | "profile";
+
 export default function KnockPage() {
   const { user } = useAuth();
   const { currentOrg } = useOrg();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<Tab>("leads");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLead, setSelectedLead] = useState<any | null>(null);
   const [notes, setNotes] = useState("");
   const [detecting, setDetecting] = useState(false);
-  const [detectedAddress, setDetectedAddress] = useState<ParsedAddress | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string | null>(null);
 
-  // Address search for new leads
+  // New prospect state
+  const [newAddress, setNewAddress] = useState<ParsedAddress | null>(null);
   const [addressSearchQuery, setAddressSearchQuery] = useState("");
   const [addressSearchResults, setAddressSearchResults] = useState<any[]>([]);
   const [addressSearching, setAddressSearching] = useState(false);
+  const [newNotes, setNewNotes] = useState("");
+  const [newPropertyType, setNewPropertyType] = useState("residential");
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -66,7 +72,7 @@ export default function KnockPage() {
     });
   }, []);
 
-  // Debounced address search for new leads
+  // Debounced address search
   useEffect(() => {
     if (!addressSearchQuery || addressSearchQuery.length < 3 || !mapboxToken) {
       setAddressSearchResults([]);
@@ -99,7 +105,7 @@ export default function KnockPage() {
         .from("canvassing_leads")
         .select("*")
         .eq("org_id", currentOrg.id)
-        .order("address", { ascending: true });
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data || [];
     },
@@ -119,7 +125,7 @@ export default function KnockPage() {
   });
 
   const createLeadMutation = useMutation({
-    mutationFn: async (lead: ParsedAddress & { status: string; notes: string }) => {
+    mutationFn: async (lead: ParsedAddress & { status: string; notes: string; property_type: string }) => {
       if (!currentOrg || !user) throw new Error("Not authenticated");
       const { error } = await supabase.from("canvassing_leads").insert({
         org_id: currentOrg.id,
@@ -129,6 +135,7 @@ export default function KnockPage() {
         zip: lead.zip,
         status: lead.status,
         notes: lead.notes,
+        property_type: lead.property_type,
         assigned_to: user.id,
         assigned_to_name: user.user_metadata?.display_name || user.email,
         knocked_at: new Date().toISOString(),
@@ -137,11 +144,12 @@ export default function KnockPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["knock-all-leads"] });
-      toast.success("Lead saved!");
-      setDetectedAddress(null);
-      setNotes("");
+      toast.success("Prospect created!");
+      setNewAddress(null);
+      setNewNotes("");
       setAddressSearchQuery("");
       setAddressSearchResults([]);
+      setActiveTab("leads");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -163,9 +171,12 @@ export default function KnockPage() {
       );
       const geo = await resp.json();
       if (geo.features?.length > 0) {
-        setDetectedAddress(parseMapboxFeature(geo.features[0]));
-        setAddressSearchQuery("");
-        setAddressSearchResults([]);
+        const parsed = parseMapboxFeature(geo.features[0]);
+        if (activeTab === "new") {
+          setNewAddress(parsed);
+          setAddressSearchQuery("");
+          setAddressSearchResults([]);
+        }
       } else {
         toast.error("Couldn't detect address. Try searching instead.");
       }
@@ -175,7 +186,7 @@ export default function KnockPage() {
     } finally {
       setDetecting(false);
     }
-  }, [mapboxToken]);
+  }, [mapboxToken, activeTab]);
 
   const handleStatusTap = (status: string) => {
     if (selectedLead) {
@@ -186,9 +197,17 @@ export default function KnockPage() {
       updateLeadMutation.mutate({ id: selectedLead.id, updates });
       setSelectedLead(null);
       setNotes("");
-    } else if (detectedAddress) {
-      createLeadMutation.mutate({ ...detectedAddress, status, notes });
     }
+  };
+
+  const handleCreateProspect = (status: string) => {
+    if (!newAddress) return;
+    createLeadMutation.mutate({
+      ...newAddress,
+      status,
+      notes: newNotes,
+      property_type: newPropertyType,
+    });
   };
 
   // Filter leads
@@ -208,20 +227,20 @@ export default function KnockPage() {
     count: allLeads.filter((l: any) => l.status === s.value).length,
   }));
 
-  // Detail view for a specific lead
+  // ─── LEAD DETAIL VIEW ───
   if (selectedLead) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-3 flex items-center gap-3">
+        <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-3 flex items-center gap-3 safe-area-top">
           <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/10" onClick={() => { setSelectedLead(null); setNotes(""); }}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Back
           </Button>
           <span className="text-sm font-semibold truncate">{selectedLead.address}</span>
         </header>
 
-        <div className="flex-1 p-4 space-y-4">
+        <div className="flex-1 p-4 space-y-4 pb-24">
           <Card>
-            <CardContent className="pt-4 space-y-2">
+            <CardContent className="pt-4 space-y-3">
               <div className="flex items-start gap-2">
                 <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <div>
@@ -231,6 +250,9 @@ export default function KnockPage() {
                   </p>
                 </div>
               </div>
+              {selectedLead.property_type && (
+                <p className="text-xs text-muted-foreground">Property: {selectedLead.property_type}</p>
+              )}
               {selectedLead.mailing_name && (
                 <p className="text-xs text-muted-foreground">Campaign: {selectedLead.mailing_name}</p>
               )}
@@ -249,7 +271,7 @@ export default function KnockPage() {
           </Card>
 
           <Textarea
-            placeholder="Notes (optional)..."
+            placeholder="Add notes about this prospect..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[80px]"
@@ -279,46 +301,129 @@ export default function KnockPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-3 space-y-3">
+      {/* ─── HEADER ─── */}
+      <header className="sticky top-0 z-10 bg-primary text-primary-foreground px-4 py-3 safe-area-top">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold">🚪 Sales Dashboard</h1>
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={detectAddress} disabled={detecting} className="gap-1 text-xs">
-              {detecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
-              GPS
-            </Button>
+          <h1 className="text-lg font-bold">
+            {activeTab === "leads" && "🏠 Prospects"}
+            {activeTab === "new" && "➕ New Prospect"}
+            {activeTab === "profile" && "👤 My Stats"}
+          </h1>
+          <div className="flex items-center gap-2 text-xs text-primary-foreground/70">
+            <span>{allLeads.length} total</span>
           </div>
-        </div>
-
-        {/* Search within existing leads */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-foreground/50" />
-          <Input
-            placeholder="Search addresses..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9 text-sm bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
-          />
         </div>
       </header>
 
+      {/* ─── TAB CONTENT ─── */}
+      <div className="flex-1 overflow-auto pb-20">
+        {activeTab === "leads" && (
+          <LeadsTab
+            allLeads={allLeads}
+            filtered={filtered}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            statusCounts={statusCounts}
+            onSelectLead={(lead: any) => { setSelectedLead(lead); setNotes(lead.notes || ""); }}
+          />
+        )}
+
+        {activeTab === "new" && (
+          <NewProspectTab
+            newAddress={newAddress}
+            setNewAddress={setNewAddress}
+            addressSearchQuery={addressSearchQuery}
+            setAddressSearchQuery={setAddressSearchQuery}
+            addressSearchResults={addressSearchResults}
+            addressSearching={addressSearching}
+            newNotes={newNotes}
+            setNewNotes={setNewNotes}
+            newPropertyType={newPropertyType}
+            setNewPropertyType={setNewPropertyType}
+            detecting={detecting}
+            detectAddress={detectAddress}
+            onCreateProspect={handleCreateProspect}
+            isPending={createLeadMutation.isPending}
+          />
+        )}
+
+        {activeTab === "profile" && (
+          <ProfileTab user={user} allLeads={allLeads} />
+        )}
+      </div>
+
+      {/* ─── BOTTOM TAB BAR ─── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-card border-t border-border safe-area-bottom">
+        <div className="flex items-center justify-around h-16">
+          <TabButton icon={List} label="Prospects" active={activeTab === "leads"} onClick={() => setActiveTab("leads")} />
+          <TabButton icon={Plus} label="New" active={activeTab === "new"} onClick={() => setActiveTab("new")} isPrimary />
+          <TabButton icon={User} label="My Stats" active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+// ─── TAB BUTTON COMPONENT ───
+function TabButton({ icon: Icon, label, active, onClick, isPrimary }: {
+  icon: React.ElementType; label: string; active: boolean; onClick: () => void; isPrimary?: boolean;
+}) {
+  if (isPrimary) {
+    return (
+      <button onClick={onClick} className="flex flex-col items-center gap-0.5">
+        <div className={`flex h-12 w-12 items-center justify-center rounded-full transition-colors ${
+          active ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+        }`}>
+          <Icon className="h-6 w-6" />
+        </div>
+        <span className={`text-[10px] font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>{label}</span>
+      </button>
+    );
+  }
+  return (
+    <button onClick={onClick} className="flex flex-col items-center gap-1 min-w-[64px]">
+      <Icon className={`h-5 w-5 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`} />
+      <span className={`text-[10px] font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>{label}</span>
+    </button>
+  );
+}
+
+// ─── LEADS TAB ───
+function LeadsTab({ allLeads, filtered, isLoading, searchQuery, setSearchQuery, filterStatus, setFilterStatus, statusCounts, onSelectLead }: any) {
+  return (
+    <>
+      {/* Search bar */}
+      <div className="px-4 pt-3 pb-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search addresses, city, zip..."
+            value={searchQuery}
+            onChange={(e: any) => setSearchQuery(e.target.value)}
+            className="pl-9 h-10"
+          />
+        </div>
+      </div>
+
       {/* Status filter chips */}
-      <div className="px-3 py-2 flex gap-2 overflow-x-auto bg-muted/30 border-b border-border">
+      <div className="px-3 py-2 flex gap-2 overflow-x-auto">
         <button
           onClick={() => setFilterStatus("all")}
           className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            filterStatus === "all" ? "bg-primary text-primary-foreground" : "bg-background border border-border text-foreground"
+            filterStatus === "all" ? "bg-primary text-primary-foreground" : "bg-muted border border-border text-foreground"
           }`}
         >
           All ({allLeads.length})
         </button>
-        {statusCounts.map((s) => (
+        {statusCounts.map((s: any) => (
           <button
             key={s.value}
             onClick={() => setFilterStatus(filterStatus === s.value ? "all" : s.value)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              filterStatus === s.value ? "bg-primary text-primary-foreground" : "bg-background border border-border text-foreground"
+              filterStatus === s.value ? "bg-primary text-primary-foreground" : "bg-muted border border-border text-foreground"
             }`}
           >
             {s.label} ({s.count})
@@ -326,36 +431,195 @@ export default function KnockPage() {
         ))}
       </div>
 
-      {/* Detected address banner */}
-      {detectedAddress && (
-        <div className="bg-primary/10 border-b border-primary/20 px-4 py-3 space-y-3">
-          <div className="flex items-start gap-2">
-            <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-sm">{detectedAddress.address}</p>
-              <p className="text-xs text-muted-foreground">
-                {[detectedAddress.city, detectedAddress.state, detectedAddress.zip].filter(Boolean).join(", ")}
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => { setDetectedAddress(null); setNotes(""); }} className="text-xs shrink-0">✕</Button>
-          </div>
-          <Textarea
-            placeholder="Notes (optional)..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="min-h-[50px] text-sm"
+      {/* Leads list */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-16 text-center">
+          <MapPin className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground font-medium">
+            {allLeads.length === 0 ? "No prospects yet" : "No matches found"}
+          </p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            {allLeads.length === 0 ? "Tap + to add your first prospect" : "Try different search or filter"}
+          </p>
+        </div>
+      ) : (
+        <div className="divide-y divide-border">
+          <p className="px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30">
+            {filtered.length} prospect{filtered.length !== 1 ? "s" : ""}
+          </p>
+          {filtered.map((lead: any) => {
+            const status = STATUSES.find(s => s.value === lead.status) || STATUSES[0];
+            return (
+              <button
+                key={lead.id}
+                onClick={() => onSelectLead(lead)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/30 active:bg-muted/50 transition-colors"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                  <MapPin className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{lead.address}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[lead.city, lead.state, lead.zip].filter(Boolean).join(", ")}
+                  </p>
+                </div>
+                <Badge className={`${status.color} text-[10px] border-0 shrink-0`}>{status.label}</Badge>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── NEW PROSPECT TAB ───
+function NewProspectTab({
+  newAddress, setNewAddress, addressSearchQuery, setAddressSearchQuery,
+  addressSearchResults, addressSearching, newNotes, setNewNotes,
+  newPropertyType, setNewPropertyType, detecting, detectAddress,
+  onCreateProspect, isPending,
+}: any) {
+  return (
+    <div className="p-4 space-y-4">
+      {/* Step 1: Find Address */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+          Find Address
+        </h2>
+
+        {/* GPS Button */}
+        <Button
+          onClick={detectAddress}
+          disabled={detecting}
+          variant="outline"
+          className="w-full h-12 gap-2 text-sm"
+        >
+          {detecting ? <Loader2 className="h-5 w-5 animate-spin" /> : <LocateFixed className="h-5 w-5" />}
+          {detecting ? "Detecting location..." : "Use My Current Location"}
+        </Button>
+
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground">or search</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* Address Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Type an address..."
+            value={addressSearchQuery}
+            onChange={(e) => setAddressSearchQuery(e.target.value)}
+            className="pl-9 h-11"
           />
-          <div className="grid grid-cols-3 gap-2">
-            {STATUSES.filter(s => s.value !== "unvisited").slice(0, 6).map((s) => {
+          {addressSearching && (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+          )}
+        </div>
+
+        {/* Search Results */}
+        {addressSearchResults.length > 0 && (
+          <div className="rounded-lg border border-border overflow-hidden">
+            {addressSearchResults.map((feature: any, i: number) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setNewAddress(parseMapboxFeature(feature));
+                  setAddressSearchQuery("");
+                }}
+                className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-muted/50 active:bg-muted border-b last:border-0 border-border transition-colors"
+              >
+                <MapPin className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm truncate">{feature.place_name}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Selected Address Card */}
+      {newAddress && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="pt-4 space-y-1">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-2">
+                <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-medium text-sm">{newAddress.address}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {[newAddress.city, newAddress.state, newAddress.zip].filter(Boolean).join(", ")}
+                  </p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setNewAddress(null)} className="text-xs h-7 px-2">✕</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 2: Property Details */}
+      {newAddress && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+            Property Details
+          </h2>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-muted-foreground">Property Type</label>
+            <div className="grid grid-cols-3 gap-2">
+              {["residential", "commercial", "vacant lot"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setNewPropertyType(type)}
+                  className={`rounded-lg border px-3 py-2.5 text-xs font-medium capitalize transition-colors ${
+                    newPropertyType === type
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-foreground"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Textarea
+            placeholder="Notes about this property (trees, yard condition, etc.)..."
+            value={newNotes}
+            onChange={(e) => setNewNotes(e.target.value)}
+            className="min-h-[80px]"
+          />
+        </div>
+      )}
+
+      {/* Step 3: Set Status & Save */}
+      {newAddress && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
+            Set Initial Status
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {STATUSES.map((s) => {
               const Icon = s.icon;
               return (
                 <button
                   key={s.value}
-                  onClick={() => handleStatusTap(s.value)}
-                  disabled={createLeadMutation.isPending}
-                  className={`${s.color} rounded-lg p-2 flex flex-col items-center gap-1 text-[11px] font-medium transition-all active:scale-95`}
+                  onClick={() => onCreateProspect(s.value)}
+                  disabled={isPending}
+                  className={`${s.color} rounded-xl p-4 flex flex-col items-center gap-2 text-sm font-medium transition-all active:scale-95`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-6 w-6" />
                   {s.label}
                 </button>
               );
@@ -363,51 +627,78 @@ export default function KnockPage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* Leads list */}
-      <div className="flex-1 overflow-auto">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+// ─── PROFILE / STATS TAB ───
+function ProfileTab({ user, allLeads }: { user: any; allLeads: any[] }) {
+  const myLeads = allLeads.filter((l: any) => l.assigned_to === user?.id);
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayKnocks = myLeads.filter((l: any) => l.knocked_at?.startsWith(todayStr)).length;
+
+  const statusBreakdown = STATUSES.map((s) => ({
+    ...s,
+    count: myLeads.filter((l: any) => l.status === s.value).length,
+  })).filter(s => s.count > 0);
+
+  return (
+    <div className="p-4 space-y-4">
+      {/* User card */}
+      <Card>
+        <CardContent className="pt-5 pb-5 flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl font-bold">
+            {(user?.user_metadata?.display_name || user?.email || "?")[0].toUpperCase()}
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <MapPin className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground font-medium">
-              {allLeads.length === 0 ? "No leads yet" : "No leads match your search"}
-            </p>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              {allLeads.length === 0 ? "Use GPS or sync from admin to add addresses" : "Try a different filter or search"}
-            </p>
+          <div>
+            <p className="font-semibold text-foreground">{user?.user_metadata?.display_name || user?.email}</p>
+            <p className="text-xs text-muted-foreground">Sales Rep</p>
           </div>
-        ) : (
-          <div className="divide-y divide-border">
-            <p className="px-4 py-2 text-xs font-medium text-muted-foreground bg-muted/30">
-              {filtered.length} address{filtered.length !== 1 ? "es" : ""}
+        </CardContent>
+      </Card>
+
+      {/* Today's Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">{todayKnocks}</p>
+            <p className="text-[10px] text-muted-foreground font-medium mt-1">Today</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">{myLeads.length}</p>
+            <p className="text-[10px] text-muted-foreground font-medium mt-1">My Prospects</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">
+              {myLeads.filter((l: any) => l.status === "converted").length}
             </p>
-            {filtered.map((lead: any) => {
-              const status = STATUSES.find(s => s.value === lead.status) || STATUSES[0];
-              return (
-                <button
-                  key={lead.id}
-                  onClick={() => { setSelectedLead(lead); setNotes(lead.notes || ""); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-muted/30 active:bg-muted/50 transition-colors"
-                >
-                  <MapPin className="h-4 w-4 text-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{lead.address}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {[lead.city, lead.state, lead.zip].filter(Boolean).join(", ")}
-                    </p>
-                  </div>
-                  <Badge className={`${status.color} text-[10px] border-0 shrink-0`}>{status.label}</Badge>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                </button>
-              );
-            })}
-          </div>
-        )}
+            <p className="text-[10px] text-muted-foreground font-medium mt-1">Converted</p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Status breakdown */}
+      {statusBreakdown.length > 0 && (
+        <Card>
+          <CardContent className="pt-4 pb-2">
+            <p className="text-sm font-semibold text-foreground mb-3">My Status Breakdown</p>
+            <div className="space-y-2">
+              {statusBreakdown.map((s) => (
+                <div key={s.value} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <Badge className={`${s.color} text-[10px] border-0`}>{s.label}</Badge>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground">{s.count}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
