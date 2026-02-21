@@ -60,20 +60,20 @@ export default function MainDashboardPage() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
 
-  // Check actual DB role (includes "sales" which isn't in typed userRole)
-  const { data: dbRole } = useQuery({
-    queryKey: ["user-db-role", currentOrg?.id, user?.id],
+  // Check ALL memberships to detect sales role across orgs
+  const { data: salesMembership, isLoading: roleLoading } = useQuery({
+    queryKey: ["user-all-roles", user?.id],
     queryFn: async () => {
-      if (!currentOrg || !user) return null;
+      if (!user) return null;
       const { data } = await supabase
         .from("team_members")
-        .select("role")
-        .eq("org_id", currentOrg.id)
-        .eq("user_id", user.id)
-        .single();
-      return data?.role || null;
+        .select("role, org_id")
+        .eq("user_id", user.id);
+      // Find any membership with "sales" role
+      const salesEntry = data?.find((m: any) => m.role === "sales");
+      return salesEntry || null;
     },
-    enabled: !!currentOrg && !!user,
+    enabled: !!user,
   });
 
 
@@ -149,18 +149,18 @@ export default function MainDashboardPage() {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [leadsData]);
 
-  // Sales role → redirect to Sales Dashboard
-  if (dbRole === "sales") {
-    return <Navigate to="/knock" replace />;
-  }
-
-  // Wait for both role check and stats to load
-  if (isLoading || (!!currentOrg && !!user && dbRole === undefined)) {
+  // Wait for role check to complete before rendering
+  if (isLoading || (!!user && roleLoading)) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
+  }
+
+  // Sales role detected on any org → redirect to Sales PWA
+  if (salesMembership) {
+    return <Navigate to="/knock" replace />;
   }
 
   const s = stats || { totalBookings: 0, booked: 0, aiCalls: 0, clientProfiles: 0, latestBrandScore: null };

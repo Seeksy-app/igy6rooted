@@ -47,7 +47,7 @@ type Tab = "leads" | "new" | "profile";
 
 export default function KnockPage() {
   const { user } = useAuth();
-  const { currentOrg } = useOrg();
+  const { currentOrg, orgs, setCurrentOrg } = useOrg();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("leads");
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -65,6 +65,23 @@ export default function KnockPage() {
   const [newNotes, setNewNotes] = useState("");
   const [newPropertyType, setNewPropertyType] = useState("residential");
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Auto-switch to the org where user has "sales" role
+  useEffect(() => {
+    if (!user || !orgs.length) return;
+    const findSalesOrg = async () => {
+      const { data } = await supabase
+        .from("team_members")
+        .select("org_id, role")
+        .eq("user_id", user.id);
+      const salesEntry = data?.find((m: any) => m.role === "sales");
+      if (salesEntry && currentOrg?.id !== salesEntry.org_id) {
+        const salesOrg = orgs.find((o) => o.id === salesEntry.org_id);
+        if (salesOrg) setCurrentOrg(salesOrg);
+      }
+    };
+    findSalesOrg();
+  }, [user, orgs, currentOrg?.id]);
 
   useEffect(() => {
     supabase.functions.invoke("mapbox-token").then(({ data }) => {
