@@ -20,6 +20,7 @@ import AboutPage from "@/pages/public/AboutPage";
 import ServicesPage from "@/pages/public/ServicesPage";
 import ContactPage from "@/pages/public/ContactPage";
 import ReferralLandingPage from "@/pages/public/ReferralLandingPage";
+import ArticlePage from "@/pages/public/ArticlePage";
 import {
   TreeRemovalPage,
   TreeTrimmingPage,
@@ -178,6 +179,7 @@ function AppRoutes() {
       <Route path="/services/land-clearing" element={<PublicLayout><LandClearingPage /></PublicLayout>} />
       <Route path="/services/lot-clearing" element={<PublicLayout><LotClearingPage /></PublicLayout>} />
       <Route path="/services/brush-removal" element={<PublicLayout><BrushRemovalPage /></PublicLayout>} />
+      <Route path="/articles/:slug" element={<PublicLayout><ArticlePage /></PublicLayout>} />
 
       {/* Auth routes */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />

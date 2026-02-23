@@ -1500,6 +1500,7 @@ export type Database = {
           og_image_url: string | null
           og_title: string | null
           org_id: string
+          page_content: Json | null
           page_name: string
           robots: string
           route_path: string
@@ -1525,6 +1526,7 @@ export type Database = {
           og_image_url?: string | null
           og_title?: string | null
           org_id: string
+          page_content?: Json | null
           page_name: string
           robots?: string
           route_path: string
@@ -1550,6 +1552,7 @@ export type Database = {
           og_image_url?: string | null
           og_title?: string | null
           org_id?: string
+          page_content?: Json | null
           page_name?: string
           robots?: string
           route_path?: string

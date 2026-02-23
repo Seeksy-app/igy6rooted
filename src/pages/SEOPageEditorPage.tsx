@@ -35,6 +35,7 @@ interface SeoForm {
   twitter_image_url: string;
   twitter_image_alt: string;
   status: string;
+  page_content: string;
 }
 
 const defaultForm: SeoForm = {
@@ -55,6 +56,7 @@ const defaultForm: SeoForm = {
   twitter_image_url: "",
   twitter_image_alt: "",
   status: "draft",
+  page_content: "",
 };
 
 function computeSeoScore(form: SeoForm): { score: number; checks: { label: string; status: "pass" | "warn" | "fail"; detail: string }[] } {
@@ -178,6 +180,7 @@ export default function SEOPageEditorPage() {
         twitter_image_url: existing.twitter_image_url || "",
         twitter_image_alt: existing.twitter_image_alt || "",
         status: existing.status || "draft",
+        page_content: existing.page_content ? JSON.stringify(existing.page_content, null, 2) : "",
       });
     }
   }, [existing]);
@@ -189,9 +192,20 @@ export default function SEOPageEditorPage() {
       if (!currentOrg) throw new Error("No org");
       if (!form.route_path || !form.page_name) throw new Error("Route path and page name are required");
 
+      let parsedContent = null;
+      if (form.page_content.trim()) {
+        try {
+          parsedContent = JSON.parse(form.page_content);
+        } catch {
+          throw new Error("Page Content JSON is invalid. Please fix before saving.");
+        }
+      }
+
+      const { page_content, ...rest } = form;
       const payload = {
         org_id: currentOrg.id,
-        ...form,
+        ...rest,
+        page_content: parsedContent,
         seo_score: score,
       };
 
@@ -333,6 +347,28 @@ export default function SEOPageEditorPage() {
                   <Label>H1 Override</Label>
                   <Input value={form.h1_override} onChange={(e) => update("h1_override", e.target.value)} placeholder="Main heading for the page" />
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Page Content JSON */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Page Content (JSON)</CardTitle>
+                <CardDescription>
+                  Paste article body as JSON. Expected format: <code className="text-xs bg-muted px-1 py-0.5 rounded">{"{ \"sections\": [{ \"heading\": \"...\", \"content\": \"...\" }], \"benefits\": [\"...\"], \"cta\": { \"text\": \"...\", \"url\": \"...\" } }"}</code>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  value={form.page_content}
+                  onChange={(e) => update("page_content", e.target.value)}
+                  placeholder='{\n  "sections": [\n    { "heading": "Why Choose Us", "content": "..." }\n  ],\n  "benefits": ["Licensed & Insured", "Free Estimates"],\n  "cta": { "text": "Get a Free Quote", "url": "/contact" }\n}'
+                  className="min-h-[200px] font-mono text-sm"
+                />
+                {form.page_content.trim() && (() => {
+                  try { JSON.parse(form.page_content); return <p className="text-xs text-emerald-600 mt-1">✓ Valid JSON</p>; }
+                  catch { return <p className="text-xs text-destructive mt-1">✗ Invalid JSON — fix before saving</p>; }
+                })()}
               </CardContent>
             </Card>
           </div>
