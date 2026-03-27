@@ -58,14 +58,10 @@ export default function HomePage() {
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              Stump Grinding &
-              <br />
-              <span className="text-[hsl(82,50%,65%)]">Tree Service</span>
-              <br />
-              in Niceville, FL
+              {SITE_CONFIG.hero.title}
             </h1>
             <p className="text-lg sm:text-xl text-white/80 mb-8 max-w-lg">
-              Clean. Fast. No damage. We bring military precision and respect for your yard to every job across Northwest Florida.
+              {SITE_CONFIG.hero.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
@@ -122,15 +118,14 @@ export default function HomePage() {
                 About IGY6 Rooted
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(82,25%,20%)] mt-2 mb-6">
-                Proudly Serving Northwest Florida — One Tree at a Time
+                {SITE_CONFIG.about.title}
               </h2>
               <p className="text-[hsl(82,10%,40%)] mb-4 leading-relaxed">
                 Since founding IGY6 Rooted in April 2024, we've been helping homeowners and businesses across
                 the Destin–Fort Walton Beach area maintain healthy, safe trees on their properties.
               </p>
               <p className="text-[hsl(82,10%,40%)] mb-6 leading-relaxed">
-                Craig Orner — a Pavements & Construction Equipment Specialist in the U.S. Air Force Reserve — brings
-                decades of experience and military precision to every job. No gimmicks. Just professionalism.
+                {SITE_CONFIG.about.body2}
               </p>
               <div className="space-y-3 mb-8">
                 {["Respect for your yard — always", "Complete cleanup included", "Honest assessments, fair pricing", "DigSafe utility checks on every job"].map((item) => (
