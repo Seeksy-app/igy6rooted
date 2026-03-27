@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { SITE_CONFIG } from "@/config/site.config";
 import { Helmet } from "react-helmet-async";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
 
@@ -30,7 +31,7 @@ export default function ContactPage() {
         <title>Contact IGY6 Rooted | Free Tree Service Estimate in Niceville, FL</title>
         <meta
           name="description"
-          content="Contact IGY6 Rooted for a free tree service estimate in Northwest Florida. Call (518) 265-0275. Open 7 days a week, 7am-9pm. Emergency services available."
+          content="Contact IGY6 Rooted for a free tree service estimate in Northwest Florida. Call {SITE_CONFIG.business.phone}. Open 7 days a week, 7am-9pm. Emergency services available."
         />
       </Helmet>
 
@@ -75,19 +76,19 @@ export default function ContactPage() {
                     <Phone className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[hsl(82,25%,20%)]">(518) 265-0275</p>
+                    <p className="font-semibold text-[hsl(82,25%,20%)]">{SITE_CONFIG.business.phone}</p>
                     <p className="text-sm text-[hsl(82,10%,50%)]">Call us anytime during business hours</p>
                   </div>
                 </a>
                 <a
-                  href="mailto:CO@IGY6Rooted.com"
+                  href="mailto:{SITE_CONFIG.business.email}"
                   className="flex items-center gap-4 p-5 rounded-xl bg-[hsl(82,10%,96%)] hover:bg-[hsl(82,10%,93%)] transition-colors"
                 >
                   <div className="w-12 h-12 rounded-xl bg-[hsl(82,25%,30%)] flex items-center justify-center">
                     <Mail className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[hsl(82,25%,20%)]">CO@IGY6Rooted.com</p>
+                    <p className="font-semibold text-[hsl(82,25%,20%)]">{SITE_CONFIG.business.email}</p>
                     <p className="text-sm text-[hsl(82,10%,50%)]">Send us a message anytime</p>
                   </div>
                 </a>
@@ -105,7 +106,7 @@ export default function ContactPage() {
                     <Clock className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[hsl(82,25%,20%)]">Mon–Sun: 7:00 AM – 9:00 PM CST</p>
+                    <p className="font-semibold text-[hsl(82,25%,20%)]">{SITE_CONFIG.business.hours}</p>
                     <p className="text-sm text-[hsl(82,10%,50%)]">Emergency services available outside hours</p>
                   </div>
                 </div>

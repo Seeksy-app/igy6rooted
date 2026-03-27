@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Shield, CheckCircle, Star, Phone, Award, Heart } from "lucide-react";
 import craigPhoto from "@/assets/craig-orner.avif";
+import { SITE_CONFIG } from "@/config/site.config";
 
 export default function AboutPage() {
   return (
@@ -154,7 +155,7 @@ export default function AboutPage() {
             Call us for a free, no-obligation estimate. We'll assess your situation and give you our honest recommendation.
           </p>
           <a
-            href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
+            href="{SITE_CONFIG.business.jobberUrl}"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-white text-[hsl(82,25%,25%)] px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/90 transition-colors"
