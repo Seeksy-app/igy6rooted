@@ -2,59 +2,9 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Phone, Shield, Star, TreePine, Clock, CheckCircle, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-tree-service.jpg";
+import { SITE_CONFIG } from "@/config/site.config";
 
-const services = [
-  {
-    name: "Tree Removal",
-    href: "/services/tree-removal",
-    desc: "Safe, efficient removal of hazardous or unwanted trees from your property.",
-  },
-  {
-    name: "Tree Trimming",
-    href: "/services/tree-trimming",
-    desc: "Professional shaping and overgrowth management for healthy, attractive trees.",
-  },
-  {
-    name: "Tree Pruning",
-    href: "/services/tree-pruning",
-    desc: "Targeted removal of dead or diseased branches for improved tree health.",
-  },
-  {
-    name: "Stump Grinding",
-    href: "/services/stump-grinding",
-    desc: "Complete stump removal below ground level for a clean, usable yard.",
-  },
-  {
-    name: "Emergency Tree Removal",
-    href: "/services/emergency-tree-removal",
-    desc: "24/7 response for storm damage, fallen trees, and urgent safety hazards.",
-  },
-  {
-    name: "Debris Removal",
-    href: "/services/debris-removal",
-    desc: "Full cleanup and hauling of branches, limbs, and storm debris.",
-  },
-  {
-    name: "Landscaping",
-    href: "/services/landscaping",
-    desc: "Design and installation to transform your outdoor spaces.",
-  },
-  {
-    name: "Land Clearing",
-    href: "/services/land-clearing",
-    desc: "Prepare your property for construction or development projects.",
-  },
-  {
-    name: "Lot Clearing",
-    href: "/services/lot-clearing",
-    desc: "Complete lot preparation including vegetation and debris removal.",
-  },
-  {
-    name: "Brush Removal",
-    href: "/services/brush-removal",
-    desc: "Clear overgrown brush and vegetation for a safer, cleaner property.",
-  },
-];
+const services = SITE_CONFIG.services;
 
 const testimonials = [
   {
