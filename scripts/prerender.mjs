@@ -181,19 +181,28 @@ function injectMeta(html, route, meta) {
     <meta name="description" content="${escapeHtml(meta.description)}" />
     <link rel="canonical" href="${canonical}" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="IGY6 Rooted" />
     <meta property="og:url" content="${canonical}" />
     <meta property="og:title" content="${escapeHtml(meta.title)}" />
     <meta property="og:description" content="${escapeHtml(meta.description)}" />
     <meta property="og:image" content="${ogImageAbs}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeHtml(meta.title)}" />
     <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
     <meta name="twitter:image" content="${ogImageAbs}" />
   `.trim();
 
-  // Replace the placeholder <title> in index.html. The Vite-built index.html
-  // contains a default <title> tag we can swap, plus we append our extra meta.
-  let out = html.replace(/<title>[^<]*<\/title>/, "");
+  // Strip the default index.html SEO tags so the route-specific ones are
+  // the single source of truth in the pre-rendered HTML.
+  let out = html
+    .replace(/<title>[^<]*<\/title>/gi, "")
+    .replace(/<meta\s+name=["']description["'][^>]*>/gi, "")
+    .replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "")
+    .replace(/<meta\s+property=["']og:[^"']+["'][^>]*>/gi, "")
+    .replace(/<meta\s+name=["']twitter:[^"']+["'][^>]*>/gi, "");
+
   out = out.replace("</head>", `${headTags}\n  </head>`);
   return out;
 }
