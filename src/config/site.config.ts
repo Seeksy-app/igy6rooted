@@ -8,8 +8,8 @@ export const SITE_CONFIG = {
     jobberUrl: "https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new",
   },
   hero: {
-    title: "Stump Grinding and Tree Service in Niceville, FL",
-    subtitle: "Clean. Fast. No damage. Military precision on every job.",
+    title: "Tree Service, Lawn Care & Landscaping in Niceville, Fort Walton Beach, and Surrounding Areas",
+    subtitle: "Tree trimming, removals, lawn care, and landscaping to keep your property clean, healthy, and summer-ready.",
     cta1: "Get Free Estimate",
     cta2: "Our Services",
   },
