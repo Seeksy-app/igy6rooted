@@ -488,3 +488,87 @@ export function BrushRemovalPage() {
     />
   );
 }
+
+export function LawnCarePage() {
+  return (
+    <ServicePageTemplate
+      title="Lawn Care & Mowing"
+      metaTitle="Lawn Care & Mowing Niceville & Destin FL | IGY6 Rooted"
+      metaDescription="Weekly mowing, edging, fertilization, and full lawn care across Niceville, Destin & Fort Walton Beach. Healthier grass, sharper edges. (518) 265-0275."
+      ogImage="/og/lawn-care.jpg"
+      serviceKeyword="Lawn Care"
+      heroText="Healthier grass, sharper edges, and a yard you'll actually want to walk barefoot in — week after week."
+      heroImage={heroOption4}
+      heroImageAlt="Lush green Florida lawn with manicured edges in front of a coastal home"
+      midImage={heroMain}
+      midImageAlt="Striped lawn after professional mowing service in Northwest Florida"
+      midImageCaption="A consistent mow schedule does more for your lawn than any single fertilizer treatment."
+      sections={[
+        {
+          heading: "Lawn Care That Actually Shows Up",
+          content:
+            "The hardest part of lawn care in Northwest Florida isn't the work itself — it's finding a crew that consistently shows up on the day they said they would, cuts at the right height for the season, and edges every walkway and bed without being asked. That's the bar we hold ourselves to in Niceville, Destin, Fort Walton Beach, Bluewater Bay, and Crestview. You shouldn't have to text a vendor to ask if they're coming this week.\n\nOur weekly and bi-weekly lawn care plans cover mowing at the proper height for your grass type (St. Augustine, Bermuda, Zoysia, or Centipede), crisp edging along driveways, walkways, and beds, line trimming around trees and structures, and a full blow-off of every hard surface before we leave. That's the standard visit. Add-on services like fertilization, weed control, and seasonal cleanups are available as needed.",
+        },
+        {
+          heading: "What Healthy Florida Grass Needs",
+          content:
+            "Most lawn problems in our area trace back to one of three things: cutting too short, watering wrong, or skipping the dormant-season prep. We mow at the height your specific grass type wants (3.5–4\" for St. Augustine, 1–2\" for Bermuda) so the lawn shades its own roots and chokes out crabgrass and dollarweed naturally. We rotate cut direction visit-to-visit so the lawn doesn't develop ruts or grain, and we keep blades sharp so the grass tips heal cleanly instead of browning.\n\nFor irrigation and fertilization, we'll give you straight advice during the first visit. If you're already happy with your irrigation setup, we won't push services you don't need. If your sprinkler heads are spraying the driveway or your lawn is hungry, we'll point it out and either handle it or refer you to someone who can.",
+        },
+        {
+          heading: "Built To Pair With Tree & Yard Work",
+          content:
+            "A big advantage of having one veteran-owned crew handling both lawn and tree work is coordination. When we know we're scheduling a {' '}<a className=\"underline hover:no-underline\" href=\"/services/tree-trimming\">tree trimming</a> visit, we time it so the cleanup wraps before the next mow. When we install new {' '}<a className=\"underline hover:no-underline\" href=\"/services/landscaping\">landscaping</a> beds, we adjust the mow line right away so nothing gets accidentally scalped. And after a {' '}<a className=\"underline hover:no-underline\" href=\"/services/stump-grinding\">stump grinding</a> job, we'll backfill and reseed the area so it blends in with the rest of the lawn within a season.\n\nMost customers start with a one-time visit and a free property walkthrough, then move to recurring service if it fits. No long contracts, no setup fees — just a clean, reliable schedule.",
+        },
+      ]}
+      benefits={defaultBenefits}
+      relatedServices={[
+        { name: "Landscaping", href: "/services/landscaping" },
+        { name: "Property Maintenance", href: "/services/property-maintenance" },
+        { name: "Tree Trimming", href: "/services/tree-trimming" },
+        { name: "Brush Removal", href: "/services/brush-removal" },
+      ]}
+    />
+  );
+}
+
+export function PropertyMaintenancePage() {
+  return (
+    <ServicePageTemplate
+      title="Property Maintenance"
+      metaTitle="Property Maintenance Niceville & Destin FL | IGY6 Rooted"
+      metaDescription="Recurring property maintenance across Niceville, Destin & Crestview: mowing, trimming, debris cleanup, and seasonal yard care on one schedule. (518) 265-0275."
+      ogImage="/og/property-maintenance.jpg"
+      serviceKeyword="Property Maintenance"
+      heroText="One veteran-owned crew, one schedule, one invoice — keeping your property dialed in year-round."
+      heroImage={heroOption4}
+      heroImageAlt="Well-maintained Florida residential property with healthy lawn and trimmed trees"
+      midImage={serviceSecondary}
+      midImageAlt="Manicured residential lawn and clean beds after recurring property maintenance"
+      midImageCaption="Recurring service is the cheapest way to keep a property looking its best year-round."
+      sections={[
+        {
+          heading: "Recurring Property Care, Without The Vendor Juggle",
+          content:
+            "Most homeowners along the Emerald Coast end up using three or four different vendors to keep a property looking the way they want — one for mowing, one for trees, one for cleanups after storms, one for the random projects nobody else handles. Our property maintenance program rolls all of that into a single recurring schedule with one accountable crew. Niceville, Destin, Fort Walton Beach, Bluewater Bay, Valparaiso, and Crestview all included.\n\nA typical maintenance plan includes weekly or bi-weekly {' '}<a className=\"underline hover:no-underline\" href=\"/services/lawn-care\">lawn care</a>, quarterly {' '}<a className=\"underline hover:no-underline\" href=\"/services/tree-trimming\">tree trimming</a> as needed, seasonal {' '}<a className=\"underline hover:no-underline\" href=\"/services/debris-removal\">debris removal</a>, and on-call response for storm cleanup or one-off projects. You get one consistent crew that knows your property, one invoice, and one phone number to call.",
+        },
+        {
+          heading: "Built For Owners Who Don't Live On-Property Full Time",
+          content:
+            "We work with a lot of seasonal residents, second-home owners, and out-of-state landlords across Northwest Florida. Property maintenance for those owners isn't just about appearance — it's about catching small issues before they become expensive ones. A leaning tree, an irrigation leak, a brewing erosion problem, an overgrown perimeter that's becoming a fire risk: these are all things we identify on regular visits and flag immediately, with photos, so you can decide what to do without flying back.\n\nFor HOA-governed properties and rentals, we can also handle compliance-focused care: keeping the front yard within deed restrictions, managing the curb-appeal-critical zones (mailboxes, walkways, entry beds), and quickly addressing any HOA letters before fines stack up.",
+        },
+        {
+          heading: "Customizable, Cancel Any Time",
+          content:
+            "There's no long contract. Most maintenance customers start month-to-month, see how the cadence works, then settle into a rhythm. Add or pause services as your property's needs change through the seasons. We bill monthly for predictability, and we provide a clear scope of work so you always know exactly what's included.\n\nReady to stop chasing vendors? Call (518) 265-0275 or request a free walkthrough. We'll come look at the property, listen to what's been frustrating you, and put together a plan that's actually maintainable.",
+        },
+      ]}
+      benefits={defaultBenefits}
+      relatedServices={[
+        { name: "Lawn Care & Mowing", href: "/services/lawn-care" },
+        { name: "Tree Trimming", href: "/services/tree-trimming" },
+        { name: "Debris Removal", href: "/services/debris-removal" },
+        { name: "Landscaping", href: "/services/landscaping" },
+      ]}
+    />
+  );
+}
