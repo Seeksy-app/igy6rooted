@@ -32,21 +32,24 @@ export function PublicHeader() {
     closeTimer.current = setTimeout(() => setServicesOpen(false), 180);
   };
 
-  const scrollToReviews = (e: React.MouseEvent) => {
+  const scrollToSection = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     setMobileOpen(false);
+    setServicesOpen(false);
     const doScroll = () => {
-      const el = document.getElementById("reviews");
+      const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     };
     if (location.pathname !== "/") {
-      navigate("/#reviews");
+      navigate(`/#${id}`);
       // wait for homepage to mount
       setTimeout(doScroll, 350);
     } else {
       doScroll();
     }
   };
+  const scrollToReviews = scrollToSection("reviews");
+  const scrollToServices = scrollToSection("services");
 
   // Close on route change
   useEffect(() => {
