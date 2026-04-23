@@ -318,56 +318,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Services grid */}
-      <section className="bg-[hsl(82,10%,96%)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center mb-12">
-            <span className="text-sm font-semibold text-[hsl(82,40%,40%)] uppercase tracking-wider">
-              What We Do
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(82,25%,20%)] mt-2">
-              Our Tree & Yard Services
-            </h2>
-            <p className="text-[hsl(82,10%,45%)] mt-3 max-w-2xl mx-auto">
-              From routine trimming to emergency storm response, we handle every aspect of tree care
-              for residential and commercial properties across Okaloosa, Walton, Santa Rosa, and Escambia counties.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service) => (
-              <Link
-                key={service.href}
-                to={service.href}
-                className="group bg-white rounded-xl overflow-hidden border border-[hsl(82,15%,90%)] hover:border-[hsl(82,30%,50%)] hover:shadow-xl transition-all"
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-[hsl(82,15%,93%)]">
-                  <img
-                    src={service.image}
-                    alt={service.name}
-                    width={800}
-                    height={600}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-2 mb-1">
-                    <TreePine className="h-4 w-4 text-[hsl(82,30%,40%)]" />
-                    <h3 className="font-semibold text-[hsl(82,25%,20%)] group-hover:text-[hsl(82,30%,35%)] transition-colors">
-                      {service.name}
-                    </h3>
-                  </div>
-                  <p className="text-sm text-[hsl(82,10%,50%)]">{service.desc}</p>
-                  <div className="flex items-center gap-1 mt-3 text-sm font-semibold text-[hsl(82,40%,35%)] opacity-0 group-hover:opacity-100 transition-opacity">
-                    Learn more <ArrowRight className="h-3.5 w-3.5" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
       <section id="reviews" className="bg-white scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
