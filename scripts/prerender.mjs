@@ -64,24 +64,9 @@ const PUBLIC_ROUTES = [
 ];
 
 async function setupDomGlobals() {
-  const dom = new JSDOM("<!doctype html><html><head></head><body></body></html>", {
-    url: "https://igy6rooted.com",
-    pretendToBeVisual: true,
-  });
-  globalThis.window = dom.window;
-  globalThis.document = dom.window.document;
-  globalThis.navigator = dom.window.navigator;
-  globalThis.HTMLElement = dom.window.HTMLElement;
-  globalThis.Element = dom.window.Element;
-  globalThis.Node = dom.window.Node;
-  globalThis.localStorage = dom.window.localStorage;
-  globalThis.sessionStorage = dom.window.sessionStorage;
-  // Stub fetch so any accidental network call during render fails fast
-  // instead of hanging the build.
-  globalThis.fetch = async () => {
-    throw new Error("fetch() called during prerender — skipping data fetch");
-  };
-  return dom;
+  // No DOM globals needed — we inject static head tags as strings.
+  // Kept as a stub for future renderToString expansion.
+  return null;
 }
 
 async function loadAppEntry() {
