@@ -46,7 +46,12 @@ export function ServicePageTemplate({
   // Insert mid image roughly halfway through sections
   const midIndex = Math.max(1, Math.floor(sections.length / 2));
 
-  const serviceJsonLd = {
+  // AggregateRating scaffold — gated until live Google Reviews data is wired.
+  // To enable: flip ENABLE_AGGREGATE_RATING = true and source values from the
+  // google-reviews edge function. Never enable with placeholder data.
+  const ENABLE_AGGREGATE_RATING = false;
+
+  const serviceJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: serviceKeyword ?? title,
@@ -68,6 +73,16 @@ export function ServicePageTemplate({
     ],
     description: metaDescription,
   };
+
+  if (ENABLE_AGGREGATE_RATING) {
+    serviceJsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: "0.0",  // populate from google-reviews edge function
+      reviewCount: 0,      // populate from google-reviews edge function
+      bestRating: "5",
+      worstRating: "1",
+    };
+  }
 
   return (
     <>
