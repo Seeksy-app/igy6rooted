@@ -1,10 +1,23 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Phone, Shield, Star, TreePine, Clock, CheckCircle, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-tree-service.jpg";
+import heroOption1 from "@/assets/hero-option-1.jpg";
+import heroOption2 from "@/assets/hero-option-2.jpg";
+import heroOption3 from "@/assets/hero-option-3.jpg";
+import heroOption4 from "@/assets/hero-option-4.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
 
 const services = SITE_CONFIG.services;
+
+const heroImages = [
+  { src: heroImage, alt: "Beautifully manicured residential lawn and tree care in Northwest Florida" },
+  { src: heroOption1, alt: "Cozy Florida ranch home with healthy oak trees and a freshly mowed lawn" },
+  { src: heroOption2, alt: "Lush green backyard with mature pine and oak trees in Northwest Florida" },
+  { src: heroOption3, alt: "Striped manicured lawn next to a healthy oak tree at a residential home" },
+  { src: heroOption4, alt: "White coastal-style Florida home with palms and crisp green hedges" },
+];
 
 const testimonials = [
   {
