@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { TreePine, Phone, ArrowRight } from "lucide-react";
+import { TreePine, ArrowRight } from "lucide-react";
 
 const services = [
   {

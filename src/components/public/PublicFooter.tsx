@@ -33,14 +33,23 @@ export function PublicFooter() {
           <p className="text-white/80 mb-6 max-w-xl mx-auto">
             Call us today for a no-obligation assessment of your tree service needs.
           </p>
-          <a
-            href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-white text-[hsl(82,25%,25%)] px-8 py-3.5 rounded-lg font-bold text-lg hover:bg-white/90 transition-colors"
-          >
-            Get Free Estimate
-          </a>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <a
+              href="tel:+15182650275"
+              className="inline-flex items-center gap-2 bg-white text-[hsl(82,25%,25%)] px-8 py-3.5 rounded-lg font-bold text-lg hover:bg-white/90 transition-colors"
+            >
+              <Phone className="h-5 w-5" />
+              (518) 265-0275
+            </a>
+            <a
+              href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[hsl(82,25%,18%)] text-white border-2 border-white/20 px-8 py-3.5 rounded-lg font-bold text-lg hover:bg-[hsl(82,25%,14%)] transition-colors"
+            >
+              Get Free Estimate
+            </a>
+          </div>
         </div>
       </div>
 
