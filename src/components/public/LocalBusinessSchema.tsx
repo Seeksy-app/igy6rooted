@@ -1,7 +1,22 @@
 import { Helmet } from "react-helmet-async";
 
+/**
+ * AggregateRating SCAFFOLD — gated off until live Google Reviews payload is wired.
+ * To enable: set ENABLE_AGGREGATE_RATING = true and supply real values from the
+ * google-reviews edge function (ratingValue, reviewCount). DO NOT enable with
+ * placeholder data — Google penalizes fake review markup.
+ */
+const ENABLE_AGGREGATE_RATING = false;
+const aggregateRatingScaffold = {
+  "@type": "AggregateRating",
+  ratingValue: "0.0",   // populate from google-reviews edge function
+  reviewCount: 0,       // populate from google-reviews edge function
+  bestRating: "5",
+  worstRating: "1",
+};
+
 export function LocalBusinessSchema() {
-  const schema = {
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: "IGY6 Rooted Stump Grinding & Tree Service",
@@ -57,6 +72,10 @@ export function LocalBusinessSchema() {
       ],
     },
   };
+
+  if (ENABLE_AGGREGATE_RATING) {
+    schema.aggregateRating = aggregateRatingScaffold;
+  }
 
   return (
     <Helmet>
