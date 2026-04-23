@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -21,6 +21,7 @@ export function PublicHeader() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const openServices = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -29,6 +30,22 @@ export function PublicHeader() {
   const scheduleCloseServices = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setServicesOpen(false), 180);
+  };
+
+  const scrollToReviews = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMobileOpen(false);
+    const doScroll = () => {
+      const el = document.getElementById("reviews");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    if (location.pathname !== "/") {
+      navigate("/#reviews");
+      // wait for homepage to mount
+      setTimeout(doScroll, 350);
+    } else {
+      doScroll();
+    }
   };
 
   // Close on route change
