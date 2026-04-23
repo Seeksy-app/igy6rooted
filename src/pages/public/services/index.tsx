@@ -248,44 +248,58 @@ export function EmergencyTreeRemovalPage() {
 export function DebrisRemovalPage() {
   return (
     <ServicePageTemplate
-      title="Debris Removal"
-      metaTitle="Debris Removal in Niceville, FL | IGY6 Rooted"
-      metaDescription="Storm debris and yard waste removal across Northwest Florida. Branches, limbs, full cleanups, hauled away fast. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
-      serviceKeyword="Debris Removal"
-      heroText="Complete cleanup and hauling of branches, limbs, and storm debris from your property."
+      title="Debris Removal & Storm Cleanup"
+      metaTitle="Storm Debris Removal Niceville, Destin & Fort Walton FL"
+      metaDescription="Fast yard debris and storm cleanup across Niceville, Destin, Fort Walton Beach & Crestview. Branch hauling, full property cleanup, post-hurricane response. Call (518) 265-0275."
+      ogImage="/og/debris-removal.jpg"
+      serviceKeyword="Debris Removal & Storm Cleanup"
+      heroText="Branches down, limbs piled up, post-storm mess across the yard? We haul it all — fast, complete, and on the schedule the city can't match."
       heroImage={heroOption2}
       heroImageAlt="Northwest Florida residential property with mature trees and clean lawn after debris cleanup"
       midImage={heroOption1}
-      midImageAlt="Tidy Florida home with mature oaks and clean front yard after professional debris removal"
+      midImageAlt="Tidy Niceville home with mature oaks and clean front yard after professional debris removal"
       midImageCaption="A clean property after debris removal — exactly how every job should end."
       sections={[
         {
-          heading: "Complete Property Cleanup, Done Right",
+          heading: "Storm Debris & Yard Waste Removal — Done in One Visit",
           content:
-            "There's a common scenario in Northwest Florida that every homeowner recognizes: a storm rolls through, the wind dies down, and suddenly the yard is unrecognizable. Branches, leaves, palm fronds, snapped limbs, and small downed trees cover the lawn, the driveway, and the flower beds. Even a moderate thunderstorm can drop hundreds of pounds of organic material on an average residential lot. A real tropical system can produce more debris than a typical pickup truck can haul in a dozen trips.\n\nDebris removal is one of those services that sounds simple until you actually try to do it yourself. Branches are heavier than they look, leaf piles compact into wet, dense mats, and most municipalities have strict rules about what can go in yard waste containers and how it must be cut and bundled. We bring the right equipment — chippers, dump trailers, loaders for larger jobs — to handle debris of any size, from small post-storm branch piles to entire trees worth of material.",
+            "There's a common scenario along the Emerald Coast that every Niceville, Destin, and Fort Walton Beach homeowner recognizes: a storm rolls through, the wind dies down, and suddenly the yard is unrecognizable. Branches, leaves, palm fronds, snapped limbs, and small downed trees cover the lawn, the driveway, and the flower beds. Even a moderate Florida thunderstorm can drop hundreds of pounds of organic material on an average residential lot. A real tropical system or hurricane can produce more debris than a typical pickup truck can haul in a dozen trips.\n\nDebris removal is one of those services that sounds simple until you actually try to do it yourself. Branches are heavier than they look, leaf piles compact into wet, dense mats, and Okaloosa County, Walton County, and the City of Destin all have strict rules about what can go in yard waste containers and how it must be cut and bundled. We bring the right equipment — chippers, dump trailers, loaders for larger jobs — to handle debris of any size, from small post-storm branch piles to entire trees worth of material. One visit, one truck out, one clean property.",
         },
         {
-          heading: "When To Call For Debris Removal",
+          heading: "When To Call Us For Debris Removal",
           content:
-            "After a storm is the obvious case, but it's far from the only one. Property owners call us for debris removal after their own DIY tree work (a branch that came down harder than planned, a hedge trim that produced more material than expected), after construction or remodeling that left a yard full of cleared vegetation, after a long-vacant property changes hands and needs to be cleaned up before listing, and as part of routine seasonal cleanups for landlords, HOAs, and commercial property managers.\n\nWe also handle debris removal as a standalone service for customers who used another tree company that didn't complete the cleanup. That happens more often than people realize — a removal crew finishes the actual cutting, then leaves piles of brush and rounds for the homeowner to deal with. We're happy to come in behind another crew and finish the job properly.",
+            "After a storm is the obvious case, but it's far from the only one. Property owners across Northwest Florida call us for debris removal after their own DIY tree work (a branch that came down harder than planned, a hedge trim that produced more material than expected), after construction or remodeling that left a yard full of cleared vegetation, after a long-vacant property changes hands and needs to be cleaned up before listing, and as part of routine seasonal cleanups for landlords, HOAs, and commercial property managers in Bluewater Bay, Valparaiso, Crestview, and Navarre.\n\nWe also handle debris removal as a standalone service for customers who used another tree company that didn't complete the cleanup. That happens more often than people realize — a removal crew finishes the actual cutting, then leaves piles of brush and rounds for the homeowner to deal with. We're happy to come in behind another crew and finish the job properly. If you've already scheduled a tree job with us, complete debris cleanup is included by default — no extra trip, no extra invoice.",
         },
         {
-          heading: "Storm Damage Cleanup On The Emerald Coast",
+          heading: "Hurricane & Tropical Storm Cleanup On The Emerald Coast",
           content:
-            "Northwest Florida's storm season can leave your property covered in fallen branches, leaves, and tree debris for weeks if you wait on municipal pickup. Local yard waste collection typically runs slow after a major weather event — the sheer volume of debris across the county overwhelms normal pickup schedules, and your pile of branches at the curb can sit for a month before it's collected. We provide fast, efficient cleanup so you can get back to normal as quickly as possible, without waiting on the city or county.\n\nFor major storm cleanup, we can dispatch larger equipment and crews to handle multiple acres in a day. We chip what we can on-site (which dramatically reduces hauling volume and cost), load larger material directly into our trailers, and dispose of everything at proper municipal or commercial composting facilities. We do not dump debris on adjacent vacant lots, in the woods, or anywhere else it shouldn't be — every load is tracked from your property to a legitimate disposal site.",
+            "Northwest Florida's storm season can leave your property covered in fallen branches, leaves, and tree debris for weeks if you wait on municipal pickup. Local yard waste collection typically runs slow after a major weather event — the sheer volume of debris across Okaloosa, Walton, and Santa Rosa counties overwhelms normal pickup schedules, and your pile of branches at the curb can sit for a month before it's collected. We provide fast, efficient post-hurricane cleanup so you can get back to normal as quickly as possible, without waiting on the city or county.\n\nFor major storm cleanup, we can dispatch larger equipment and crews to handle multiple acres in a day. We chip what we can on-site (which dramatically reduces hauling volume and cost), load larger material directly into our trailers, and dispose of everything at proper municipal or commercial composting facilities. We do not dump debris on adjacent vacant lots, in the woods, or anywhere else it shouldn't be — every load is tracked from your property to a legitimate disposal site. If your insurance adjuster needs documentation of work performed and material hauled, we can provide written records on request.",
         },
         {
-          heading: "Pricing And What's Included",
+          heading: "What's Included In Every Debris Removal Visit",
           content:
-            "Debris removal pricing depends on volume, accessibility, and how much processing the material needs before it can be loaded. A small pile of clean branches in an accessible front yard is a quick, low-cost visit. An acre of post-hurricane mixed debris with full trees down across fences and outbuildings is a multi-day project with multiple crews and equipment. We give you an honest estimate after seeing the property, and we don't add surprise charges later.\n\nEvery debris removal job includes complete cleanup of the work area — raking, blowing off hardscape, and removing every bit of material we generated. If we cut something, we haul it. If we agreed to remove an existing pile, we remove all of it, not just the easy parts on top. By the time we leave, your property looks better than it did before the storm.",
+            "Every debris removal job we run is end-to-end. We rake the affected areas (not just the obvious piles), blow off your driveway, walkway, and patio, pick up small wood and bark fragments by hand where needed, and load every bit of material we generated into our trucks before we leave. If we cut something, we haul it. If we agreed to remove an existing pile, we remove all of it — not just the easy pieces on top.\n\nWe also handle the non-yard parts that often get ignored: cleaning out clogged gutters of pine needles after a heavy storm, raking leaves out of pool screens and equipment areas, and cleaning debris off flat roofs where it's safe to do so. Tell us what you need cleaned up and we'll scope it; the goal is for your property to look better when we leave than it did before the storm. For ongoing peace of mind, ask about pairing debris removal with regular {' '}<a className=\"underline hover:no-underline\" href=\"/services/tree-trimming\">tree trimming</a> visits — it's the cheapest insurance against the next storm.",
+        },
+        {
+          heading: "Pricing, Timing & How To Book",
+          content:
+            "Debris removal pricing depends on volume, accessibility, and how much processing the material needs before it can be loaded. A small pile of clean branches in an accessible Niceville front yard is a quick, low-cost visit — often under an hour on-site. An acre of post-hurricane mixed debris with full trees down across fences and outbuildings in Crestview is a multi-day project with multiple crews and equipment. We give you an honest estimate after seeing the property, and we don't add surprise charges later.\n\nFor non-emergency cleanups we typically schedule within 5-7 business days. For active storm response we triage by safety risk first and reach the worst situations within 24-48 hours when conditions allow. Call (518) 265-0275 for a free estimate, or use our online booking form. If your situation involves a fallen tree blocking access or threatening a structure, you actually want our {' '}<a className=\"underline hover:no-underline\" href=\"/services/emergency-tree-removal\">emergency tree removal</a> line — debris removal picks up where that work ends.",
         },
       ]}
-      benefits={defaultBenefits}
+      benefits={[
+        "Same- or next-week scheduling for non-emergencies",
+        "Hurricane response with extra crews on standby",
+        "Insurance-ready documentation on request",
+        "On-site chipping reduces cost",
+        "Disposal at licensed composting facilities only",
+        "Veteran-owned & fully insured",
+      ]}
       relatedServices={[
         { name: "Emergency Tree Removal", href: "/services/emergency-tree-removal" },
         { name: "Brush Removal", href: "/services/brush-removal" },
         { name: "Lot Clearing", href: "/services/lot-clearing" },
+        { name: "Tree Trimming", href: "/services/tree-trimming" },
+        { name: "Property Maintenance", href: "/services/property-maintenance" },
       ]}
     />
   );
