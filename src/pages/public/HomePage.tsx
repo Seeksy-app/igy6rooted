@@ -272,7 +272,7 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-white">
+      <section id="reviews" className="bg-white scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-12">
             <span className="text-sm font-semibold text-[hsl(82,40%,40%)] uppercase tracking-wider">

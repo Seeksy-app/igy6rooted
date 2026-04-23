@@ -141,6 +141,12 @@ export function PublicHeader() {
               </div>
 
               <Link
+                to="/#reviews"
+                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,93%)]"
+              >
+                Reviews
+              </Link>
+              <Link
                 to="/contact"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive("/contact")
@@ -208,6 +214,13 @@ export function PublicHeader() {
                   {s.name}
                 </Link>
               ))}
+              <Link
+                to="/#reviews"
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-3 rounded-lg text-sm font-medium text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,95%)]"
+              >
+                Reviews
+              </Link>
               <Link
                 to="/contact"
                 onClick={() => setMobileOpen(false)}
