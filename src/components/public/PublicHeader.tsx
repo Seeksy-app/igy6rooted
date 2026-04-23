@@ -99,11 +99,12 @@ export function PublicHeader() {
               {/* Services dropdown */}
               <div
                 className="relative"
-                onMouseEnter={() => setServicesOpen(true)}
-                onMouseLeave={() => setServicesOpen(false)}
+                onMouseEnter={openServices}
+                onMouseLeave={scheduleCloseServices}
               >
                 <Link
                   to="/services"
+                  onFocus={openServices}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                     isServicesActive
                       ? "bg-[hsl(82,25%,28%)] text-white"
@@ -115,7 +116,13 @@ export function PublicHeader() {
                 </Link>
 
                 {servicesOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-[hsl(82,15%,90%)] py-2 z-50">
+                  <div
+                    className="absolute top-full left-0 w-64 bg-white rounded-xl shadow-xl border border-[hsl(82,15%,90%)] py-2 z-50"
+                    onMouseEnter={openServices}
+                    onMouseLeave={scheduleCloseServices}
+                  >
+                    {/* invisible bridge to prevent gap-flicker */}
+                    <span className="absolute -top-2 left-0 right-0 h-2" aria-hidden="true" />
                     {services.map((s) => (
                       <Link
                         key={s.href}
