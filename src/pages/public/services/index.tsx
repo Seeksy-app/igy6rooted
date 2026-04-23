@@ -19,9 +19,9 @@ export function TreeRemovalPage() {
   return (
     <ServicePageTemplate
       title="Tree Removal"
-      metaTitle="Tree Removal in Niceville, FL | IGY6 Rooted"
+      metaTitle="Tree Removal Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Safe, professional tree removal in Niceville, Destin & Fort Walton Beach. Licensed, insured, veteran-owned. Free estimates — call (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/tree-removal.jpg"
       serviceKeyword="Tree Removal"
       heroText="Safe, professional removal of hazardous, diseased, or unwanted trees — with complete cleanup included."
       heroImage={heroOption1}
@@ -65,9 +65,9 @@ export function TreeTrimmingPage() {
   return (
     <ServicePageTemplate
       title="Tree Trimming"
-      metaTitle="Tree Trimming in Niceville, FL | IGY6 Rooted"
+      metaTitle="Tree Trimming Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Professional tree trimming in Niceville, Destin & Fort Walton Beach. Shape trees, prevent storm damage, improve health. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/tree-trimming.jpg"
       serviceKeyword="Tree Trimming"
       heroText="Keep your trees healthy, safe, and looking their best with professional trimming services."
       heroImage={heroOption2}
@@ -111,9 +111,9 @@ export function TreePruningPage() {
   return (
     <ServicePageTemplate
       title="Tree Pruning"
-      metaTitle="Tree Pruning in Niceville, FL | IGY6 Rooted"
+      metaTitle="Tree Pruning Niceville FL | IGY6 Rooted"
       metaDescription="Expert tree pruning in Northwest Florida. Remove dead and diseased branches, extend tree life, improve structure. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/tree-pruning.jpg"
       serviceKeyword="Tree Pruning"
       heroText="Specialized care that targets the health of your trees — remove disease, improve circulation, and strengthen growth."
       heroImage={heroOption3}
@@ -157,9 +157,9 @@ export function StumpGrindingPage() {
   return (
     <ServicePageTemplate
       title="Stump Grinding"
-      metaTitle="Stump Grinding in Niceville, FL | IGY6 Rooted"
+      metaTitle="Stump Grinding Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Professional stump grinding in Niceville, Destin & Fort Walton Beach. Grind below grade for a clean, level yard. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/stump-grinding.jpg"
       serviceKeyword="Stump Grinding"
       heroText="Our specialty — grind stumps below ground level for a clean, flat, usable yard."
       heroImage={serviceSecondary}
@@ -295,9 +295,9 @@ export function LandscapingPage() {
   return (
     <ServicePageTemplate
       title="Landscaping"
-      metaTitle="Landscaping in Niceville & Destin, FL | IGY6 Rooted"
+      metaTitle="Landscaping Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Florida-friendly landscaping in Northwest Florida: beds, sod, mulch, planting, and curb-appeal renovation. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/landscaping.jpg"
       serviceKeyword="Landscaping"
       heroText="Transform your outdoor spaces with professional landscaping design and installation."
       heroImage={heroOption4}
@@ -341,9 +341,9 @@ export function LandClearingPage() {
   return (
     <ServicePageTemplate
       title="Land Clearing"
-      metaTitle="Land Clearing in Niceville & Crestview, FL | IGY6 Rooted"
+      metaTitle="Land Clearing Niceville & Crestview FL | IGY6 Rooted"
       metaDescription="Land clearing for builders and homeowners across Okaloosa & Walton County. Selective or full clearing, forestry mulching, hauling. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/land-clearing.jpg"
       serviceKeyword="Land Clearing"
       heroText="Prepare your property for construction, development, or a fresh start with professional land clearing."
       heroImage={heroOption2}
@@ -387,9 +387,9 @@ export function LotClearingPage() {
   return (
     <ServicePageTemplate
       title="Lot Clearing"
-      metaTitle="Lot Clearing in Niceville & Destin, FL | IGY6 Rooted"
+      metaTitle="Lot Clearing Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Build-ready lot clearing for residential and commercial sites in Northwest Florida. Trees, stumps, brush, debris removed. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/lot-clearing.jpg"
       serviceKeyword="Lot Clearing"
       heroText="Complete lot preparation including vegetation, stumps, and debris removal for residential and commercial properties."
       heroImage={heroOption2}
@@ -433,9 +433,9 @@ export function BrushRemovalPage() {
   return (
     <ServicePageTemplate
       title="Brush Removal"
-      metaTitle="Brush Removal in Niceville & Crestview, FL | IGY6 Rooted"
+      metaTitle="Brush Removal Niceville & Crestview FL | IGY6 Rooted"
       metaDescription="Overgrown brush, vines, and underbrush cleared across Northwest Florida. Fire safety, defensible space, curb appeal. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/brush-removal.jpg"
       serviceKeyword="Brush Removal"
       heroText="Clear overgrown brush and undergrowth for fire safety, aesthetics, and usable outdoor space."
       heroImage={heroOption2}
