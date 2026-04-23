@@ -46,6 +46,13 @@ export function ServicePageTemplate({
   // Insert mid image roughly halfway through sections
   const midIndex = Math.max(1, Math.floor(sections.length / 2));
 
+  // Auto-derive a .webp sibling for any .jpg/.jpeg/.png source so browsers
+  // that support WebP get the smaller asset, while older browsers fall back to
+  // the original. Both variants are emitted at build time.
+  const toWebp = (src: string) => src.replace(/\.(jpe?g|png)(\?.*)?$/i, ".webp$2");
+  const heroWebp = toWebp(heroImage);
+  const midWebp = toWebp(midImage);
+
   // AggregateRating scaffold — gated until live Google Reviews data is wired.
   // To enable: flip ENABLE_AGGREGATE_RATING = true and source values from the
   // google-reviews edge function. Never enable with placeholder data.
@@ -98,13 +105,16 @@ export function ServicePageTemplate({
       {/* Hero with image */}
       <section className="relative bg-[hsl(82,25%,22%)] text-white overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt={heroImageAlt}
-            className="w-full h-full object-cover"
-            width={1920}
-            height={1080}
-          />
+          <picture>
+            <source srcSet={heroWebp} type="image/webp" />
+            <img
+              src={heroImage}
+              alt={heroImageAlt}
+              className="w-full h-full object-cover"
+              width={1920}
+              height={1080}
+            />
+          </picture>
           <div
             className="absolute inset-0"
             style={{
@@ -142,14 +152,17 @@ export function ServicePageTemplate({
 
                   {i === midIndex - 1 && (
                     <figure className="mt-8">
-                      <img
-                        src={midImage}
-                        alt={midImageAlt}
-                        loading="lazy"
-                        width={1920}
-                        height={1080}
-                        className="w-full rounded-xl shadow-md border border-[hsl(82,15%,90%)]"
-                      />
+                      <picture>
+                        <source srcSet={midWebp} type="image/webp" />
+                        <img
+                          src={midImage}
+                          alt={midImageAlt}
+                          loading="lazy"
+                          width={1920}
+                          height={1080}
+                          className="w-full rounded-xl shadow-md border border-[hsl(82,15%,90%)]"
+                        />
+                      </picture>
                       {midImageCaption && (
                         <figcaption className="text-sm text-[hsl(82,10%,50%)] mt-2 italic">
                           {midImageCaption}
