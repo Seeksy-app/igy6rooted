@@ -19,7 +19,23 @@ const services = [
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
+
+  const openServices = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setServicesOpen(true);
+  };
+  const scheduleCloseServices = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setServicesOpen(false), 180);
+  };
+
+  // Close on route change
+  useEffect(() => {
+    setServicesOpen(false);
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
   const isServicesActive = location.pathname.startsWith("/services");
