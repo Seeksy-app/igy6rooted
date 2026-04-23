@@ -32,6 +32,8 @@ import {
   LandClearingPage,
   LotClearingPage,
   BrushRemovalPage,
+  LawnCarePage,
+  PropertyMaintenancePage,
 } from "@/pages/public/services";
 
 // AI Platform pages
@@ -179,6 +181,8 @@ function AppRoutes() {
       <Route path="/services/land-clearing" element={<PublicLayout><LandClearingPage /></PublicLayout>} />
       <Route path="/services/lot-clearing" element={<PublicLayout><LotClearingPage /></PublicLayout>} />
       <Route path="/services/brush-removal" element={<PublicLayout><BrushRemovalPage /></PublicLayout>} />
+      <Route path="/services/lawn-care" element={<PublicLayout><LawnCarePage /></PublicLayout>} />
+      <Route path="/services/property-maintenance" element={<PublicLayout><PropertyMaintenancePage /></PublicLayout>} />
       <Route path="/articles/:slug" element={<PublicLayout><ArticlePage /></PublicLayout>} />
 
       {/* Auth routes */}

@@ -19,9 +19,9 @@ export function TreeRemovalPage() {
   return (
     <ServicePageTemplate
       title="Tree Removal"
-      metaTitle="Tree Removal in Niceville, FL | IGY6 Rooted"
+      metaTitle="Tree Removal Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Safe, professional tree removal in Niceville, Destin & Fort Walton Beach. Licensed, insured, veteran-owned. Free estimates — call (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/tree-removal.jpg"
       serviceKeyword="Tree Removal"
       heroText="Safe, professional removal of hazardous, diseased, or unwanted trees — with complete cleanup included."
       heroImage={heroOption1}
@@ -65,9 +65,9 @@ export function TreeTrimmingPage() {
   return (
     <ServicePageTemplate
       title="Tree Trimming"
-      metaTitle="Tree Trimming in Niceville, FL | IGY6 Rooted"
+      metaTitle="Tree Trimming Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Professional tree trimming in Niceville, Destin & Fort Walton Beach. Shape trees, prevent storm damage, improve health. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/tree-trimming.jpg"
       serviceKeyword="Tree Trimming"
       heroText="Keep your trees healthy, safe, and looking their best with professional trimming services."
       heroImage={heroOption2}
@@ -111,9 +111,9 @@ export function TreePruningPage() {
   return (
     <ServicePageTemplate
       title="Tree Pruning"
-      metaTitle="Tree Pruning in Niceville, FL | IGY6 Rooted"
+      metaTitle="Tree Pruning Niceville FL | IGY6 Rooted"
       metaDescription="Expert tree pruning in Northwest Florida. Remove dead and diseased branches, extend tree life, improve structure. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/tree-pruning.jpg"
       serviceKeyword="Tree Pruning"
       heroText="Specialized care that targets the health of your trees — remove disease, improve circulation, and strengthen growth."
       heroImage={heroOption3}
@@ -157,9 +157,9 @@ export function StumpGrindingPage() {
   return (
     <ServicePageTemplate
       title="Stump Grinding"
-      metaTitle="Stump Grinding in Niceville, FL | IGY6 Rooted"
+      metaTitle="Stump Grinding Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Professional stump grinding in Niceville, Destin & Fort Walton Beach. Grind below grade for a clean, level yard. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/stump-grinding.jpg"
       serviceKeyword="Stump Grinding"
       heroText="Our specialty — grind stumps below ground level for a clean, flat, usable yard."
       heroImage={serviceSecondary}
@@ -248,44 +248,58 @@ export function EmergencyTreeRemovalPage() {
 export function DebrisRemovalPage() {
   return (
     <ServicePageTemplate
-      title="Debris Removal"
-      metaTitle="Debris Removal in Niceville, FL | IGY6 Rooted"
-      metaDescription="Storm debris and yard waste removal across Northwest Florida. Branches, limbs, full cleanups, hauled away fast. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
-      serviceKeyword="Debris Removal"
-      heroText="Complete cleanup and hauling of branches, limbs, and storm debris from your property."
+      title="Debris Removal & Storm Cleanup"
+      metaTitle="Storm Debris Removal Niceville, Destin & Fort Walton FL"
+      metaDescription="Fast yard debris and storm cleanup across Niceville, Destin, Fort Walton Beach & Crestview. Branch hauling, full property cleanup, post-hurricane response. Call (518) 265-0275."
+      ogImage="/og/debris-removal.jpg"
+      serviceKeyword="Debris Removal & Storm Cleanup"
+      heroText="Branches down, limbs piled up, post-storm mess across the yard? We haul it all — fast, complete, and on the schedule the city can't match."
       heroImage={heroOption2}
       heroImageAlt="Northwest Florida residential property with mature trees and clean lawn after debris cleanup"
       midImage={heroOption1}
-      midImageAlt="Tidy Florida home with mature oaks and clean front yard after professional debris removal"
+      midImageAlt="Tidy Niceville home with mature oaks and clean front yard after professional debris removal"
       midImageCaption="A clean property after debris removal — exactly how every job should end."
       sections={[
         {
-          heading: "Complete Property Cleanup, Done Right",
+          heading: "Storm Debris & Yard Waste Removal — Done in One Visit",
           content:
-            "There's a common scenario in Northwest Florida that every homeowner recognizes: a storm rolls through, the wind dies down, and suddenly the yard is unrecognizable. Branches, leaves, palm fronds, snapped limbs, and small downed trees cover the lawn, the driveway, and the flower beds. Even a moderate thunderstorm can drop hundreds of pounds of organic material on an average residential lot. A real tropical system can produce more debris than a typical pickup truck can haul in a dozen trips.\n\nDebris removal is one of those services that sounds simple until you actually try to do it yourself. Branches are heavier than they look, leaf piles compact into wet, dense mats, and most municipalities have strict rules about what can go in yard waste containers and how it must be cut and bundled. We bring the right equipment — chippers, dump trailers, loaders for larger jobs — to handle debris of any size, from small post-storm branch piles to entire trees worth of material.",
+            "There's a common scenario along the Emerald Coast that every Niceville, Destin, and Fort Walton Beach homeowner recognizes: a storm rolls through, the wind dies down, and suddenly the yard is unrecognizable. Branches, leaves, palm fronds, snapped limbs, and small downed trees cover the lawn, the driveway, and the flower beds. Even a moderate Florida thunderstorm can drop hundreds of pounds of organic material on an average residential lot. A real tropical system or hurricane can produce more debris than a typical pickup truck can haul in a dozen trips.\n\nDebris removal is one of those services that sounds simple until you actually try to do it yourself. Branches are heavier than they look, leaf piles compact into wet, dense mats, and Okaloosa County, Walton County, and the City of Destin all have strict rules about what can go in yard waste containers and how it must be cut and bundled. We bring the right equipment — chippers, dump trailers, loaders for larger jobs — to handle debris of any size, from small post-storm branch piles to entire trees worth of material. One visit, one truck out, one clean property.",
         },
         {
-          heading: "When To Call For Debris Removal",
+          heading: "When To Call Us For Debris Removal",
           content:
-            "After a storm is the obvious case, but it's far from the only one. Property owners call us for debris removal after their own DIY tree work (a branch that came down harder than planned, a hedge trim that produced more material than expected), after construction or remodeling that left a yard full of cleared vegetation, after a long-vacant property changes hands and needs to be cleaned up before listing, and as part of routine seasonal cleanups for landlords, HOAs, and commercial property managers.\n\nWe also handle debris removal as a standalone service for customers who used another tree company that didn't complete the cleanup. That happens more often than people realize — a removal crew finishes the actual cutting, then leaves piles of brush and rounds for the homeowner to deal with. We're happy to come in behind another crew and finish the job properly.",
+            "After a storm is the obvious case, but it's far from the only one. Property owners across Northwest Florida call us for debris removal after their own DIY tree work (a branch that came down harder than planned, a hedge trim that produced more material than expected), after construction or remodeling that left a yard full of cleared vegetation, after a long-vacant property changes hands and needs to be cleaned up before listing, and as part of routine seasonal cleanups for landlords, HOAs, and commercial property managers in Bluewater Bay, Valparaiso, Crestview, and Navarre.\n\nWe also handle debris removal as a standalone service for customers who used another tree company that didn't complete the cleanup. That happens more often than people realize — a removal crew finishes the actual cutting, then leaves piles of brush and rounds for the homeowner to deal with. We're happy to come in behind another crew and finish the job properly. If you've already scheduled a tree job with us, complete debris cleanup is included by default — no extra trip, no extra invoice.",
         },
         {
-          heading: "Storm Damage Cleanup On The Emerald Coast",
+          heading: "Hurricane & Tropical Storm Cleanup On The Emerald Coast",
           content:
-            "Northwest Florida's storm season can leave your property covered in fallen branches, leaves, and tree debris for weeks if you wait on municipal pickup. Local yard waste collection typically runs slow after a major weather event — the sheer volume of debris across the county overwhelms normal pickup schedules, and your pile of branches at the curb can sit for a month before it's collected. We provide fast, efficient cleanup so you can get back to normal as quickly as possible, without waiting on the city or county.\n\nFor major storm cleanup, we can dispatch larger equipment and crews to handle multiple acres in a day. We chip what we can on-site (which dramatically reduces hauling volume and cost), load larger material directly into our trailers, and dispose of everything at proper municipal or commercial composting facilities. We do not dump debris on adjacent vacant lots, in the woods, or anywhere else it shouldn't be — every load is tracked from your property to a legitimate disposal site.",
+            "Northwest Florida's storm season can leave your property covered in fallen branches, leaves, and tree debris for weeks if you wait on municipal pickup. Local yard waste collection typically runs slow after a major weather event — the sheer volume of debris across Okaloosa, Walton, and Santa Rosa counties overwhelms normal pickup schedules, and your pile of branches at the curb can sit for a month before it's collected. We provide fast, efficient post-hurricane cleanup so you can get back to normal as quickly as possible, without waiting on the city or county.\n\nFor major storm cleanup, we can dispatch larger equipment and crews to handle multiple acres in a day. We chip what we can on-site (which dramatically reduces hauling volume and cost), load larger material directly into our trailers, and dispose of everything at proper municipal or commercial composting facilities. We do not dump debris on adjacent vacant lots, in the woods, or anywhere else it shouldn't be — every load is tracked from your property to a legitimate disposal site. If your insurance adjuster needs documentation of work performed and material hauled, we can provide written records on request.",
         },
         {
-          heading: "Pricing And What's Included",
+          heading: "What's Included In Every Debris Removal Visit",
           content:
-            "Debris removal pricing depends on volume, accessibility, and how much processing the material needs before it can be loaded. A small pile of clean branches in an accessible front yard is a quick, low-cost visit. An acre of post-hurricane mixed debris with full trees down across fences and outbuildings is a multi-day project with multiple crews and equipment. We give you an honest estimate after seeing the property, and we don't add surprise charges later.\n\nEvery debris removal job includes complete cleanup of the work area — raking, blowing off hardscape, and removing every bit of material we generated. If we cut something, we haul it. If we agreed to remove an existing pile, we remove all of it, not just the easy parts on top. By the time we leave, your property looks better than it did before the storm.",
+            "Every debris removal job we run is end-to-end. We rake the affected areas (not just the obvious piles), blow off your driveway, walkway, and patio, pick up small wood and bark fragments by hand where needed, and load every bit of material we generated into our trucks before we leave. If we cut something, we haul it. If we agreed to remove an existing pile, we remove all of it — not just the easy pieces on top.\n\nWe also handle the non-yard parts that often get ignored: cleaning out clogged gutters of pine needles after a heavy storm, raking leaves out of pool screens and equipment areas, and cleaning debris off flat roofs where it's safe to do so. Tell us what you need cleaned up and we'll scope it; the goal is for your property to look better when we leave than it did before the storm. For ongoing peace of mind, ask about pairing debris removal with regular {' '}<a className=\"underline hover:no-underline\" href=\"/services/tree-trimming\">tree trimming</a> visits — it's the cheapest insurance against the next storm.",
+        },
+        {
+          heading: "Pricing, Timing & How To Book",
+          content:
+            "Debris removal pricing depends on volume, accessibility, and how much processing the material needs before it can be loaded. A small pile of clean branches in an accessible Niceville front yard is a quick, low-cost visit — often under an hour on-site. An acre of post-hurricane mixed debris with full trees down across fences and outbuildings in Crestview is a multi-day project with multiple crews and equipment. We give you an honest estimate after seeing the property, and we don't add surprise charges later.\n\nFor non-emergency cleanups we typically schedule within 5-7 business days. For active storm response we triage by safety risk first and reach the worst situations within 24-48 hours when conditions allow. Call (518) 265-0275 for a free estimate, or use our online booking form. If your situation involves a fallen tree blocking access or threatening a structure, you actually want our {' '}<a className=\"underline hover:no-underline\" href=\"/services/emergency-tree-removal\">emergency tree removal</a> line — debris removal picks up where that work ends.",
         },
       ]}
-      benefits={defaultBenefits}
+      benefits={[
+        "Same- or next-week scheduling for non-emergencies",
+        "Hurricane response with extra crews on standby",
+        "Insurance-ready documentation on request",
+        "On-site chipping reduces cost",
+        "Disposal at licensed composting facilities only",
+        "Veteran-owned & fully insured",
+      ]}
       relatedServices={[
         { name: "Emergency Tree Removal", href: "/services/emergency-tree-removal" },
         { name: "Brush Removal", href: "/services/brush-removal" },
         { name: "Lot Clearing", href: "/services/lot-clearing" },
+        { name: "Tree Trimming", href: "/services/tree-trimming" },
+        { name: "Property Maintenance", href: "/services/property-maintenance" },
       ]}
     />
   );
@@ -295,9 +309,9 @@ export function LandscapingPage() {
   return (
     <ServicePageTemplate
       title="Landscaping"
-      metaTitle="Landscaping in Niceville & Destin, FL | IGY6 Rooted"
+      metaTitle="Landscaping Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Florida-friendly landscaping in Northwest Florida: beds, sod, mulch, planting, and curb-appeal renovation. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/landscaping.jpg"
       serviceKeyword="Landscaping"
       heroText="Transform your outdoor spaces with professional landscaping design and installation."
       heroImage={heroOption4}
@@ -341,9 +355,9 @@ export function LandClearingPage() {
   return (
     <ServicePageTemplate
       title="Land Clearing"
-      metaTitle="Land Clearing in Niceville & Crestview, FL | IGY6 Rooted"
+      metaTitle="Land Clearing Niceville & Crestview FL | IGY6 Rooted"
       metaDescription="Land clearing for builders and homeowners across Okaloosa & Walton County. Selective or full clearing, forestry mulching, hauling. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/land-clearing.jpg"
       serviceKeyword="Land Clearing"
       heroText="Prepare your property for construction, development, or a fresh start with professional land clearing."
       heroImage={heroOption2}
@@ -387,9 +401,9 @@ export function LotClearingPage() {
   return (
     <ServicePageTemplate
       title="Lot Clearing"
-      metaTitle="Lot Clearing in Niceville & Destin, FL | IGY6 Rooted"
+      metaTitle="Lot Clearing Niceville & Destin FL | IGY6 Rooted"
       metaDescription="Build-ready lot clearing for residential and commercial sites in Northwest Florida. Trees, stumps, brush, debris removed. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/lot-clearing.jpg"
       serviceKeyword="Lot Clearing"
       heroText="Complete lot preparation including vegetation, stumps, and debris removal for residential and commercial properties."
       heroImage={heroOption2}
@@ -433,9 +447,9 @@ export function BrushRemovalPage() {
   return (
     <ServicePageTemplate
       title="Brush Removal"
-      metaTitle="Brush Removal in Niceville & Crestview, FL | IGY6 Rooted"
+      metaTitle="Brush Removal Niceville & Crestview FL | IGY6 Rooted"
       metaDescription="Overgrown brush, vines, and underbrush cleared across Northwest Florida. Fire safety, defensible space, curb appeal. Free estimates — (518) 265-0275."
-      ogImage="/og/services.jpg"
+      ogImage="/og/brush-removal.jpg"
       serviceKeyword="Brush Removal"
       heroText="Clear overgrown brush and undergrowth for fire safety, aesthetics, and usable outdoor space."
       heroImage={heroOption2}
@@ -469,6 +483,90 @@ export function BrushRemovalPage() {
       relatedServices={[
         { name: "Debris Removal", href: "/services/debris-removal" },
         { name: "Land Clearing", href: "/services/land-clearing" },
+        { name: "Landscaping", href: "/services/landscaping" },
+      ]}
+    />
+  );
+}
+
+export function LawnCarePage() {
+  return (
+    <ServicePageTemplate
+      title="Lawn Care & Mowing"
+      metaTitle="Lawn Care & Mowing Niceville & Destin FL | IGY6 Rooted"
+      metaDescription="Weekly mowing, edging, fertilization, and full lawn care across Niceville, Destin & Fort Walton Beach. Healthier grass, sharper edges. (518) 265-0275."
+      ogImage="/og/lawn-care.jpg"
+      serviceKeyword="Lawn Care"
+      heroText="Healthier grass, sharper edges, and a yard you'll actually want to walk barefoot in — week after week."
+      heroImage={heroOption4}
+      heroImageAlt="Lush green Florida lawn with manicured edges in front of a coastal home"
+      midImage={heroMain}
+      midImageAlt="Striped lawn after professional mowing service in Northwest Florida"
+      midImageCaption="A consistent mow schedule does more for your lawn than any single fertilizer treatment."
+      sections={[
+        {
+          heading: "Lawn Care That Actually Shows Up",
+          content:
+            "The hardest part of lawn care in Northwest Florida isn't the work itself — it's finding a crew that consistently shows up on the day they said they would, cuts at the right height for the season, and edges every walkway and bed without being asked. That's the bar we hold ourselves to in Niceville, Destin, Fort Walton Beach, Bluewater Bay, and Crestview. You shouldn't have to text a vendor to ask if they're coming this week.\n\nOur weekly and bi-weekly lawn care plans cover mowing at the proper height for your grass type (St. Augustine, Bermuda, Zoysia, or Centipede), crisp edging along driveways, walkways, and beds, line trimming around trees and structures, and a full blow-off of every hard surface before we leave. That's the standard visit. Add-on services like fertilization, weed control, and seasonal cleanups are available as needed.",
+        },
+        {
+          heading: "What Healthy Florida Grass Needs",
+          content:
+            "Most lawn problems in our area trace back to one of three things: cutting too short, watering wrong, or skipping the dormant-season prep. We mow at the height your specific grass type wants (3.5–4\" for St. Augustine, 1–2\" for Bermuda) so the lawn shades its own roots and chokes out crabgrass and dollarweed naturally. We rotate cut direction visit-to-visit so the lawn doesn't develop ruts or grain, and we keep blades sharp so the grass tips heal cleanly instead of browning.\n\nFor irrigation and fertilization, we'll give you straight advice during the first visit. If you're already happy with your irrigation setup, we won't push services you don't need. If your sprinkler heads are spraying the driveway or your lawn is hungry, we'll point it out and either handle it or refer you to someone who can.",
+        },
+        {
+          heading: "Built To Pair With Tree & Yard Work",
+          content:
+            "A big advantage of having one veteran-owned crew handling both lawn and tree work is coordination. When we know we're scheduling a {' '}<a className=\"underline hover:no-underline\" href=\"/services/tree-trimming\">tree trimming</a> visit, we time it so the cleanup wraps before the next mow. When we install new {' '}<a className=\"underline hover:no-underline\" href=\"/services/landscaping\">landscaping</a> beds, we adjust the mow line right away so nothing gets accidentally scalped. And after a {' '}<a className=\"underline hover:no-underline\" href=\"/services/stump-grinding\">stump grinding</a> job, we'll backfill and reseed the area so it blends in with the rest of the lawn within a season.\n\nMost customers start with a one-time visit and a free property walkthrough, then move to recurring service if it fits. No long contracts, no setup fees — just a clean, reliable schedule.",
+        },
+      ]}
+      benefits={defaultBenefits}
+      relatedServices={[
+        { name: "Landscaping", href: "/services/landscaping" },
+        { name: "Property Maintenance", href: "/services/property-maintenance" },
+        { name: "Tree Trimming", href: "/services/tree-trimming" },
+        { name: "Brush Removal", href: "/services/brush-removal" },
+      ]}
+    />
+  );
+}
+
+export function PropertyMaintenancePage() {
+  return (
+    <ServicePageTemplate
+      title="Property Maintenance"
+      metaTitle="Property Maintenance Niceville & Destin FL | IGY6 Rooted"
+      metaDescription="Recurring property maintenance across Niceville, Destin & Crestview: mowing, trimming, debris cleanup, and seasonal yard care on one schedule. (518) 265-0275."
+      ogImage="/og/property-maintenance.jpg"
+      serviceKeyword="Property Maintenance"
+      heroText="One veteran-owned crew, one schedule, one invoice — keeping your property dialed in year-round."
+      heroImage={heroOption4}
+      heroImageAlt="Well-maintained Florida residential property with healthy lawn and trimmed trees"
+      midImage={serviceSecondary}
+      midImageAlt="Manicured residential lawn and clean beds after recurring property maintenance"
+      midImageCaption="Recurring service is the cheapest way to keep a property looking its best year-round."
+      sections={[
+        {
+          heading: "Recurring Property Care, Without The Vendor Juggle",
+          content:
+            "Most homeowners along the Emerald Coast end up using three or four different vendors to keep a property looking the way they want — one for mowing, one for trees, one for cleanups after storms, one for the random projects nobody else handles. Our property maintenance program rolls all of that into a single recurring schedule with one accountable crew. Niceville, Destin, Fort Walton Beach, Bluewater Bay, Valparaiso, and Crestview all included.\n\nA typical maintenance plan includes weekly or bi-weekly {' '}<a className=\"underline hover:no-underline\" href=\"/services/lawn-care\">lawn care</a>, quarterly {' '}<a className=\"underline hover:no-underline\" href=\"/services/tree-trimming\">tree trimming</a> as needed, seasonal {' '}<a className=\"underline hover:no-underline\" href=\"/services/debris-removal\">debris removal</a>, and on-call response for storm cleanup or one-off projects. You get one consistent crew that knows your property, one invoice, and one phone number to call.",
+        },
+        {
+          heading: "Built For Owners Who Don't Live On-Property Full Time",
+          content:
+            "We work with a lot of seasonal residents, second-home owners, and out-of-state landlords across Northwest Florida. Property maintenance for those owners isn't just about appearance — it's about catching small issues before they become expensive ones. A leaning tree, an irrigation leak, a brewing erosion problem, an overgrown perimeter that's becoming a fire risk: these are all things we identify on regular visits and flag immediately, with photos, so you can decide what to do without flying back.\n\nFor HOA-governed properties and rentals, we can also handle compliance-focused care: keeping the front yard within deed restrictions, managing the curb-appeal-critical zones (mailboxes, walkways, entry beds), and quickly addressing any HOA letters before fines stack up.",
+        },
+        {
+          heading: "Customizable, Cancel Any Time",
+          content:
+            "There's no long contract. Most maintenance customers start month-to-month, see how the cadence works, then settle into a rhythm. Add or pause services as your property's needs change through the seasons. We bill monthly for predictability, and we provide a clear scope of work so you always know exactly what's included.\n\nReady to stop chasing vendors? Call (518) 265-0275 or request a free walkthrough. We'll come look at the property, listen to what's been frustrating you, and put together a plan that's actually maintainable.",
+        },
+      ]}
+      benefits={defaultBenefits}
+      relatedServices={[
+        { name: "Lawn Care & Mowing", href: "/services/lawn-care" },
+        { name: "Tree Trimming", href: "/services/tree-trimming" },
+        { name: "Debris Removal", href: "/services/debris-removal" },
         { name: "Landscaping", href: "/services/landscaping" },
       ]}
     />

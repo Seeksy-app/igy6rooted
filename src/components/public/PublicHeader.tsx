@@ -10,6 +10,8 @@ const services = [
   { name: "Stump Grinding", href: "/services/stump-grinding" },
   { name: "Emergency Tree Removal", href: "/services/emergency-tree-removal" },
   { name: "Debris Removal", href: "/services/debris-removal" },
+  { name: "Lawn Care & Mowing", href: "/services/lawn-care" },
+  { name: "Property Maintenance", href: "/services/property-maintenance" },
   { name: "Landscaping", href: "/services/landscaping" },
   { name: "Land Clearing", href: "/services/land-clearing" },
   { name: "Lot Clearing", href: "/services/lot-clearing" },

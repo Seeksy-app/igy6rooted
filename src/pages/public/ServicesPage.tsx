@@ -3,56 +3,18 @@ import { SEOHead } from "@/components/public/SEOHead";
 import { TreePine, ArrowRight } from "lucide-react";
 
 const services = [
-  {
-    name: "Tree Removal",
-    href: "/services/tree-removal",
-    desc: "Safe, professional removal of hazardous, diseased, or unwanted trees. Complete cleanup included.",
-  },
-  {
-    name: "Tree Trimming",
-    href: "/services/tree-trimming",
-    desc: "Remove overgrowth, shape trees for safety and appearance, and prevent storm damage.",
-  },
-  {
-    name: "Tree Pruning",
-    href: "/services/tree-pruning",
-    desc: "Targeted care to remove dead or diseased branches and improve overall tree health.",
-  },
-  {
-    name: "Stump Grinding",
-    href: "/services/stump-grinding",
-    desc: "Grind stumps below ground level for a clean, flat yard. Our specialty since day one.",
-  },
-  {
-    name: "Emergency Tree Removal",
-    href: "/services/emergency-tree-removal",
-    desc: "24/7 rapid response for fallen trees, storm damage, and urgent safety hazards.",
-  },
-  {
-    name: "Debris Removal",
-    href: "/services/debris-removal",
-    desc: "Full cleanup and hauling of branches, limbs, and storm debris from your property.",
-  },
-  {
-    name: "Landscaping",
-    href: "/services/landscaping",
-    desc: "Design and installation services to transform and beautify your outdoor spaces.",
-  },
-  {
-    name: "Land Clearing",
-    href: "/services/land-clearing",
-    desc: "Prepare raw land for construction, farming, or development with full vegetation removal.",
-  },
-  {
-    name: "Lot Clearing",
-    href: "/services/lot-clearing",
-    desc: "Complete residential or commercial lot preparation including stumps, brush, and debris.",
-  },
-  {
-    name: "Brush Removal",
-    href: "/services/brush-removal",
-    desc: "Clear overgrown brush and undergrowth for fire safety, aesthetics, and usability.",
-  },
+  { name: "Tree Removal", href: "/services/tree-removal", desc: "Safe, professional removal of hazardous, diseased, or unwanted trees. Complete cleanup included." },
+  { name: "Tree Trimming", href: "/services/tree-trimming", desc: "Remove overgrowth, shape trees for safety and appearance, and prevent storm damage." },
+  { name: "Tree Pruning", href: "/services/tree-pruning", desc: "Targeted care to remove dead or diseased branches and improve overall tree health." },
+  { name: "Stump Grinding", href: "/services/stump-grinding", desc: "Grind stumps below ground level for a clean, flat yard. Our specialty since day one." },
+  { name: "Emergency Tree Removal", href: "/services/emergency-tree-removal", desc: "24/7 rapid response for fallen trees, storm damage, and urgent safety hazards." },
+  { name: "Debris Removal", href: "/services/debris-removal", desc: "Storm cleanup, branch hauling, and full property reset — usually within the same week." },
+  { name: "Lawn Care & Mowing", href: "/services/lawn-care", desc: "Weekly mowing, edging, and crisp lawn care across Niceville, Destin & Fort Walton Beach." },
+  { name: "Property Maintenance", href: "/services/property-maintenance", desc: "One crew, one schedule — recurring lawn, tree, and cleanup care year-round." },
+  { name: "Landscaping", href: "/services/landscaping", desc: "Design and installation services to transform and beautify your outdoor spaces." },
+  { name: "Land Clearing", href: "/services/land-clearing", desc: "Prepare raw land for construction, farming, or development with full vegetation removal." },
+  { name: "Lot Clearing", href: "/services/lot-clearing", desc: "Complete residential or commercial lot preparation including stumps, brush, and debris." },
+  { name: "Brush Removal", href: "/services/brush-removal", desc: "Clear overgrown brush and undergrowth for fire safety, aesthetics, and usability." },
 ];
 
 export default function ServicesPage() {
