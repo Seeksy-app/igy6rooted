@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   },
   hero: {
     title: "Tree Service, Lawn Care & Landscaping in Niceville, Fort Walton Beach, and Surrounding Areas",
-    subtitle: "Tree trimming, removals, lawn care, and landscaping to keep your property clean, healthy, and summer-ready.",
+    subtitle: "From safer trees to healthier grass, we help make your home look better and feel better.",
     cta1: "Get Free Estimate",
     cta2: "Our Services",
   },
