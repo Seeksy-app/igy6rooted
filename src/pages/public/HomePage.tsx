@@ -8,6 +8,22 @@ import heroOption2 from "@/assets/hero-option-2.jpg";
 import heroOption3 from "@/assets/hero-option-3.jpg";
 import heroOption4 from "@/assets/hero-option-4.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
+import { supabase } from "@/integrations/supabase/client";
+
+type GoogleReview = {
+  author: string;
+  photo: string | null;
+  rating: number;
+  text: string;
+  relativeTime: string;
+};
+
+type GoogleReviewsPayload = {
+  rating: number | null;
+  totalRatings: number | null;
+  mapsUrl: string | null;
+  reviews: GoogleReview[];
+};
 
 const services = SITE_CONFIG.services;
 
@@ -42,6 +58,7 @@ const testimonials = [
 
 export default function HomePage() {
   const [activeHero, setActiveHero] = useState(0);
+  const [google, setGoogle] = useState<GoogleReviewsPayload | null>(null);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -49,6 +66,32 @@ export default function HomePage() {
     }, 6000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("google-reviews");
+        if (!cancelled && !error && data) setGoogle(data as GoogleReviewsPayload);
+      } catch (e) {
+        console.warn("Failed to load Google reviews", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayReviews =
+    google?.reviews && google.reviews.length > 0
+      ? google.reviews.slice(0, 3).map((r) => ({
+          name: r.author,
+          location: r.relativeTime,
+          text: r.text,
+          rating: r.rating,
+          photo: r.photo,
+        }))
+      : testimonials.map((t) => ({ ...t, photo: null as string | null }));
 
   return (
     <>
@@ -233,16 +276,35 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-12">
             <span className="text-sm font-semibold text-[hsl(82,40%,40%)] uppercase tracking-wider">
-              Testimonials
+              {google ? "Google Reviews" : "Testimonials"}
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(82,25%,20%)] mt-2">
               What Our Customers Say
             </h2>
+            {google?.rating && (
+              <div className="flex items-center justify-center gap-2 mt-3">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-5 w-5 ${
+                        i < Math.round(google.rating ?? 0)
+                          ? "fill-[hsl(45,90%,50%)] text-[hsl(45,90%,50%)]"
+                          : "text-[hsl(82,10%,70%)]"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-[hsl(82,10%,40%)] font-medium">
+                  {google.rating.toFixed(1)} · {google.totalRatings ?? 0} reviews on Google
+                </span>
+              </div>
+            )}
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t) => (
+            {displayReviews.map((t, idx) => (
               <div
-                key={t.name}
+                key={`${t.name}-${idx}`}
                 className="bg-[hsl(82,10%,97%)] rounded-xl p-6 border border-[hsl(82,15%,92%)]"
               >
                 <div className="flex mb-3">
@@ -250,14 +312,38 @@ export default function HomePage() {
                     <Star key={i} className="h-4 w-4 fill-[hsl(45,90%,50%)] text-[hsl(45,90%,50%)]" />
                   ))}
                 </div>
-                <p className="text-[hsl(82,10%,35%)] mb-4 leading-relaxed">"{t.text}"</p>
-                <div>
-                  <p className="font-semibold text-[hsl(82,25%,20%)]">{t.name}</p>
-                  <p className="text-sm text-[hsl(82,10%,50%)]">{t.location}</p>
+                <p className="text-[hsl(82,10%,35%)] mb-4 leading-relaxed line-clamp-6">"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  {t.photo && (
+                    <img
+                      src={t.photo}
+                      alt={t.name}
+                      className="h-10 w-10 rounded-full object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                  <div>
+                    <p className="font-semibold text-[hsl(82,25%,20%)]">{t.name}</p>
+                    <p className="text-sm text-[hsl(82,10%,50%)]">{t.location}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+          {google?.mapsUrl && (
+            <div className="text-center mt-8">
+              <a
+                href={google.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-[hsl(82,40%,35%)] font-semibold hover:underline"
+              >
+                See all reviews on Google
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
