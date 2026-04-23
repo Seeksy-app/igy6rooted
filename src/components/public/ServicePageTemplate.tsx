@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Link, useLocation } from "react-router-dom";
 import { Phone, CheckCircle, ArrowLeft, TreePine } from "lucide-react";
+import { SEOHead } from "@/components/public/SEOHead";
 
 interface ServicePageTemplateProps {
   title: string;
@@ -16,6 +16,10 @@ interface ServicePageTemplateProps {
   sections: { heading: string; content: string }[];
   benefits: string[];
   relatedServices: { name: string; href: string }[];
+  /** Path-only OG image (defaults to /og/services.jpg) */
+  ogImage?: string;
+  /** Primary keyword for service-specific JSON-LD */
+  serviceKeyword?: string;
 }
 
 export function ServicePageTemplate({
@@ -31,7 +35,10 @@ export function ServicePageTemplate({
   sections,
   benefits,
   relatedServices,
+  ogImage = "/og/services.jpg",
+  serviceKeyword,
 }: ServicePageTemplateProps) {
+  const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -39,12 +46,39 @@ export function ServicePageTemplate({
   // Insert mid image roughly halfway through sections
   const midIndex = Math.max(1, Math.floor(sections.length / 2));
 
+  const serviceJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: serviceKeyword ?? title,
+    provider: {
+      "@type": "LocalBusiness",
+      name: "IGY6 Rooted",
+      telephone: "+1-518-265-0275",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Niceville",
+        addressRegion: "FL",
+        postalCode: "32578",
+        addressCountry: "US",
+      },
+    },
+    areaServed: [
+      "Niceville, FL", "Destin, FL", "Fort Walton Beach, FL", "Crestview, FL",
+      "Navarre, FL", "Bluewater Bay, FL", "Valparaiso, FL",
+    ],
+    description: metaDescription,
+  };
+
   return (
     <>
-      <Helmet>
-        <title>{metaTitle}</title>
-        <meta name="description" content={metaDescription} />
-      </Helmet>
+      <SEOHead
+        title={metaTitle}
+        description={metaDescription}
+        path={location.pathname}
+        image={ogImage}
+        jsonLd={serviceJsonLd}
+      />
+
 
       {/* Hero with image */}
       <section className="relative bg-[hsl(82,25%,22%)] text-white overflow-hidden">

@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/public/SEOHead";
 import { Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 
@@ -67,18 +67,19 @@ export default function ArticlePage() {
 
   return (
     <>
-      <Helmet>
-        <title>{page.meta_title || page.page_name}</title>
-        {page.meta_description && <meta name="description" content={page.meta_description} />}
-        {page.canonical_url && <link rel="canonical" href={page.canonical_url} />}
-        {page.robots && <meta name="robots" content={page.robots} />}
-        {page.og_title && <meta property="og:title" content={page.og_title} />}
-        {page.og_description && <meta property="og:description" content={page.og_description} />}
-        {page.og_image_url && <meta property="og:image" content={page.og_image_url} />}
-        {page.twitter_card && <meta name="twitter:card" content={page.twitter_card} />}
-        {page.twitter_title && <meta name="twitter:title" content={page.twitter_title} />}
-        {page.twitter_description && <meta name="twitter:description" content={page.twitter_description} />}
-      </Helmet>
+      <SEOHead
+        title={page.meta_title || `${page.page_name} | IGY6 Rooted`}
+        description={
+          page.meta_description ||
+          `${page.page_name} — guidance from IGY6 Rooted, veteran-owned tree service in Northwest Florida.`
+        }
+        path={page.route_path || `/articles/${slug}`}
+        image={page.og_image_url || "/og/default.jpg"}
+        ogTitle={page.og_title || undefined}
+        ogDescription={page.og_description || undefined}
+        type="article"
+        robots={page.robots || "index,follow"}
+      />
 
       {/* Hero */}
       <section className="bg-[hsl(82,25%,22%)] text-white">

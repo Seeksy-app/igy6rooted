@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/public/SEOHead";
 import { Shield, CheckCircle, Star, Phone, Award, Heart } from "lucide-react";
 import craigPhoto from "@/assets/craig-orner.avif";
 import { SITE_CONFIG } from "@/config/site.config";
@@ -7,13 +7,24 @@ import { SITE_CONFIG } from "@/config/site.config";
 export default function AboutPage() {
   return (
     <>
-      <Helmet>
-        <title>About Craig Orner & IGY6 Rooted | Veteran-Owned Tree Service</title>
-        <meta
-          name="description"
-          content="Meet Craig Orner, USAF Reservist and founder of IGY6 Rooted. Veteran-owned tree service in Niceville, FL with military precision and respect for your property."
-        />
-      </Helmet>
+      <SEOHead
+        title="About Craig Orner | Veteran-Owned Tree Service in Niceville, FL"
+        description="Meet Craig Orner, USAF Reservist and founder of IGY6 Rooted. Veteran-owned tree service serving Niceville, Destin, and Fort Walton Beach with military precision since 2024."
+        path="/about"
+        image="/og/about.jpg"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          name: "About IGY6 Rooted",
+          url: "https://igy6rooted.com/about",
+          mainEntity: {
+            "@type": "Person",
+            name: "Craig Orner",
+            jobTitle: "Founder",
+            worksFor: { "@type": "LocalBusiness", name: "IGY6 Rooted" },
+          },
+        }}
+      />
 
       {/* Hero */}
       <section className="bg-[hsl(82,25%,22%)] text-white">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/public/SEOHead";
 import { Phone, Mail, MapPin, CheckCircle, Loader2, TreePine } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -98,9 +98,13 @@ export default function ReferralLandingPage() {
   if (submitted) {
     return (
       <>
-        <Helmet>
-          <title>Thank You | IGY6 Rooted Tree Service</title>
-        </Helmet>
+        <SEOHead
+          title="Thank You | IGY6 Rooted Tree Service"
+          description="Thanks for reaching out to IGY6 Rooted. A team member will contact you shortly to schedule your service."
+          path="/offer"
+          image="/og/contact.jpg"
+          robots="noindex,follow"
+        />
         <div className="min-h-screen bg-gradient-to-b from-[hsl(82,25%,22%)] to-[hsl(82,20%,30%)] flex items-center justify-center p-6">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-10 text-center">
             <CheckCircle className="h-16 w-16 text-[hsl(82,40%,45%)] mx-auto mb-4" />
@@ -123,13 +127,13 @@ export default function ReferralLandingPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Special Offer | IGY6 Rooted Tree Service - Niceville, FL</title>
-        <meta
-          name="description"
-          content="Claim your special offer from IGY6 Rooted. Veteran-owned tree service in Northwest Florida. Free estimates available."
-        />
-      </Helmet>
+      <SEOHead
+        title="Claim Your Offer | IGY6 Rooted Tree Service in Niceville, FL"
+        description="Claim your exclusive offer from IGY6 Rooted, veteran-owned tree service in Northwest Florida. Tree removal, stump grinding, and more — free estimates."
+        path="/offer"
+        image="/og/contact.jpg"
+        robots="noindex,follow"
+      />
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-[hsl(82,25%,22%)] to-[hsl(82,20%,28%)] text-white">
