@@ -38,16 +38,25 @@ export function PublicHeader() {
     e.preventDefault();
     setMobileOpen(false);
     setServicesOpen(false);
-    const doScroll = () => {
+
+    // Poll for the element — homepage hydrates async (Google Reviews fetch,
+    // lazy images), so the section may not exist yet on cross-page nav.
+    const tryScroll = (attempt = 0) => {
       const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (attempt < 20) {
+        setTimeout(() => tryScroll(attempt + 1), 100);
+      }
     };
+
     if (location.pathname !== "/") {
       navigate(`/#${id}`);
-      // wait for homepage to mount
-      setTimeout(doScroll, 350);
+      setTimeout(() => tryScroll(0), 100);
     } else {
-      doScroll();
+      tryScroll(0);
     }
   };
   const scrollToReviews = scrollToSection("reviews");
