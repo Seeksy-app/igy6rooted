@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -21,6 +21,7 @@ export function PublicHeader() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const openServices = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -29,6 +30,22 @@ export function PublicHeader() {
   const scheduleCloseServices = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setServicesOpen(false), 180);
+  };
+
+  const scrollToReviews = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMobileOpen(false);
+    const doScroll = () => {
+      const el = document.getElementById("reviews");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    if (location.pathname !== "/") {
+      navigate("/#reviews");
+      // wait for homepage to mount
+      setTimeout(doScroll, 350);
+    } else {
+      doScroll();
+    }
   };
 
   // Close on route change
@@ -140,12 +157,13 @@ export function PublicHeader() {
                 )}
               </div>
 
-              <Link
-                to="/#reviews"
+              <a
+                href="/#reviews"
+                onClick={scrollToReviews}
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,93%)]"
               >
                 Reviews
-              </Link>
+              </a>
               <Link
                 to="/contact"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -214,13 +232,13 @@ export function PublicHeader() {
                   {s.name}
                 </Link>
               ))}
-              <Link
-                to="/#reviews"
-                onClick={() => setMobileOpen(false)}
+              <a
+                href="/#reviews"
+                onClick={scrollToReviews}
                 className="block px-4 py-3 rounded-lg text-sm font-medium text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,95%)]"
               >
                 Reviews
-              </Link>
+              </a>
               <Link
                 to="/contact"
                 onClick={() => setMobileOpen(false)}
