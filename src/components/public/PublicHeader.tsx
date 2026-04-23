@@ -122,8 +122,9 @@ export function PublicHeader() {
                 onMouseEnter={openServices}
                 onMouseLeave={scheduleCloseServices}
               >
-                <Link
-                  to="/services"
+                <a
+                  href="/#services"
+                  onClick={scrollToServices}
                   onFocus={openServices}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                     isServicesActive
@@ -133,7 +134,7 @@ export function PublicHeader() {
                 >
                   Services
                   <ChevronDown className="h-3.5 w-3.5" />
-                </Link>
+                </a>
 
                 {servicesOpen && (
                   <div
@@ -218,13 +219,13 @@ export function PublicHeader() {
               >
                 About
               </Link>
-              <Link
-                to="/services"
-                onClick={() => setMobileOpen(false)}
+              <a
+                href="/#services"
+                onClick={scrollToServices}
                 className="block px-4 py-3 rounded-lg text-sm font-medium text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,95%)]"
               >
                 All Services
-              </Link>
+              </a>
               {services.map((s) => (
                 <Link
                   key={s.href}
