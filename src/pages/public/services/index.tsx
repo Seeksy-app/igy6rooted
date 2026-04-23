@@ -20,7 +20,9 @@ export function TreeRemovalPage() {
     <ServicePageTemplate
       title="Tree Removal"
       metaTitle="Tree Removal in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional tree removal services in Northwest Florida. Safe, efficient removal of hazardous or unwanted trees. Free estimates. Call (518) 265-0275."
+      metaDescription="Safe, professional tree removal in Niceville, Destin & Fort Walton Beach. Licensed, insured, veteran-owned. Free estimates — call (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Tree Removal"
       heroText="Safe, professional removal of hazardous, diseased, or unwanted trees — with complete cleanup included."
       heroImage={heroOption1}
       heroImageAlt="Mature oak trees framing a Florida residential home before tree removal"
@@ -64,7 +66,9 @@ export function TreeTrimmingPage() {
     <ServicePageTemplate
       title="Tree Trimming"
       metaTitle="Tree Trimming in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional tree trimming in Northwest Florida. Remove overgrowth, shape trees, prevent storm damage. Free estimates. Call (518) 265-0275."
+      metaDescription="Professional tree trimming in Niceville, Destin & Fort Walton Beach. Shape trees, prevent storm damage, improve health. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Tree Trimming"
       heroText="Keep your trees healthy, safe, and looking their best with professional trimming services."
       heroImage={heroOption2}
       heroImageAlt="Mature pine and oak trees over a manicured Florida backyard lawn"
@@ -108,7 +112,9 @@ export function TreePruningPage() {
     <ServicePageTemplate
       title="Tree Pruning"
       metaTitle="Tree Pruning in Niceville, FL | IGY6 Rooted"
-      metaDescription="Expert tree pruning in Northwest Florida. Remove dead and diseased branches, improve tree health. Free estimates. Call (518) 265-0275."
+      metaDescription="Expert tree pruning in Northwest Florida. Remove dead and diseased branches, extend tree life, improve structure. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Tree Pruning"
       heroText="Specialized care that targets the health of your trees — remove disease, improve circulation, and strengthen growth."
       heroImage={heroOption3}
       heroImageAlt="Healthy mature oak tree above a striped, professionally maintained lawn"
@@ -152,7 +158,9 @@ export function StumpGrindingPage() {
     <ServicePageTemplate
       title="Stump Grinding"
       metaTitle="Stump Grinding in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional stump grinding in Northwest Florida. Grind stumps below ground level for a clean yard. Free estimates. Call (518) 265-0275."
+      metaDescription="Professional stump grinding in Niceville, Destin & Fort Walton Beach. Grind below grade for a clean, level yard. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Stump Grinding"
       heroText="Our specialty — grind stumps below ground level for a clean, flat, usable yard."
       heroImage={serviceSecondary}
       heroImageAlt="Manicured residential lawn with a mulched ring where a tree was professionally removed"
@@ -195,8 +203,10 @@ export function EmergencyTreeRemovalPage() {
   return (
     <ServicePageTemplate
       title="Emergency Tree Removal"
-      metaTitle="Emergency Tree Removal in Niceville, FL | IGY6 Rooted"
-      metaDescription="24/7 emergency tree removal in Northwest Florida. Fallen trees, storm damage, urgent hazards. Call (518) 265-0275 immediately."
+      metaTitle="24/7 Emergency Tree Removal in Niceville, FL | IGY6 Rooted"
+      metaDescription="24/7 emergency tree removal in Northwest Florida. Storm damage, fallen trees, urgent hazards. Call (518) 265-0275 for immediate response."
+      ogImage="/og/emergency.jpg"
+      serviceKeyword="Emergency Tree Removal"
       heroText="24/7 rapid response for fallen trees, storm damage, and urgent safety hazards. Don't wait — call us immediately."
       heroImage={heroOption2}
       heroImageAlt="Tall mature pines and oaks in a Northwest Florida backyard following a storm"
@@ -239,8 +249,10 @@ export function DebrisRemovalPage() {
   return (
     <ServicePageTemplate
       title="Debris Removal"
-      metaTitle="Debris Removal Service in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional debris removal and cleanup in Northwest Florida. Storm damage, branches, limbs hauled away. Free estimates. Call (518) 265-0275."
+      metaTitle="Debris Removal in Niceville, FL | IGY6 Rooted"
+      metaDescription="Storm debris and yard waste removal across Northwest Florida. Branches, limbs, full cleanups, hauled away fast. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Debris Removal"
       heroText="Complete cleanup and hauling of branches, limbs, and storm debris from your property."
       heroImage={heroOption2}
       heroImageAlt="Northwest Florida residential property with mature trees and clean lawn after debris cleanup"
@@ -283,8 +295,10 @@ export function LandscapingPage() {
   return (
     <ServicePageTemplate
       title="Landscaping"
-      metaTitle="Landscaping Services in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional landscaping services in Northwest Florida. Design and installation for beautiful outdoor spaces. Free estimates. Call (518) 265-0275."
+      metaTitle="Landscaping in Niceville & Destin, FL | IGY6 Rooted"
+      metaDescription="Florida-friendly landscaping in Northwest Florida: beds, sod, mulch, planting, and curb-appeal renovation. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Landscaping"
       heroText="Transform your outdoor spaces with professional landscaping design and installation."
       heroImage={heroOption4}
       heroImageAlt="White Florida coastal home with lush landscaping, palms, and crisp green hedges"
@@ -327,8 +341,10 @@ export function LandClearingPage() {
   return (
     <ServicePageTemplate
       title="Land Clearing"
-      metaTitle="Land Clearing in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional land clearing in Northwest Florida. Prepare your property for construction or development. Free estimates. Call (518) 265-0275."
+      metaTitle="Land Clearing in Niceville & Crestview, FL | IGY6 Rooted"
+      metaDescription="Land clearing for builders and homeowners across Okaloosa & Walton County. Selective or full clearing, forestry mulching, hauling. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Land Clearing"
       heroText="Prepare your property for construction, development, or a fresh start with professional land clearing."
       heroImage={heroOption2}
       heroImageAlt="Open Northwest Florida property with mature trees ready for selective land clearing"
@@ -371,8 +387,10 @@ export function LotClearingPage() {
   return (
     <ServicePageTemplate
       title="Lot Clearing"
-      metaTitle="Lot Clearing in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional lot clearing in Northwest Florida. Complete residential and commercial lot preparation. Free estimates. Call (518) 265-0275."
+      metaTitle="Lot Clearing in Niceville & Destin, FL | IGY6 Rooted"
+      metaDescription="Build-ready lot clearing for residential and commercial sites in Northwest Florida. Trees, stumps, brush, debris removed. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Lot Clearing"
       heroText="Complete lot preparation including vegetation, stumps, and debris removal for residential and commercial properties."
       heroImage={heroOption2}
       heroImageAlt="Wooded Northwest Florida lot ready for residential or commercial lot clearing"
@@ -415,8 +433,10 @@ export function BrushRemovalPage() {
   return (
     <ServicePageTemplate
       title="Brush Removal"
-      metaTitle="Brush Removal in Niceville, FL | IGY6 Rooted"
-      metaDescription="Professional brush removal and clearing in Northwest Florida. Clear overgrown vegetation for safety and aesthetics. Free estimates. Call (518) 265-0275."
+      metaTitle="Brush Removal in Niceville & Crestview, FL | IGY6 Rooted"
+      metaDescription="Overgrown brush, vines, and underbrush cleared across Northwest Florida. Fire safety, defensible space, curb appeal. Free estimates — (518) 265-0275."
+      ogImage="/og/services.jpg"
+      serviceKeyword="Brush Removal"
       heroText="Clear overgrown brush and undergrowth for fire safety, aesthetics, and usable outdoor space."
       heroImage={heroOption2}
       heroImageAlt="Overgrown brush along a wooded Northwest Florida property line"
