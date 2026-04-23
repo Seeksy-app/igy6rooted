@@ -8,6 +8,11 @@ interface ServicePageTemplateProps {
   metaTitle: string;
   metaDescription: string;
   heroText: string;
+  heroImage: string;
+  heroImageAlt: string;
+  midImage: string;
+  midImageAlt: string;
+  midImageCaption?: string;
   sections: { heading: string; content: string }[];
   benefits: string[];
   relatedServices: { name: string; href: string }[];
@@ -18,6 +23,11 @@ export function ServicePageTemplate({
   metaTitle,
   metaDescription,
   heroText,
+  heroImage,
+  heroImageAlt,
+  midImage,
+  midImageAlt,
+  midImageCaption,
   sections,
   benefits,
   relatedServices,
@@ -26,6 +36,9 @@ export function ServicePageTemplate({
     window.scrollTo(0, 0);
   }, []);
 
+  // Insert mid image roughly halfway through sections
+  const midIndex = Math.max(1, Math.floor(sections.length / 2));
+
   return (
     <>
       <Helmet>
@@ -33,20 +46,36 @@ export function ServicePageTemplate({
         <meta name="description" content={metaDescription} />
       </Helmet>
 
-      {/* Hero */}
-      <section className="bg-[hsl(82,25%,22%)] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+      {/* Hero with image */}
+      <section className="relative bg-[hsl(82,25%,22%)] text-white overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src={heroImage}
+            alt={heroImageAlt}
+            className="w-full h-full object-cover"
+            width={1920}
+            height={1080}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to right, hsla(82,25%,12%,0.85), hsla(82,25%,12%,0.65), hsla(82,25%,12%,0.30))',
+            }}
+          />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <Link
             to="/services"
-            className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             All Services
           </Link>
           <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-6">
-            {title} in <span className="text-[hsl(82,50%,65%)]">Northwest Florida</span>
+            {title} in <span className="text-[hsl(82,50%,70%)]">Northwest Florida</span>
           </h1>
-          <p className="text-xl text-white/80 max-w-2xl">{heroText}</p>
+          <p className="text-xl text-white/85 max-w-2xl">{heroText}</p>
         </div>
       </section>
 
@@ -58,7 +87,27 @@ export function ServicePageTemplate({
               {sections.map((s, i) => (
                 <div key={i}>
                   <h2 className="text-2xl font-bold text-[hsl(82,25%,20%)] mb-4">{s.heading}</h2>
-                  <p className="text-[hsl(82,10%,40%)] leading-relaxed whitespace-pre-line">{s.content}</p>
+                  <p className="text-[hsl(82,10%,40%)] leading-relaxed whitespace-pre-line">
+                    {s.content}
+                  </p>
+
+                  {i === midIndex - 1 && (
+                    <figure className="mt-8">
+                      <img
+                        src={midImage}
+                        alt={midImageAlt}
+                        loading="lazy"
+                        width={1920}
+                        height={1080}
+                        className="w-full rounded-xl shadow-md border border-[hsl(82,15%,90%)]"
+                      />
+                      {midImageCaption && (
+                        <figcaption className="text-sm text-[hsl(82,10%,50%)] mt-2 italic">
+                          {midImageCaption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  )}
                 </div>
               ))}
             </div>
@@ -78,6 +127,13 @@ export function ServicePageTemplate({
                   className="flex items-center justify-center gap-2 bg-white text-[hsl(82,25%,25%)] px-6 py-3 rounded-lg font-bold hover:bg-white/90 transition-colors"
                 >
                   Get Free Estimate
+                </a>
+                <a
+                  href="tel:+15182650275"
+                  className="flex items-center justify-center gap-2 mt-3 text-white/90 hover:text-white text-sm font-semibold"
+                >
+                  <Phone className="h-4 w-4" />
+                  (518) 265-0275
                 </a>
               </div>
 

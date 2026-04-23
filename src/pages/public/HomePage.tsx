@@ -1,10 +1,23 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Phone, Shield, Star, TreePine, Clock, CheckCircle, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-tree-service.jpg";
+import heroOption1 from "@/assets/hero-option-1.jpg";
+import heroOption2 from "@/assets/hero-option-2.jpg";
+import heroOption3 from "@/assets/hero-option-3.jpg";
+import heroOption4 from "@/assets/hero-option-4.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
 
 const services = SITE_CONFIG.services;
+
+const heroImages = [
+  { src: heroImage, alt: "Beautifully manicured residential lawn and tree care in Northwest Florida" },
+  { src: heroOption1, alt: "Cozy Florida ranch home with healthy oak trees and a freshly mowed lawn" },
+  { src: heroOption2, alt: "Lush green backyard with mature pine and oak trees in Northwest Florida" },
+  { src: heroOption3, alt: "Striped manicured lawn next to a healthy oak tree at a residential home" },
+  { src: heroOption4, alt: "White coastal-style Florida home with palms and crisp green hedges" },
+];
 
 const testimonials = [
   {
@@ -28,6 +41,15 @@ const testimonials = [
 ];
 
 export default function HomePage() {
+  const [activeHero, setActiveHero] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveHero((i) => (i + 1) % heroImages.length);
+    }, 6000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -41,12 +63,17 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative">
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Beautifully manicured residential lawn and tree care in Northwest Florida"
-            className="w-full h-full object-cover"
-          />
+        <div className="absolute inset-0 overflow-hidden">
+          {heroImages.map((img, i) => (
+            <img
+              key={img.src}
+              src={img.src}
+              alt={img.alt}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out ${
+                i === activeHero ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ))}
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, hsla(82,25%,10%,0.55), hsla(82,25%,10%,0.40), hsla(82,25%,10%,0.05))' }} />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
