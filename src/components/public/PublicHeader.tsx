@@ -157,12 +157,13 @@ export function PublicHeader() {
                 )}
               </div>
 
-              <Link
-                to="/#reviews"
+              <a
+                href="/#reviews"
+                onClick={scrollToReviews}
                 className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,93%)]"
               >
                 Reviews
-              </Link>
+              </a>
               <Link
                 to="/contact"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -231,13 +232,13 @@ export function PublicHeader() {
                   {s.name}
                 </Link>
               ))}
-              <Link
-                to="/#reviews"
-                onClick={() => setMobileOpen(false)}
+              <a
+                href="/#reviews"
+                onClick={scrollToReviews}
                 className="block px-4 py-3 rounded-lg text-sm font-medium text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,95%)]"
               >
                 Reviews
-              </Link>
+              </a>
               <Link
                 to="/contact"
                 onClick={() => setMobileOpen(false)}
