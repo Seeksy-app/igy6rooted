@@ -215,17 +215,53 @@ export default function HomePage() {
             </div>
             <div className="relative">
               <div className="bg-[hsl(82,15%,93%)] rounded-2xl p-8 lg:p-10">
-                <blockquote className="text-lg italic text-[hsl(82,10%,30%)] mb-4">
-                  "He doesn't just show up with fancy equipment. He shows up with care, clean lines, and clear communication.
-                  That's why tree companies, churches, and homeowners all keep calling him back."
-                </blockquote>
-                <div className="flex items-center gap-2 mt-4">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-[hsl(45,90%,50%)] text-[hsl(45,90%,50%)]" />
-                    ))}
-                  </div>
-                </div>
+                {(() => {
+                  const top = google?.reviews
+                    ?.filter((r) => r.rating >= 5 && r.text.length > 60)
+                    .sort((a, b) => b.text.length - a.text.length)[0];
+                  if (top) {
+                    return (
+                      <>
+                        <blockquote className="text-lg italic text-[hsl(82,10%,30%)] mb-4 line-clamp-6">
+                          "{top.text}"
+                        </blockquote>
+                        <div className="flex">
+                          {[...Array(top.rating)].map((_, i) => (
+                            <Star key={i} className="h-4 w-4 fill-[hsl(45,90%,50%)] text-[hsl(45,90%,50%)]" />
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-3 mt-4">
+                          {top.photo && (
+                            <img
+                              src={top.photo}
+                              alt={top.author}
+                              className="h-10 w-10 rounded-full object-cover"
+                              loading="lazy"
+                              referrerPolicy="no-referrer"
+                            />
+                          )}
+                          <div>
+                            <p className="font-semibold text-[hsl(82,25%,20%)]">{top.author}</p>
+                            <p className="text-xs text-[hsl(82,10%,50%)]">Verified Google Review</p>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  }
+                  return (
+                    <>
+                      <blockquote className="text-lg italic text-[hsl(82,10%,30%)] mb-4">
+                        "He doesn't just show up with fancy equipment. He shows up with care, clean lines, and clear communication.
+                        That's why tree companies, churches, and homeowners all keep calling him back."
+                      </blockquote>
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-[hsl(45,90%,50%)] text-[hsl(45,90%,50%)]" />
+                        ))}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -247,22 +283,33 @@ export default function HomePage() {
               for residential and commercial properties across Okaloosa, Walton, Santa Rosa, and Escambia counties.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {services.map((service) => (
               <Link
                 key={service.href}
                 to={service.href}
-                className="bg-white rounded-xl p-6 border border-[hsl(82,15%,90%)] hover:border-[hsl(82,30%,50%)] hover:shadow-lg transition-all group"
+                className="group bg-white rounded-xl overflow-hidden border border-[hsl(82,15%,90%)] hover:border-[hsl(82,30%,50%)] hover:shadow-xl transition-all"
               >
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[hsl(82,30%,90%)] flex items-center justify-center shrink-0 group-hover:bg-[hsl(82,30%,40%)] transition-colors">
-                    <TreePine className="h-5 w-5 text-[hsl(82,30%,40%)] group-hover:text-white transition-colors" />
-                  </div>
-                  <div>
+                <div className="aspect-[4/3] overflow-hidden bg-[hsl(82,15%,93%)]">
+                  <img
+                    src={service.image}
+                    alt={service.name}
+                    width={800}
+                    height={600}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TreePine className="h-4 w-4 text-[hsl(82,30%,40%)]" />
                     <h3 className="font-semibold text-[hsl(82,25%,20%)] group-hover:text-[hsl(82,30%,35%)] transition-colors">
                       {service.name}
                     </h3>
-                    <p className="text-sm text-[hsl(82,10%,50%)] mt-1">{service.desc}</p>
+                  </div>
+                  <p className="text-sm text-[hsl(82,10%,50%)]">{service.desc}</p>
+                  <div className="flex items-center gap-1 mt-3 text-sm font-semibold text-[hsl(82,40%,35%)] opacity-0 group-hover:opacity-100 transition-opacity">
+                    Learn more <ArrowRight className="h-3.5 w-3.5" />
                   </div>
                 </div>
               </Link>
