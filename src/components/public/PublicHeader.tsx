@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -19,7 +19,23 @@ const services = [
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
+
+  const openServices = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setServicesOpen(true);
+  };
+  const scheduleCloseServices = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setServicesOpen(false), 180);
+  };
+
+  // Close on route change
+  useEffect(() => {
+    setServicesOpen(false);
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
   const isServicesActive = location.pathname.startsWith("/services");
@@ -83,11 +99,12 @@ export function PublicHeader() {
               {/* Services dropdown */}
               <div
                 className="relative"
-                onMouseEnter={() => setServicesOpen(true)}
-                onMouseLeave={() => setServicesOpen(false)}
+                onMouseEnter={openServices}
+                onMouseLeave={scheduleCloseServices}
               >
                 <Link
                   to="/services"
+                  onFocus={openServices}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
                     isServicesActive
                       ? "bg-[hsl(82,25%,28%)] text-white"
@@ -99,7 +116,13 @@ export function PublicHeader() {
                 </Link>
 
                 {servicesOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-[hsl(82,15%,90%)] py-2 z-50">
+                  <div
+                    className="absolute top-full left-0 w-64 bg-white rounded-xl shadow-xl border border-[hsl(82,15%,90%)] py-2 z-50"
+                    onMouseEnter={openServices}
+                    onMouseLeave={scheduleCloseServices}
+                  >
+                    {/* invisible bridge to prevent gap-flicker */}
+                    <span className="absolute -top-2 left-0 right-0 h-2" aria-hidden="true" />
                     {services.map((s) => (
                       <Link
                         key={s.href}
