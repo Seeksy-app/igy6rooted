@@ -44,7 +44,7 @@ export default function HomePage() {
         <div className="absolute inset-0">
           <img
             src={heroImage}
-            alt="Professional stump grinding service in Northwest Florida"
+            alt="Beautifully manicured residential lawn and tree care in Northwest Florida"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, hsla(82,25%,10%,0.55), hsla(82,25%,10%,0.40), hsla(82,25%,10%,0.05))' }} />
