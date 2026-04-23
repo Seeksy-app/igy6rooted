@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.zapier-canvassing-webhook]
 verify_jwt = false
+
+[functions.google-reviews]
+verify_jwt = false
