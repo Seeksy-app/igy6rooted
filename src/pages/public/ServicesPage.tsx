@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/public/SEOHead";
 import { TreePine, ArrowRight } from "lucide-react";
 
 const services = [
@@ -58,13 +58,23 @@ const services = [
 export default function ServicesPage() {
   return (
     <>
-      <Helmet>
-        <title>Tree Services in Niceville, FL | IGY6 Rooted</title>
-        <meta
-          name="description"
-          content="Complete tree services in Northwest Florida: tree removal, trimming, pruning, stump grinding, emergency services, land clearing, and more. Free estimates."
-        />
-      </Helmet>
+      <SEOHead
+        title="Tree Services in Niceville & Destin, FL | IGY6 Rooted"
+        description="Full-service tree care in Northwest Florida: removal, trimming, pruning, stump grinding, 24/7 emergency response, land & lot clearing. Free estimates — (518) 265-0275."
+        path="/services"
+        image="/og/services.jpg"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "IGY6 Rooted Tree Services",
+          itemListElement: services.map((s, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: s.name,
+            url: `https://igy6rooted.com${s.href}`,
+          })),
+        }}
+      />
 
       {/* Hero */}
       <section className="bg-[hsl(82,25%,22%)] text-white">

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { SITE_CONFIG } from "@/config/site.config";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/public/SEOHead";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
 
 export default function ContactPage() {
@@ -27,13 +27,18 @@ export default function ContactPage() {
 
   return (
     <>
-      <Helmet>
-        <title>Contact IGY6 Rooted | Free Tree Service Estimate in Niceville, FL</title>
-        <meta
-          name="description"
-          content="Contact IGY6 Rooted for a free tree service estimate in Northwest Florida. Call {SITE_CONFIG.business.phone}. Open 7 days a week, 7am-9pm. Emergency services available."
-        />
-      </Helmet>
+      <SEOHead
+        title="Contact IGY6 Rooted | Free Tree Service Estimate, Niceville FL"
+        description={`Contact IGY6 Rooted for a free tree service estimate in Northwest Florida. Call ${SITE_CONFIG.business.phone}. Open 7 days a week, 7am–9pm. Emergency services available.`}
+        path="/contact"
+        image="/og/contact.jpg"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          name: "Contact IGY6 Rooted",
+          url: "https://igy6rooted.com/contact",
+        }}
+      />
 
       {/* Hero */}
       <section className="bg-[hsl(82,25%,22%)] text-white">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEOHead } from "@/components/public/SEOHead";
+import { LocalBusinessSchema } from "@/components/public/LocalBusinessSchema";
 import { Phone, Shield, Star, TreePine, Clock, CheckCircle, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-tree-service.jpg";
 import heroOption1 from "@/assets/hero-option-1.jpg";
@@ -95,14 +96,13 @@ export default function HomePage() {
 
   return (
     <>
-      <Helmet>
-        <title>IGY6 Rooted | Stump Grinding & Tree Service in Niceville, FL</title>
-        <meta
-          name="description"
-          content="Veteran-owned tree service in Northwest Florida. Stump grinding, tree removal, trimming, pruning, and emergency services. Free estimates. Call (518) 265-0275."
-        />
-        <link rel="canonical" href="https://igy6rooted.com" />
-      </Helmet>
+      <SEOHead
+        title="Tree Service & Stump Grinding in Niceville, FL | IGY6 Rooted"
+        description="Veteran-owned tree service in Niceville, Destin & Fort Walton Beach, FL. Tree removal, stump grinding, trimming, and 24/7 emergency response. Free estimates — (518) 265-0275."
+        path="/"
+        image="/og/home.jpg"
+      />
+      <LocalBusinessSchema />
 
       {/* Hero */}
       <section className="relative">
