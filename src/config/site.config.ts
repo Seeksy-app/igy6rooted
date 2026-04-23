@@ -1,3 +1,12 @@
+import treeRemoval from "@/assets/services/tree-removal.jpg";
+import stumpGrinding from "@/assets/services/stump-grinding.jpg";
+import treeTrimming from "@/assets/services/tree-trimming.jpg";
+import treePruning from "@/assets/services/tree-pruning.jpg";
+import emergencyRemoval from "@/assets/services/emergency-removal.jpg";
+import landscaping from "@/assets/services/landscaping.jpg";
+import landClearing from "@/assets/services/land-clearing.jpg";
+import debrisRemoval from "@/assets/services/debris-removal.jpg";
+
 export const SITE_CONFIG = {
   business: {
     name: "IGY6 Rooted",
@@ -19,9 +28,13 @@ export const SITE_CONFIG = {
     body2: "Craig Orner brings military precision to every job. No gimmicks. Just professionalism.",
   },
   services: [
-    { name: "Tree Removal", href: "/services/tree-removal", desc: "Safe removal of hazardous trees." },
-    { name: "Stump Grinding", href: "/services/stump-grinding", desc: "Complete stump removal below ground level." },
-    { name: "Tree Trimming", href: "/services/tree-trimming", desc: "Professional shaping for healthy trees." },
-    { name: "Emergency Tree Removal", href: "/services/emergency-tree-removal", desc: "24/7 storm damage response." },
+    { name: "Tree Removal", href: "/services/tree-removal", desc: "Safe removal of hazardous trees.", image: treeRemoval },
+    { name: "Stump Grinding", href: "/services/stump-grinding", desc: "Complete stump removal below ground level.", image: stumpGrinding },
+    { name: "Tree Trimming", href: "/services/tree-trimming", desc: "Professional shaping for healthy trees.", image: treeTrimming },
+    { name: "Tree Pruning", href: "/services/tree-pruning", desc: "Precision pruning for growth and structure.", image: treePruning },
+    { name: "Emergency Tree Removal", href: "/services/emergency-tree-removal", desc: "24/7 storm damage response.", image: emergencyRemoval },
+    { name: "Landscaping", href: "/services/landscaping", desc: "Mulch, shrubs, and curb appeal.", image: landscaping },
+    { name: "Land Clearing", href: "/services/land-clearing", desc: "Lot prep and brush clearing.", image: landClearing },
+    { name: "Debris Removal", href: "/services/debris-removal", desc: "Full cleanup and haul-away.", image: debrisRemoval },
   ],
 };
