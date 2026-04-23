@@ -113,22 +113,6 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-[hsl(82,25%,28%)] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h2 className="text-3xl font-bold mb-4">Not Sure What You Need?</h2>
-          <p className="text-white/80 mb-8 max-w-xl mx-auto">
-            Call us for a free assessment. We'll come to your property, evaluate the situation, and give you an honest recommendation.
-          </p>
-          <a
-            href="tel:+15182650275"
-            className="inline-flex items-center gap-2 bg-white text-[hsl(82,25%,25%)] px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/90 transition-colors"
-          >
-            <Phone className="h-5 w-5" />
-            (518) 265-0275
-          </a>
-        </div>
-      </section>
     </>
   );
 }
