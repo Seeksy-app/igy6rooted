@@ -174,7 +174,7 @@ const ROUTE_META = {
 const SITE_URL = "https://igy6rooted.com";
 
 function injectMeta(html, route, meta) {
-  const canonical = `${SITE_URL}${route}`;
+  const canonical = meta.canonical || `${SITE_URL}${route}`;
   const ogImageAbs = meta.ogImage.startsWith("http")
     ? meta.ogImage
     : `${SITE_URL}${meta.ogImage}`;
