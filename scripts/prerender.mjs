@@ -231,6 +231,60 @@ async function writeRouteHtml(route, html) {
   await writeFile(join(dir, "index.html"), html, "utf8");
 }
 
+/**
+ * Fetch published seo_pages rows from Supabase and convert into a
+ * route → meta map. Falls back to inline ROUTE_META on any failure so the
+ * build never breaks because of transient DB issues.
+ *
+ * Only `status = 'published'` rows are used — that matches the public RLS
+ * policy and the in-app SEO Manager's notion of "shipped" metadata.
+ */
+async function fetchRouteMetaFromDb() {
+  const url = process.env.VITE_SUPABASE_URL;
+  const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) {
+    console.warn("  ! Supabase env vars not set — using inline ROUTE_META fallback.");
+    return {};
+  }
+  try {
+    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const { data, error } = await supabase
+      .from("seo_pages")
+      .select("route_path, meta_title, meta_description, og_image_url, canonical_url, status")
+      .eq("status", "published");
+    if (error) {
+      console.warn(`  ! seo_pages fetch failed (${error.message}) — using inline fallback.`);
+      return {};
+    }
+    const map = {};
+    for (const row of data || []) {
+      if (!row.route_path) continue;
+      map[row.route_path] = {
+        title: row.meta_title || undefined,
+        description: row.meta_description || undefined,
+        ogImage: row.og_image_url || undefined,
+        canonical: row.canonical_url || undefined,
+      };
+    }
+    console.log(`  ✓ Loaded ${Object.keys(map).length} published seo_pages rows from DB.`);
+    return map;
+  } catch (err) {
+    console.warn(`  ! seo_pages fetch threw (${err.message}) — using inline fallback.`);
+    return {};
+  }
+}
+
+function mergeMeta(route, dbMeta, inlineMeta) {
+  const db = dbMeta[route] || {};
+  const inline = inlineMeta[route] || {};
+  return {
+    title: db.title || inline.title,
+    description: db.description || inline.description,
+    ogImage: db.ogImage || inline.ogImage,
+    canonical: db.canonical, // optional override; injectMeta defaults to SITE_URL+route
+  };
+}
+
 async function main() {
   if (!existsSync(indexHtmlPath)) {
     console.error(`✖ ${indexHtmlPath} not found. Run \`vite build\` first.`);
@@ -240,16 +294,20 @@ async function main() {
   await setupDomGlobals();
   const baseHtml = await readFile(indexHtmlPath, "utf8");
 
+  console.log(`→ Fetching published SEO metadata from seo_pages…`);
+  const dbMeta = await fetchRouteMetaFromDb();
+
   console.log(`→ Pre-rendering ${PUBLIC_ROUTES.length} public routes…`);
   for (const route of PUBLIC_ROUTES) {
-    const meta = ROUTE_META[route];
-    if (!meta) {
-      console.warn(`  · ${route}  (no meta — skipping)`);
+    const meta = mergeMeta(route, dbMeta, ROUTE_META);
+    if (!meta.title || !meta.description || !meta.ogImage) {
+      console.warn(`  · ${route}  (incomplete meta — skipping)`);
       continue;
     }
     const html = injectMeta(baseHtml, route, meta);
     await writeRouteHtml(route, html);
-    console.log(`  ✓ ${route}`);
+    const source = dbMeta[route] ? "db" : "inline";
+    console.log(`  ✓ ${route}  [${source}]`);
   }
   console.log("✓ Pre-render complete.");
 }
