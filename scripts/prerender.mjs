@@ -33,6 +33,10 @@ import { existsSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { JSDOM } from "jsdom";
+import { createClient } from "@supabase/supabase-js";
+import { config as loadEnv } from "dotenv";
+
+loadEnv({ path: resolve(dirname(fileURLToPath(import.meta.url)), "../.env") });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
