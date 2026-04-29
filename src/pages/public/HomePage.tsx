@@ -63,8 +63,6 @@ const testimonials = [
 export default function HomePage() {
   const [activeHero, setActiveHero] = useState(0);
   const [google, setGoogle] = useState<GoogleReviewsPayload | null>(null);
-  const factLocation = "the Niceville area";
-
   useEffect(() => {
     const id = setInterval(() => {
       setActiveHero((i) => (i + 1) % heroImages.length);
