@@ -12,6 +12,7 @@ import heroCraigBucket from "@/assets/hero-bucket-removal.jpg";
 import heroCraigTrim from "@/assets/hero-bucket-trim.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
 import { supabase } from "@/integrations/supabase/client";
+import { useVisitorCity } from "@/hooks/useVisitorCity";
 
 type GoogleReview = {
   author: string;
@@ -63,6 +64,8 @@ const testimonials = [
 export default function HomePage() {
   const [activeHero, setActiveHero] = useState(0);
   const [google, setGoogle] = useState<GoogleReviewsPayload | null>(null);
+  const { city, region } = useVisitorCity();
+  const factLocation = city || region || "Northwest Florida";
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -204,10 +207,9 @@ export default function HomePage() {
                       {service.name}
                     </h3>
                   </div>
-                  <p className="text-sm text-[hsl(82,10%,50%)]">{service.desc}</p>
                   {(service as any).fact && (
-                    <p className="mt-2 text-xs italic text-[hsl(82,25%,35%)] leading-snug">
-                      {(service as any).fact}
+                    <p className="text-[15px] text-[hsl(82,15%,30%)] leading-snug">
+                      {((service as any).fact as string).replace(/\{location\}/g, factLocation)}
                     </p>
                   )}
                   <div className="flex items-center gap-1 mt-3 text-sm font-semibold text-[hsl(82,40%,35%)] opacity-0 group-hover:opacity-100 transition-opacity">
