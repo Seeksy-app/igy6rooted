@@ -63,8 +63,6 @@ const testimonials = [
 export default function HomePage() {
   const [activeHero, setActiveHero] = useState(0);
   const [google, setGoogle] = useState<GoogleReviewsPayload | null>(null);
-  const factLocation = "the Niceville area";
-
   useEffect(() => {
     const id = setInterval(() => {
       setActiveHero((i) => (i + 1) % heroImages.length);
@@ -207,7 +205,7 @@ export default function HomePage() {
                   </div>
                   {(service as any).fact && (
                     <p className="text-[15px] text-[hsl(82,15%,30%)] leading-snug">
-                      {((service as any).fact as string).replace(/\{location\}/g, factLocation)}
+                      {(service as any).fact}
                     </p>
                   )}
                   <div className="flex items-center gap-1 mt-3 text-sm font-semibold text-[hsl(82,40%,35%)] opacity-0 group-hover:opacity-100 transition-opacity">
