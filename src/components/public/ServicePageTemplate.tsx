@@ -104,6 +104,9 @@ export function ServicePageTemplate({
             className="w-full h-full object-cover"
             width={1920}
             height={1080}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
           />
           <div
             className="absolute inset-0"
