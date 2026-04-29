@@ -193,6 +193,7 @@ export default function HomePage() {
                     height={600}
                     loading="lazy"
                     decoding="async"
+                    style={{ filter: "saturate(0.85) contrast(0.95) brightness(0.98)" }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
