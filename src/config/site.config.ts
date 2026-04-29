@@ -17,8 +17,8 @@ export const SITE_CONFIG = {
     jobberUrl: "https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new",
   },
   hero: {
-    title: "Veteran-Owned Tree Service & Stump Grinding in Niceville, Destin & Fort Walton Beach",
-    subtitle: "Military precision and respect for your yard — from routine pruning to emergency storm removal across Northwest Florida.",
+    title: "Full-Service Tree Removal, Pruning & Stump Grinding",
+    subtitle: "From routine trimming to emergency storm response, we handle every aspect of tree care for residential and commercial properties across Okaloosa, Walton, Santa Rosa, and Escambia counties.",
     cta1: "Get Free Estimate",
     cta2: "Our Services",
   },
