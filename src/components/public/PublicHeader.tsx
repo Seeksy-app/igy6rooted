@@ -18,18 +18,9 @@ const services = [
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const servicesRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-
-  const openServices = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setServicesOpen(true);
-  };
-  const scheduleCloseServices = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setServicesOpen(false), 180);
-  };
 
   const scrollToSection = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
@@ -64,6 +55,25 @@ export function PublicHeader() {
     setServicesOpen(false);
     setMobileOpen(false);
   }, [location.pathname]);
+
+  // Close dropdown on outside click / Escape
+  useEffect(() => {
+    if (!servicesOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (servicesRef.current && !servicesRef.current.contains(e.target as Node)) {
+        setServicesOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setServicesOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [servicesOpen]);
 
   const isActive = (path: string) => location.pathname === path;
   const isServicesActive = location.pathname.startsWith("/services");
@@ -124,38 +134,42 @@ export function PublicHeader() {
                 About
               </Link>
 
-              {/* Services dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={openServices}
-                onMouseLeave={scheduleCloseServices}
-              >
-                <a
-                  href="/#services"
-                  onClick={scrollToServices}
-                  onFocus={openServices}
+              {/* Services dropdown — click-to-toggle for stable behavior */}
+              <div className="relative" ref={servicesRef}>
+                <button
+                  type="button"
+                  onClick={() => setServicesOpen((v) => !v)}
+                  aria-expanded={servicesOpen}
+                  aria-haspopup="menu"
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${
-                    isServicesActive
+                    isServicesActive || servicesOpen
                       ? "bg-[hsl(82,25%,28%)] text-white"
                       : "text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,93%)]"
                   }`}
                 >
                   Services
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </a>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${servicesOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
 
                 {servicesOpen && (
                   <div
-                    className="absolute top-full left-0 w-64 bg-white rounded-xl shadow-xl border border-[hsl(82,15%,90%)] py-2 z-50"
-                    onMouseEnter={openServices}
-                    onMouseLeave={scheduleCloseServices}
+                    role="menu"
+                    className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-[hsl(82,15%,90%)] py-2 z-50"
                   >
-                    {/* invisible bridge to prevent gap-flicker */}
-                    <span className="absolute -top-2 left-0 right-0 h-2" aria-hidden="true" />
+                    <Link
+                      to="/services"
+                      onClick={() => setServicesOpen(false)}
+                      className="block px-4 py-2.5 text-sm font-semibold text-[hsl(82,25%,28%)] hover:bg-[hsl(82,15%,95%)] border-b border-[hsl(82,15%,92%)] mb-1"
+                    >
+                      All Services →
+                    </Link>
                     {services.map((s) => (
                       <Link
                         key={s.href}
                         to={s.href}
+                        onClick={() => setServicesOpen(false)}
                         className={`block px-4 py-2.5 text-sm transition-colors ${
                           isActive(s.href)
                             ? "bg-[hsl(82,25%,28%)] text-white"
