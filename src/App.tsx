@@ -21,6 +21,8 @@ import ServicesPage from "@/pages/public/ServicesPage";
 import ContactPage from "@/pages/public/ContactPage";
 import ReferralLandingPage from "@/pages/public/ReferralLandingPage";
 import ArticlePage from "@/pages/public/ArticlePage";
+import BlogIndexPage from "@/pages/public/BlogIndexPage";
+import BlogPostPage from "@/pages/public/BlogPostPage";
 import {
   TreeRemovalPage,
   TreeTrimmingPage,
@@ -184,6 +186,8 @@ function AppRoutes() {
       <Route path="/services/lawn-care" element={<PublicLayout><LawnCarePage /></PublicLayout>} />
       <Route path="/services/property-maintenance" element={<PublicLayout><PropertyMaintenancePage /></PublicLayout>} />
       <Route path="/articles/:slug" element={<PublicLayout><ArticlePage /></PublicLayout>} />
+      <Route path="/blog" element={<PublicLayout><BlogIndexPage /></PublicLayout>} />
+      <Route path="/blog/:slug" element={<PublicLayout><BlogPostPage /></PublicLayout>} />
 
       {/* Auth routes */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
