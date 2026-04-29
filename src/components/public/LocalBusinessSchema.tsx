@@ -65,7 +65,6 @@ export function LocalBusinessSchema() {
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Stump Grinding" } },
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Emergency Tree Removal" } },
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Debris Removal" } },
-        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Landscaping" } },
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Land Clearing" } },
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Lot Clearing" } },
         { "@type": "Offer", itemOffered: { "@type": "Service", name: "Brush Removal" } },

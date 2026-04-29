@@ -180,7 +180,7 @@ export default function HomePage() {
                 <div className="aspect-[4/3] overflow-hidden bg-[hsl(82,15%,93%)]">
                   <img
                     src={service.image}
-                    alt={service.name}
+                    alt={(service as any).alt ?? service.name}
                     width={800}
                     height={600}
                     loading="lazy"
