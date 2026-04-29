@@ -63,8 +63,7 @@ const testimonials = [
 export default function HomePage() {
   const [activeHero, setActiveHero] = useState(0);
   const [google, setGoogle] = useState<GoogleReviewsPayload | null>(null);
-  const { city, region } = useVisitorCity();
-  const factLocation = city || region || "Northwest Florida";
+  const factLocation = "the Niceville area";
 
   useEffect(() => {
     const id = setInterval(() => {
