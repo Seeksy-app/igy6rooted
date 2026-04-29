@@ -12,7 +12,6 @@ import heroCraigBucket from "@/assets/hero-bucket-removal.jpg";
 import heroCraigTrim from "@/assets/hero-bucket-trim.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
 import { supabase } from "@/integrations/supabase/client";
-import { useVisitorCity } from "@/hooks/useVisitorCity";
 
 type GoogleReview = {
   author: string;
@@ -64,8 +63,7 @@ const testimonials = [
 export default function HomePage() {
   const [activeHero, setActiveHero] = useState(0);
   const [google, setGoogle] = useState<GoogleReviewsPayload | null>(null);
-  const { city, region } = useVisitorCity();
-  const factLocation = city || region || "Northwest Florida";
+  const factLocation = "the Niceville area";
 
   useEffect(() => {
     const id = setInterval(() => {
