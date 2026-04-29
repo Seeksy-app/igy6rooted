@@ -15,6 +15,12 @@ import imgBrushRemoval from "@/assets/services/client/brush-removal.jpg";
 import imgDebrisRemoval from "@/assets/services/client/debris-removal.jpg";
 import imgPropertyMaintenance from "@/assets/services/client/property-maintenance.jpg";
 
+// Faded stock-style header backgrounds (AI-generated, not Craig's photos)
+import headerTrees from "@/assets/article-headers/header-trees.jpg";
+import headerGround from "@/assets/article-headers/header-ground.jpg";
+import headerLawn from "@/assets/article-headers/header-lawn.jpg";
+import headerStorm from "@/assets/article-headers/header-storm.jpg";
+
 const defaultBenefits = [
   "Veteran-owned & operated",
   "Fully licensed & insured",
