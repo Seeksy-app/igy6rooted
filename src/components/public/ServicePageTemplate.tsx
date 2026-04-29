@@ -16,6 +16,8 @@ interface ServicePageTemplateProps {
   sections: { heading: string; content: string }[];
   benefits: string[];
   relatedServices: { name: string; href: string }[];
+  /** Optional faded stock background image for the article header */
+  headerImage?: string;
   /** Path-only OG image (defaults to /og/services.jpg) */
   ogImage?: string;
   /** Primary keyword for service-specific JSON-LD */
@@ -35,6 +37,7 @@ export function ServicePageTemplate({
   sections,
   benefits,
   relatedServices,
+  headerImage,
   ogImage = "/og/services.jpg",
   serviceKeyword,
 }: ServicePageTemplateProps) {
@@ -95,9 +98,31 @@ export function ServicePageTemplate({
       />
 
 
-      {/* Header (no background image) */}
-      <section className="bg-white border-b border-[hsl(82,15%,90%)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      {/* Header — optional faded stock background */}
+      <section className="relative bg-white border-b border-[hsl(82,15%,90%)] overflow-hidden">
+        {headerImage && (
+          <>
+            <img
+              src={headerImage}
+              alt=""
+              aria-hidden="true"
+              width={1920}
+              height={768}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="absolute inset-0 w-full h-full object-cover opacity-20"
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(to right, hsla(0,0%,100%,0.92), hsla(0,0%,100%,0.78), hsla(0,0%,100%,0.92))',
+              }}
+            />
+          </>
+        )}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <Link
             to="/services"
             className="inline-flex items-center gap-2 text-sm text-[hsl(82,10%,45%)] hover:text-[hsl(82,25%,25%)] transition-colors mb-6"
@@ -113,7 +138,6 @@ export function ServicePageTemplate({
               height={160}
               loading="eager"
               decoding="async"
-              fetchPriority="high"
               className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-lg shadow-sm border border-[hsl(82,15%,90%)] shrink-0 mb-4 sm:mb-0"
             />
             <div>
