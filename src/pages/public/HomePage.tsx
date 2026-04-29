@@ -116,7 +116,12 @@ export default function HomePage() {
               key={img.src}
               src={img.src}
               alt={img.alt}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out ${
+              width={1920}
+              height={1080}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+              {...(i === 0 ? { fetchPriority: "high" as const } : {})}
+              className={`absolute inset-0 w-full h-full object-cover will-change-[opacity] transition-opacity duration-[2000ms] ease-in-out ${
                 i === activeHero ? "opacity-100" : "opacity-0"
               }`}
             />
