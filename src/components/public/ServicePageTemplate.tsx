@@ -37,6 +37,7 @@ export function ServicePageTemplate({
   sections,
   benefits,
   relatedServices,
+  headerImage,
   ogImage = "/og/services.jpg",
   serviceKeyword,
 }: ServicePageTemplateProps) {
