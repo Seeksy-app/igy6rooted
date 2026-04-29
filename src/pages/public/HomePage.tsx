@@ -33,11 +33,10 @@ const services = SITE_CONFIG.services;
 const heroImages = [
   { src: heroImage, alt: "Beautifully manicured residential lawn and tree care in Northwest Florida" },
   { src: heroCraigBucket, alt: "IGY6 Rooted bucket lift positioned beside a Niceville home for safe tree removal" },
-  { src: heroOption1, alt: "Cozy Florida ranch home with healthy oak trees and a freshly mowed lawn" },
   { src: heroCraigTrim, alt: "IGY6 Rooted crew member trimming high branches from a bucket lift over a Florida home" },
-  { src: heroOption2, alt: "Lush green backyard with mature pine and oak trees in Northwest Florida" },
-  { src: heroOption3, alt: "Striped manicured lawn next to a healthy oak tree at a residential home" },
   { src: heroOption4, alt: "White coastal-style Florida home with palms and crisp green hedges" },
+  { src: heroOption3, alt: "Striped manicured lawn next to a healthy oak tree at a residential home" },
+  { src: heroOption2, alt: "Lush green backyard with mature pine and oak trees in Northwest Florida" },
 ];
 
 const testimonials = [
