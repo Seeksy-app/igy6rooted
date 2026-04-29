@@ -108,18 +108,18 @@ export default function HomePage() {
       <LocalBusinessSchema />
 
       {/* Hero */}
-      <section className="relative">
-        <div className="absolute inset-0 overflow-hidden">
+      <section className="relative bg-[hsl(82,25%,18%)]">
+        <div className="absolute inset-0 overflow-hidden bg-[hsl(82,25%,18%)]">
           {heroImages.map((img, i) => (
             <img
               key={img.src}
               src={img.src}
               alt={img.alt}
-              width={1920}
-              height={1080}
-              loading={i === 0 ? "eager" : "lazy"}
+              width={1600}
+              height={900}
+              loading="eager"
               decoding="async"
-              {...(i === 0 ? { fetchPriority: "high" as const } : {})}
+              fetchPriority={i === 0 ? ("high" as const) : ("low" as const)}
               className={`absolute inset-0 w-full h-full object-cover will-change-[opacity] transition-opacity duration-[2000ms] ease-in-out ${
                 i === activeHero ? "opacity-100" : "opacity-0"
               }`}
