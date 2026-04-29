@@ -2,18 +2,19 @@ import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/public/SEOHead";
 import { TreePine, ArrowRight, Phone } from "lucide-react";
 
-import treeRemoval from "@/assets/services/tree-removal.jpg";
-import treeTrimming from "@/assets/services/tree-trimming.jpg";
-import treePruning from "@/assets/services/tree-pruning.jpg";
-import stumpGrinding from "@/assets/services/stump-grinding.jpg";
-import emergencyRemoval from "@/assets/services/emergency-removal.jpg";
-import debrisRemoval from "@/assets/services/debris-removal.jpg";
-import lawnCare from "@/assets/services/lawn-care.jpg";
-import propertyMaintenance from "@/assets/services/property-maintenance.jpg";
-import landscaping from "@/assets/services/landscaping.jpg";
-import landClearing from "@/assets/services/land-clearing.jpg";
-import lotClearing from "@/assets/services/lot-clearing.jpg";
-import brushRemoval from "@/assets/services/brush-removal.jpg";
+import treeRemoval from "@/assets/services/client/tree-removal.jpg";
+import treeTrimming from "@/assets/services/client/tree-trimming.jpg";
+import treePruning from "@/assets/services/client/tree-pruning.jpg";
+import stumpGrinding from "@/assets/services/client/stump-grinding-1.jpg";
+import stumpGrindingAlt from "@/assets/services/client/stump-grinding-2.jpg";
+import emergencyRemoval from "@/assets/services/client/emergency-removal.jpg";
+import debrisRemoval from "@/assets/services/client/debris-removal.jpg";
+import propertyMaintenance from "@/assets/services/client/property-maintenance.jpg";
+import landscaping from "@/assets/services/client/property-maintenance.jpg";
+import landClearing from "@/assets/services/client/land-clearing.jpg";
+import lotClearing from "@/assets/services/client/stump-grinding-2.jpg";
+import brushRemoval from "@/assets/services/client/brush-removal.jpg";
+const lawnCare = propertyMaintenance;
 
 const services = [
   { name: "Tree Removal", href: "/services/tree-removal", image: treeRemoval, desc: "Safe, professional removal of hazardous, diseased, or unwanted trees. Complete cleanup included." },

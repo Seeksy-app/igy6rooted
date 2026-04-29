@@ -1,11 +1,11 @@
-import treeRemoval from "@/assets/services/tree-removal.jpg";
-import stumpGrinding from "@/assets/services/stump-grinding.jpg";
-import treeTrimming from "@/assets/services/tree-trimming.jpg";
-import treePruning from "@/assets/services/tree-pruning.jpg";
-import emergencyRemoval from "@/assets/services/emergency-removal.jpg";
-import landscaping from "@/assets/services/landscaping.jpg";
-import landClearing from "@/assets/services/land-clearing.jpg";
-import debrisRemoval from "@/assets/services/debris-removal.jpg";
+import treeRemoval from "@/assets/services/client/tree-removal.jpg";
+import stumpGrinding from "@/assets/services/client/stump-grinding-1.jpg";
+import treeTrimming from "@/assets/services/client/tree-trimming.jpg";
+import treePruning from "@/assets/services/client/tree-pruning.jpg";
+import emergencyRemoval from "@/assets/services/client/emergency-removal.jpg";
+import landscaping from "@/assets/services/client/property-maintenance.jpg";
+import landClearing from "@/assets/services/client/land-clearing.jpg";
+import debrisRemoval from "@/assets/services/client/debris-removal.jpg";
 
 export const SITE_CONFIG = {
   business: {
