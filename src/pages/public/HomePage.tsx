@@ -12,7 +12,6 @@ import heroCraigBucket from "@/assets/hero-bucket-removal.jpg";
 import heroCraigTrim from "@/assets/hero-bucket-trim.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
 import { supabase } from "@/integrations/supabase/client";
-import { useVisitorCity } from "@/hooks/useVisitorCity";
 
 type GoogleReview = {
   author: string;
