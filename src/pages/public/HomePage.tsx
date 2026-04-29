@@ -8,8 +8,8 @@ import heroOption1 from "@/assets/hero-option-1.jpg";
 import heroOption2 from "@/assets/hero-option-2.jpg";
 import heroOption3 from "@/assets/hero-option-3.jpg";
 import heroOption4 from "@/assets/hero-option-4.jpg";
-import heroCraigBucket from "@/assets/services/client/bucket-lift-house.jpg";
-import heroCraigTrim from "@/assets/services/client/bucket-lift-trim.jpg";
+import heroCraigBucket from "@/assets/hero-bucket-removal.jpg";
+import heroCraigTrim from "@/assets/hero-bucket-trim.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
 import { supabase } from "@/integrations/supabase/client";
 
