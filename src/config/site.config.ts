@@ -6,6 +6,12 @@ import emergencyRemoval from "@/assets/services/client/emergency-removal.jpg";
 import landscaping from "@/assets/services/client/property-maintenance.jpg";
 import landClearing from "@/assets/services/client/land-clearing.jpg";
 import debrisRemoval from "@/assets/services/client/debris-removal.jpg";
+import bucketLiftHouse from "@/assets/services/client/bucket-lift-house.jpg";
+import stumpGrinding3 from "@/assets/services/client/stump-grinding-3.jpg";
+import climberPine from "@/assets/services/client/climber-pine.jpg";
+import bucketLiftTrim from "@/assets/services/client/bucket-lift-trim.jpg";
+import skidSteer from "@/assets/services/client/skid-steer.jpg";
+import brushRemoval from "@/assets/services/client/brush-removal.jpg";
 
 export const SITE_CONFIG = {
   business: {
@@ -30,11 +36,15 @@ export const SITE_CONFIG = {
   services: [
     { name: "Tree Removal", href: "/services/tree-removal", desc: "Safe removal of hazardous trees.", image: treeRemoval },
     { name: "Stump Grinding", href: "/services/stump-grinding", desc: "Complete stump removal below ground level.", image: stumpGrinding },
-    { name: "Tree Trimming", href: "/services/tree-trimming", desc: "Professional shaping for healthy trees.", image: treeTrimming },
+    { name: "Tree Trimming", href: "/services/tree-trimming", desc: "Professional shaping for healthy trees.", image: bucketLiftTrim },
     { name: "Tree Pruning", href: "/services/tree-pruning", desc: "Precision pruning for growth and structure.", image: treePruning },
     { name: "Emergency Tree Removal", href: "/services/emergency-tree-removal", desc: "24/7 storm damage response.", image: emergencyRemoval },
+    { name: "Climbing & Rigging", href: "/services/tree-removal", desc: "Skilled climbers for tight, high-risk jobs.", image: climberPine },
+    { name: "Bucket Truck Service", href: "/services/tree-trimming", desc: "Reach high canopies safely and efficiently.", image: bucketLiftHouse },
+    { name: "Stump Removal", href: "/services/stump-grinding", desc: "Below-grade grinding for a flat, usable yard.", image: stumpGrinding3 },
     { name: "Landscaping", href: "/services/landscaping", desc: "Mulch, shrubs, and curb appeal.", image: landscaping },
-    { name: "Land Clearing", href: "/services/land-clearing", desc: "Lot prep and brush clearing.", image: landClearing },
+    { name: "Land Clearing", href: "/services/land-clearing", desc: "Lot prep and brush clearing with skid steer.", image: skidSteer },
+    { name: "Brush Removal", href: "/services/brush-removal", desc: "Clear overgrowth and undergrowth fast.", image: brushRemoval },
     { name: "Debris Removal", href: "/services/debris-removal", desc: "Full cleanup and haul-away.", image: debrisRemoval },
   ],
 };
