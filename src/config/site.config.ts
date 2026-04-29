@@ -17,8 +17,8 @@ export const SITE_CONFIG = {
     jobberUrl: "https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new",
   },
   hero: {
-    title: "Tree Service, Lawn Care & Landscaping in Niceville, Fort Walton Beach, and Surrounding Areas",
-    subtitle: "From safer trees to healthier grass, we help make your home look better and feel better.",
+    title: "Veteran-Owned Tree Service & Stump Grinding in Niceville, Destin & Fort Walton Beach",
+    subtitle: "Military precision and respect for your yard — from routine pruning to emergency storm removal across Northwest Florida.",
     cta1: "Get Free Estimate",
     cta2: "Our Services",
   },
