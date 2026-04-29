@@ -38,6 +38,7 @@ export function TreeRemovalPage() {
       metaDescription="Safe, professional tree removal in Niceville, Destin & Fort Walton Beach. Licensed, insured, veteran-owned. Free estimates — call (518) 265-0275."
       ogImage="/og/tree-removal.jpg"
       serviceKeyword="Tree Removal"
+      headerImage={headerTrees}
       heroText="Safe, professional removal of hazardous, diseased, or unwanted trees — with complete cleanup included."
       heroImage={imgTreeRemoval}
       heroImageAlt="Mature oak trees framing a Florida residential home before tree removal"
@@ -84,6 +85,7 @@ export function TreeTrimmingPage() {
       metaDescription="Professional tree trimming in Niceville, Destin & Fort Walton Beach. Shape trees, prevent storm damage, improve health. Free estimates — (518) 265-0275."
       ogImage="/og/tree-trimming.jpg"
       serviceKeyword="Tree Trimming"
+      headerImage={headerTrees}
       heroText="Keep your trees healthy, safe, and looking their best with professional trimming services."
       heroImage={imgBucketLiftTrim}
       heroImageAlt="Mature pine and oak trees over a manicured Florida backyard lawn"
@@ -130,6 +132,7 @@ export function TreePruningPage() {
       metaDescription="Expert tree pruning in Northwest Florida. Remove dead and diseased branches, extend tree life, improve structure. Free estimates — (518) 265-0275."
       ogImage="/og/tree-pruning.jpg"
       serviceKeyword="Tree Pruning"
+      headerImage={headerTrees}
       heroText="Specialized care that targets the health of your trees — remove disease, improve circulation, and strengthen growth."
       heroImage={imgTreePruning}
       heroImageAlt="Healthy mature oak tree above a striped, professionally maintained lawn"
@@ -176,6 +179,7 @@ export function StumpGrindingPage() {
       metaDescription="Professional stump grinding in Niceville, Destin & Fort Walton Beach. Grind below grade for a clean, level yard. Free estimates — (518) 265-0275."
       ogImage="/og/stump-grinding.jpg"
       serviceKeyword="Stump Grinding"
+      headerImage={headerGround}
       heroText="Our specialty — grind stumps below ground level for a clean, flat, usable yard."
       heroImage={imgStumpGrinding1}
       heroImageAlt="Manicured residential lawn with a mulched ring where a tree was professionally removed"
@@ -222,6 +226,7 @@ export function EmergencyTreeRemovalPage() {
       metaDescription="24/7 emergency tree removal in Northwest Florida. Storm damage, fallen trees, urgent hazards. Call (518) 265-0275 for immediate response."
       ogImage="/og/emergency.jpg"
       serviceKeyword="Emergency Tree Removal"
+      headerImage={headerStorm}
       heroText="24/7 rapid response for fallen trees, storm damage, and urgent safety hazards. Don't wait — call us immediately."
       heroImage={imgEmergencyRemoval}
       heroImageAlt="Tall mature pines and oaks in a Northwest Florida backyard following a storm"
@@ -268,6 +273,7 @@ export function DebrisRemovalPage() {
       metaDescription="Fast yard debris and storm cleanup across Niceville, Destin, Fort Walton Beach & Crestview. Branch hauling, full property cleanup, post-hurricane response. Call (518) 265-0275."
       ogImage="/og/debris-removal.jpg"
       serviceKeyword="Debris Removal & Storm Cleanup"
+      headerImage={headerStorm}
       heroText="Branches down, limbs piled up, post-storm mess across the yard? We haul it all — fast, complete, and on the schedule the city can't match."
       heroImage={imgDebrisRemoval}
       heroImageAlt="Northwest Florida residential property with mature trees and clean lawn after debris cleanup"
@@ -328,6 +334,7 @@ export function LandscapingPage() {
       metaDescription="Florida-friendly landscaping in Northwest Florida: beds, sod, mulch, planting, and curb-appeal renovation. Free estimates — (518) 265-0275."
       ogImage="/og/landscaping.jpg"
       serviceKeyword="Landscaping"
+      headerImage={headerLawn}
       heroText="Transform your outdoor spaces with professional landscaping design and installation."
       heroImage={imgPropertyMaintenance}
       heroImageAlt="White Florida coastal home with lush landscaping, palms, and crisp green hedges"
@@ -374,6 +381,7 @@ export function LandClearingPage() {
       metaDescription="Land clearing for builders and homeowners across Okaloosa & Walton County. Selective or full clearing, forestry mulching, hauling. Free estimates — (518) 265-0275."
       ogImage="/og/land-clearing.jpg"
       serviceKeyword="Land Clearing"
+      headerImage={headerGround}
       heroText="Prepare your property for construction, development, or a fresh start with professional land clearing."
       heroImage={imgLandClearing}
       heroImageAlt="Open Northwest Florida property with mature trees ready for selective land clearing"
@@ -420,6 +428,7 @@ export function LotClearingPage() {
       metaDescription="Build-ready lot clearing for residential and commercial sites in Northwest Florida. Trees, stumps, brush, debris removed. Free estimates — (518) 265-0275."
       ogImage="/og/lot-clearing.jpg"
       serviceKeyword="Lot Clearing"
+      headerImage={headerGround}
       heroText="Complete lot preparation including vegetation, stumps, and debris removal for residential and commercial properties."
       heroImage={imgSkidSteer}
       heroImageAlt="Wooded Northwest Florida lot ready for residential or commercial lot clearing"
@@ -466,6 +475,7 @@ export function BrushRemovalPage() {
       metaDescription="Overgrown brush, vines, and underbrush cleared across Northwest Florida. Fire safety, defensible space, curb appeal. Free estimates — (518) 265-0275."
       ogImage="/og/brush-removal.jpg"
       serviceKeyword="Brush Removal"
+      headerImage={headerGround}
       heroText="Clear overgrown brush and undergrowth for fire safety, aesthetics, and usable outdoor space."
       heroImage={imgBrushRemoval}
       heroImageAlt="Overgrown brush along a wooded Northwest Florida property line"
@@ -512,6 +522,7 @@ export function LawnCarePage() {
       metaDescription="Weekly mowing, edging, fertilization, and full lawn care across Niceville, Destin & Fort Walton Beach. Healthier grass, sharper edges. (518) 265-0275."
       ogImage="/og/lawn-care.jpg"
       serviceKeyword="Lawn Care"
+      headerImage={headerLawn}
       heroText="Healthier grass, sharper edges, and a yard you'll actually want to walk barefoot in — week after week."
       heroImage={imgPropertyMaintenance}
       heroImageAlt="Lush green Florida lawn with manicured edges in front of a coastal home"
@@ -554,6 +565,7 @@ export function PropertyMaintenancePage() {
       metaDescription="Recurring property maintenance across Niceville, Destin & Crestview: mowing, trimming, debris cleanup, and seasonal yard care on one schedule. (518) 265-0275."
       ogImage="/og/property-maintenance.jpg"
       serviceKeyword="Property Maintenance"
+      headerImage={headerLawn}
       heroText="One veteran-owned crew, one schedule, one invoice — keeping your property dialed in year-round."
       heroImage={imgPropertyMaintenance}
       heroImageAlt="Well-maintained Florida residential property with healthy lawn and trimmed trees"
