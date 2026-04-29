@@ -95,39 +95,34 @@ export function ServicePageTemplate({
       />
 
 
-      {/* Hero with image */}
-      <section className="relative bg-[hsl(82,25%,22%)] text-white overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt={heroImageAlt}
-            className="w-full h-full object-cover"
-            width={1920}
-            height={1080}
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(to right, hsla(82,25%,12%,0.85), hsla(82,25%,12%,0.65), hsla(82,25%,12%,0.30))',
-            }}
-          />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+      {/* Header (no background image) */}
+      <section className="bg-white border-b border-[hsl(82,15%,90%)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <Link
             to="/services"
-            className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm text-[hsl(82,10%,45%)] hover:text-[hsl(82,25%,25%)] transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             All Services
           </Link>
-          <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-6">
-            {title} in <span className="text-[hsl(82,50%,70%)]">Northwest Florida</span>
-          </h1>
-          <p className="text-xl text-white/85 max-w-2xl">{heroText}</p>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:gap-8">
+            <img
+              src={heroImage}
+              alt={heroImageAlt}
+              width={160}
+              height={160}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-lg shadow-sm border border-[hsl(82,15%,90%)] shrink-0 mb-4 sm:mb-0"
+            />
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-4 text-[hsl(82,25%,20%)]">
+                {title} in <span className="text-[hsl(82,40%,40%)]">Northwest Florida</span>
+              </h1>
+              <p className="text-lg text-[hsl(82,10%,40%)] max-w-2xl">{heroText}</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -144,18 +139,18 @@ export function ServicePageTemplate({
                   </p>
 
                   {i === midIndex - 1 && (
-                    <figure className="mt-8">
+                    <figure className="mt-6 float-right ml-6 mb-4 w-40 sm:w-48">
                       <img
                         src={midImage}
                         alt={midImageAlt}
                         loading="lazy"
                         decoding="async"
-                        width={1920}
-                        height={1080}
-                        className="w-full rounded-xl shadow-md border border-[hsl(82,15%,90%)]"
+                        width={192}
+                        height={192}
+                        className="w-40 h-40 sm:w-48 sm:h-48 object-cover rounded-lg shadow-sm border border-[hsl(82,15%,90%)]"
                       />
                       {midImageCaption && (
-                        <figcaption className="text-sm text-[hsl(82,10%,50%)] mt-2 italic">
+                        <figcaption className="text-xs text-[hsl(82,10%,50%)] mt-2 italic">
                           {midImageCaption}
                         </figcaption>
                       )}
