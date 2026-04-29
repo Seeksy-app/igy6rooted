@@ -139,18 +139,18 @@ export function ServicePageTemplate({
                   </p>
 
                   {i === midIndex - 1 && (
-                    <figure className="mt-8">
+                    <figure className="mt-6 float-right ml-6 mb-4 w-40 sm:w-48">
                       <img
                         src={midImage}
                         alt={midImageAlt}
                         loading="lazy"
                         decoding="async"
-                        width={1920}
-                        height={1080}
-                        className="w-full rounded-xl shadow-md border border-[hsl(82,15%,90%)]"
+                        width={192}
+                        height={192}
+                        className="w-40 h-40 sm:w-48 sm:h-48 object-cover rounded-lg shadow-sm border border-[hsl(82,15%,90%)]"
                       />
                       {midImageCaption && (
-                        <figcaption className="text-sm text-[hsl(82,10%,50%)] mt-2 italic">
+                        <figcaption className="text-xs text-[hsl(82,10%,50%)] mt-2 italic">
                           {midImageCaption}
                         </figcaption>
                       )}
