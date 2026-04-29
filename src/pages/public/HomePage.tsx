@@ -205,6 +205,11 @@ export default function HomePage() {
                     </h3>
                   </div>
                   <p className="text-sm text-[hsl(82,10%,50%)]">{service.desc}</p>
+                  {(service as any).fact && (
+                    <p className="mt-2 text-xs italic text-[hsl(82,25%,35%)] leading-snug">
+                      {(service as any).fact}
+                    </p>
+                  )}
                   <div className="flex items-center gap-1 mt-3 text-sm font-semibold text-[hsl(82,40%,35%)] opacity-0 group-hover:opacity-100 transition-opacity">
                     Learn more <ArrowRight className="h-3.5 w-3.5" />
                   </div>
