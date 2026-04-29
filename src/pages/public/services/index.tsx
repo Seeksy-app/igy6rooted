@@ -1,10 +1,19 @@
 import { ServicePageTemplate } from "@/components/public/ServicePageTemplate";
-import heroOption1 from "@/assets/hero-option-1.jpg";
-import heroOption2 from "@/assets/hero-option-2.jpg";
-import heroOption3 from "@/assets/hero-option-3.jpg";
-import heroOption4 from "@/assets/hero-option-4.jpg";
-import heroMain from "@/assets/hero-tree-service.jpg";
-import serviceSecondary from "@/assets/service-secondary.jpg";
+// Craig's real-job photos — one source of truth for every article's images.
+import imgTreeRemoval from "@/assets/services/client/tree-removal.jpg";
+import imgTreeTrimming from "@/assets/services/client/tree-trimming.jpg";
+import imgTreePruning from "@/assets/services/client/tree-pruning.jpg";
+import imgStumpGrinding1 from "@/assets/services/client/stump-grinding-1.jpg";
+import imgStumpGrinding3 from "@/assets/services/client/stump-grinding-3.jpg";
+import imgEmergencyRemoval from "@/assets/services/client/emergency-removal.jpg";
+import imgBucketLiftHouse from "@/assets/services/client/bucket-lift-house.jpg";
+import imgBucketLiftTrim from "@/assets/services/client/bucket-lift-trim.jpg";
+import imgClimberPine from "@/assets/services/client/climber-pine.jpg";
+import imgLandClearing from "@/assets/services/client/land-clearing.jpg";
+import imgSkidSteer from "@/assets/services/client/skid-steer.jpg";
+import imgBrushRemoval from "@/assets/services/client/brush-removal.jpg";
+import imgDebrisRemoval from "@/assets/services/client/debris-removal.jpg";
+import imgPropertyMaintenance from "@/assets/services/client/property-maintenance.jpg";
 
 const defaultBenefits = [
   "Veteran-owned & operated",
