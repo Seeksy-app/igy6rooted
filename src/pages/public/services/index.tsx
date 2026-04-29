@@ -1,10 +1,19 @@
 import { ServicePageTemplate } from "@/components/public/ServicePageTemplate";
-import heroOption1 from "@/assets/hero-option-1.jpg";
-import heroOption2 from "@/assets/hero-option-2.jpg";
-import heroOption3 from "@/assets/hero-option-3.jpg";
-import heroOption4 from "@/assets/hero-option-4.jpg";
-import heroMain from "@/assets/hero-tree-service.jpg";
-import serviceSecondary from "@/assets/service-secondary.jpg";
+// Craig's real-job photos — one source of truth for every article's images.
+import imgTreeRemoval from "@/assets/services/client/tree-removal.jpg";
+import imgTreeTrimming from "@/assets/services/client/tree-trimming.jpg";
+import imgTreePruning from "@/assets/services/client/tree-pruning.jpg";
+import imgStumpGrinding1 from "@/assets/services/client/stump-grinding-1.jpg";
+import imgStumpGrinding3 from "@/assets/services/client/stump-grinding-3.jpg";
+import imgEmergencyRemoval from "@/assets/services/client/emergency-removal.jpg";
+import imgBucketLiftHouse from "@/assets/services/client/bucket-lift-house.jpg";
+import imgBucketLiftTrim from "@/assets/services/client/bucket-lift-trim.jpg";
+import imgClimberPine from "@/assets/services/client/climber-pine.jpg";
+import imgLandClearing from "@/assets/services/client/land-clearing.jpg";
+import imgSkidSteer from "@/assets/services/client/skid-steer.jpg";
+import imgBrushRemoval from "@/assets/services/client/brush-removal.jpg";
+import imgDebrisRemoval from "@/assets/services/client/debris-removal.jpg";
+import imgPropertyMaintenance from "@/assets/services/client/property-maintenance.jpg";
 
 const defaultBenefits = [
   "Veteran-owned & operated",
@@ -24,9 +33,9 @@ export function TreeRemovalPage() {
       ogImage="/og/tree-removal.jpg"
       serviceKeyword="Tree Removal"
       heroText="Safe, professional removal of hazardous, diseased, or unwanted trees — with complete cleanup included."
-      heroImage={heroOption1}
+      heroImage={imgTreeRemoval}
       heroImageAlt="Mature oak trees framing a Florida residential home before tree removal"
-      midImage={serviceSecondary}
+      midImage={imgBucketLiftHouse}
       midImageAlt="Freshly mulched ring around a healthy tree on a manicured lawn after professional tree care"
       midImageCaption="A clean, mulched ring is what's left after our crew finishes — no ruts, no debris."
       sections={[
@@ -70,9 +79,9 @@ export function TreeTrimmingPage() {
       ogImage="/og/tree-trimming.jpg"
       serviceKeyword="Tree Trimming"
       heroText="Keep your trees healthy, safe, and looking their best with professional trimming services."
-      heroImage={heroOption2}
+      heroImage={imgBucketLiftTrim}
       heroImageAlt="Mature pine and oak trees over a manicured Florida backyard lawn"
-      midImage={heroOption3}
+      midImage={imgTreeTrimming}
       midImageAlt="Striped manicured lawn beneath a healthy oak tree after professional trimming"
       midImageCaption="Properly thinned canopies let more light reach the lawn — and keep the tree itself healthier."
       sections={[
@@ -116,9 +125,9 @@ export function TreePruningPage() {
       ogImage="/og/tree-pruning.jpg"
       serviceKeyword="Tree Pruning"
       heroText="Specialized care that targets the health of your trees — remove disease, improve circulation, and strengthen growth."
-      heroImage={heroOption3}
+      heroImage={imgTreePruning}
       heroImageAlt="Healthy mature oak tree above a striped, professionally maintained lawn"
-      midImage={heroOption2}
+      midImage={imgClimberPine}
       midImageAlt="Lush green Bermuda lawn beneath properly pruned pine and oak trees"
       midImageCaption="Pruning improves long-term tree health — well-pruned trees live longer and look better."
       sections={[
@@ -162,9 +171,9 @@ export function StumpGrindingPage() {
       ogImage="/og/stump-grinding.jpg"
       serviceKeyword="Stump Grinding"
       heroText="Our specialty — grind stumps below ground level for a clean, flat, usable yard."
-      heroImage={serviceSecondary}
+      heroImage={imgStumpGrinding1}
       heroImageAlt="Manicured residential lawn with a mulched ring where a tree was professionally removed"
-      midImage={heroMain}
+      midImage={imgStumpGrinding3}
       midImageAlt="Beautifully manicured lawn after stump grinding and full cleanup"
       midImageCaption="A few weeks after grinding, the area blends right back into the lawn — exactly the goal."
       sections={[
@@ -208,9 +217,9 @@ export function EmergencyTreeRemovalPage() {
       ogImage="/og/emergency.jpg"
       serviceKeyword="Emergency Tree Removal"
       heroText="24/7 rapid response for fallen trees, storm damage, and urgent safety hazards. Don't wait — call us immediately."
-      heroImage={heroOption2}
+      heroImage={imgEmergencyRemoval}
       heroImageAlt="Tall mature pines and oaks in a Northwest Florida backyard following a storm"
-      midImage={serviceSecondary}
+      midImage={imgBucketLiftHouse}
       midImageAlt="Cleared and restored residential lawn following emergency tree removal"
       midImageCaption="After an emergency call, our goal is to get your property safe and back to normal as fast as possible."
       sections={[
@@ -254,9 +263,9 @@ export function DebrisRemovalPage() {
       ogImage="/og/debris-removal.jpg"
       serviceKeyword="Debris Removal & Storm Cleanup"
       heroText="Branches down, limbs piled up, post-storm mess across the yard? We haul it all — fast, complete, and on the schedule the city can't match."
-      heroImage={heroOption2}
+      heroImage={imgDebrisRemoval}
       heroImageAlt="Northwest Florida residential property with mature trees and clean lawn after debris cleanup"
-      midImage={heroOption1}
+      midImage={imgBrushRemoval}
       midImageAlt="Tidy Niceville home with mature oaks and clean front yard after professional debris removal"
       midImageCaption="A clean property after debris removal — exactly how every job should end."
       sections={[
@@ -314,9 +323,9 @@ export function LandscapingPage() {
       ogImage="/og/landscaping.jpg"
       serviceKeyword="Landscaping"
       heroText="Transform your outdoor spaces with professional landscaping design and installation."
-      heroImage={heroOption4}
+      heroImage={imgPropertyMaintenance}
       heroImageAlt="White Florida coastal home with lush landscaping, palms, and crisp green hedges"
-      midImage={heroMain}
+      midImage={imgTreeTrimming}
       midImageAlt="Manicured residential lawn with healthy trees and clean landscaping"
       midImageCaption="Good landscaping starts with a healthy lawn and well-placed trees — the rest builds on that."
       sections={[
@@ -360,9 +369,9 @@ export function LandClearingPage() {
       ogImage="/og/land-clearing.jpg"
       serviceKeyword="Land Clearing"
       heroText="Prepare your property for construction, development, or a fresh start with professional land clearing."
-      heroImage={heroOption2}
+      heroImage={imgLandClearing}
       heroImageAlt="Open Northwest Florida property with mature trees ready for selective land clearing"
-      midImage={serviceSecondary}
+      midImage={imgSkidSteer}
       midImageAlt="Cleared residential land with smooth grass surface ready for construction or use"
       midImageCaption="A finished clearing job leaves a clean, usable surface ready for the next phase."
       sections={[
@@ -406,9 +415,9 @@ export function LotClearingPage() {
       ogImage="/og/lot-clearing.jpg"
       serviceKeyword="Lot Clearing"
       heroText="Complete lot preparation including vegetation, stumps, and debris removal for residential and commercial properties."
-      heroImage={heroOption2}
+      heroImage={imgSkidSteer}
       heroImageAlt="Wooded Northwest Florida lot ready for residential or commercial lot clearing"
-      midImage={serviceSecondary}
+      midImage={imgLandClearing}
       midImageAlt="Cleared and graded residential lot ready to build on"
       midImageCaption="A properly cleared lot is the difference between a smooth build and a six-week delay."
       sections={[
@@ -452,9 +461,9 @@ export function BrushRemovalPage() {
       ogImage="/og/brush-removal.jpg"
       serviceKeyword="Brush Removal"
       heroText="Clear overgrown brush and undergrowth for fire safety, aesthetics, and usable outdoor space."
-      heroImage={heroOption2}
+      heroImage={imgBrushRemoval}
       heroImageAlt="Overgrown brush along a wooded Northwest Florida property line"
-      midImage={heroOption1}
+      midImage={imgDebrisRemoval}
       midImageAlt="Clean, tidy yard after professional brush removal in Northwest Florida"
       midImageCaption="The same property after brush removal — usable, safe, and easier to maintain."
       sections={[
@@ -498,9 +507,9 @@ export function LawnCarePage() {
       ogImage="/og/lawn-care.jpg"
       serviceKeyword="Lawn Care"
       heroText="Healthier grass, sharper edges, and a yard you'll actually want to walk barefoot in — week after week."
-      heroImage={heroOption4}
+      heroImage={imgPropertyMaintenance}
       heroImageAlt="Lush green Florida lawn with manicured edges in front of a coastal home"
-      midImage={heroMain}
+      midImage={imgTreeTrimming}
       midImageAlt="Striped lawn after professional mowing service in Northwest Florida"
       midImageCaption="A consistent mow schedule does more for your lawn than any single fertilizer treatment."
       sections={[
@@ -540,9 +549,9 @@ export function PropertyMaintenancePage() {
       ogImage="/og/property-maintenance.jpg"
       serviceKeyword="Property Maintenance"
       heroText="One veteran-owned crew, one schedule, one invoice — keeping your property dialed in year-round."
-      heroImage={heroOption4}
+      heroImage={imgPropertyMaintenance}
       heroImageAlt="Well-maintained Florida residential property with healthy lawn and trimmed trees"
-      midImage={serviceSecondary}
+      midImage={imgTreePruning}
       midImageAlt="Manicured residential lawn and clean beds after recurring property maintenance"
       midImageCaption="Recurring service is the cheapest way to keep a property looking its best year-round."
       sections={[
