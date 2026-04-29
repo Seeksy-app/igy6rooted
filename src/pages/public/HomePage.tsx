@@ -8,6 +8,8 @@ import heroOption1 from "@/assets/hero-option-1.jpg";
 import heroOption2 from "@/assets/hero-option-2.jpg";
 import heroOption3 from "@/assets/hero-option-3.jpg";
 import heroOption4 from "@/assets/hero-option-4.jpg";
+import heroCraigBucket from "@/assets/services/client/bucket-lift-house.jpg";
+import heroCraigTrim from "@/assets/services/client/bucket-lift-trim.jpg";
 import { SITE_CONFIG } from "@/config/site.config";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,7 +32,9 @@ const services = SITE_CONFIG.services;
 
 const heroImages = [
   { src: heroImage, alt: "Beautifully manicured residential lawn and tree care in Northwest Florida" },
+  { src: heroCraigBucket, alt: "IGY6 Rooted bucket lift positioned beside a Niceville home for safe tree removal" },
   { src: heroOption1, alt: "Cozy Florida ranch home with healthy oak trees and a freshly mowed lawn" },
+  { src: heroCraigTrim, alt: "IGY6 Rooted crew member trimming high branches from a bucket lift over a Florida home" },
   { src: heroOption2, alt: "Lush green backyard with mature pine and oak trees in Northwest Florida" },
   { src: heroOption3, alt: "Striped manicured lawn next to a healthy oak tree at a residential home" },
   { src: heroOption4, alt: "White coastal-style Florida home with palms and crisp green hedges" },
@@ -64,7 +68,7 @@ export default function HomePage() {
   useEffect(() => {
     const id = setInterval(() => {
       setActiveHero((i) => (i + 1) % heroImages.length);
-    }, 6000);
+    }, 7500);
     return () => clearInterval(id);
   }, []);
 
@@ -112,7 +116,12 @@ export default function HomePage() {
               key={img.src}
               src={img.src}
               alt={img.alt}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out ${
+              width={1920}
+              height={1080}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+              {...(i === 0 ? { fetchPriority: "high" as const } : {})}
+              className={`absolute inset-0 w-full h-full object-cover will-change-[opacity] transition-opacity duration-[2000ms] ease-in-out ${
                 i === activeHero ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -184,6 +193,7 @@ export default function HomePage() {
                     width={800}
                     height={600}
                     loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>

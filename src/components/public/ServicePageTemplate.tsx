@@ -104,6 +104,9 @@ export function ServicePageTemplate({
             className="w-full h-full object-cover"
             width={1920}
             height={1080}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
           />
           <div
             className="absolute inset-0"
@@ -146,6 +149,7 @@ export function ServicePageTemplate({
                         src={midImage}
                         alt={midImageAlt}
                         loading="lazy"
+                        decoding="async"
                         width={1920}
                         height={1080}
                         className="w-full rounded-xl shadow-md border border-[hsl(82,15%,90%)]"
