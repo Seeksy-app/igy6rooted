@@ -158,23 +158,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-[hsl(82,25%,28%)] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-white/80 mb-8 max-w-xl mx-auto">
-            Call us for a free, no-obligation estimate. We'll assess your situation and give you our honest recommendation.
-          </p>
-          <a
-            href="{SITE_CONFIG.business.jobberUrl}"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-white text-[hsl(82,25%,25%)] px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/90 transition-colors"
-          >
-            Get Free Estimate
-          </a>
-        </div>
-      </section>
     </>
   );
 }
