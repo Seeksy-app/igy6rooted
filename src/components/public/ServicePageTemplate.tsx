@@ -16,6 +16,8 @@ interface ServicePageTemplateProps {
   sections: { heading: string; content: string }[];
   benefits: string[];
   relatedServices: { name: string; href: string }[];
+  /** Optional faded stock background image for the article header */
+  headerImage?: string;
   /** Path-only OG image (defaults to /og/services.jpg) */
   ogImage?: string;
   /** Primary keyword for service-specific JSON-LD */
