@@ -1,14 +1,14 @@
-import treeRemoval from "@/assets/services/client/tree-removal.jpg";
+import treeRemoval from "@/assets/services/client/front-yard-tree-removal.avif";
 import stumpGrinding from "@/assets/services/client/stump-grinding-1.jpg";
 import treePruning from "@/assets/services/client/tree-pruning.jpg";
-import emergencyRemoval from "@/assets/services/client/emergency-removal.jpg";
+import emergencyRemoval from "@/assets/services/client/emergency-tree-removal.avif";
 import landClearing from "@/assets/services/client/land-clearing.jpg";
 import debrisRemoval from "@/assets/services/client/debris-removal.jpg";
-import bucketLiftHouse from "@/assets/services/client/bucket-lift-house.jpg";
+import bucketLiftHouse from "@/assets/services/client/tree-over-roof.avif";
 import hazardAssessment from "@/assets/services/client/hazard-assessment.jpg";
 import climberPine from "@/assets/services/client/climber-pine.jpg";
-import bucketLiftTrim from "@/assets/services/client/bucket-lift-trim.jpg";
-import skidSteer from "@/assets/services/client/skid-steer.jpg";
+import bucketLiftTrim from "@/assets/services/client/healthy-trees.avif";
+import skidSteer from "@/assets/services/client/commercial-clearing.avif";
 import brushRemoval from "@/assets/services/client/brush-removal.jpg";
 
 export const SITE_CONFIG = {
