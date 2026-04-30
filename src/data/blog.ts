@@ -2,7 +2,7 @@
 // Each article expands on the "Did you know" fact shown on its card.
 // Kept as a static data file so updates don't require a DB migration.
 
-import treeRemoval from "@/assets/services/client/tree-removal.jpg";
+import treeRemoval from "@/assets/services/client/emergency-tree-service.png";
 import stumpGrinding from "@/assets/services/client/stump-grinding-1.jpg";
 import bucketLiftTrim from "@/assets/services/client/bucket-lift-trim.jpg";
 import treePruning from "@/assets/services/client/tree-pruning.jpg";
