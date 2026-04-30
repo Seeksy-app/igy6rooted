@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { SEOHead } from "@/components/public/SEOHead";
 import { BLOG_BY_SLUG, BLOG_POSTS } from "@/data/blog";
@@ -6,6 +7,12 @@ import { ArrowLeft, ArrowRight, CheckCircle, Clock, Phone } from "lucide-react";
 export default function BlogPostPage() {
   const { slug } = useParams();
   const post = slug ? BLOG_BY_SLUG[slug] : undefined;
+
+  // Always anchor article landings to the top of the page, not the user's
+  // previous scroll position from the home grid.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   if (!post) {
     return <Navigate to="/blog" replace />;
@@ -43,12 +50,27 @@ export default function BlogPostPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
 
-      {/* Hero */}
-      <section className="bg-[hsl(82,25%,22%)] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+      {/* Hero — green banner with faded background image + dark overlay */}
+      <section className="relative bg-[hsl(82,25%,22%)] text-white overflow-hidden">
+        <img
+          src={post.image}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover opacity-25"
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(to right, hsla(82,25%,15%,0.85), hsla(82,25%,18%,0.78), hsla(82,25%,15%,0.85))',
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <Link
             to="/blog"
-            className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             All articles
@@ -64,21 +86,14 @@ export default function BlogPostPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6 max-w-3xl">
             {post.title}
           </h1>
-          <p className="text-xl text-white/80 max-w-2xl">{post.excerpt}</p>
+          <p className="text-xl text-white/85 max-w-2xl">{post.excerpt}</p>
         </div>
       </section>
 
-      {/* Featured image + did-you-know */}
+      {/* Did-you-know callout (image moved down into body) */}
       <section className="bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 sm:-mt-12">
-          <img
-            src={post.image}
-            alt={post.imageAlt}
-            width={560}
-            height={315}
-            className="w-full max-w-md mx-auto aspect-[16/9] object-cover rounded-xl shadow-xl border border-white"
-          />
-          <div className="mt-8 bg-[hsl(82,15%,95%)] border-l-4 border-[hsl(82,30%,40%)] rounded-r-lg p-5 sm:p-6">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12">
+          <div className="bg-[hsl(82,15%,95%)] border-l-4 border-[hsl(82,30%,40%)] rounded-r-lg p-5 sm:p-6">
             <p className="text-[hsl(82,25%,25%)] text-base sm:text-lg font-medium leading-snug">
               <span className="font-bold">Did you know:</span> {post.fact}
             </p>
@@ -92,6 +107,19 @@ export default function BlogPostPage() {
           <div className="grid lg:grid-cols-3 gap-12">
             <article className="lg:col-span-2 space-y-8">
               <p className="text-lg text-[hsl(82,15%,30%)] leading-relaxed">{post.intro}</p>
+
+              {/* Featured image — placed in the top third of the article body */}
+              <figure className="my-2">
+                <img
+                  src={post.image}
+                  alt={post.imageAlt}
+                  width={800}
+                  height={450}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full aspect-[16/9] object-cover rounded-xl shadow-md border border-[hsl(82,15%,90%)]"
+                />
+              </figure>
 
               {post.sections.map((s) => (
                 <div key={s.heading}>
