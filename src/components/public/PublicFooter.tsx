@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { BLOG_POSTS } from "@/data/blog";
 
 const services = [
   { name: "Tree Removal", href: "/services/tree-removal" },
@@ -13,6 +14,11 @@ const services = [
   { name: "Lot Clearing", href: "/services/lot-clearing" },
   { name: "Brush Removal", href: "/services/brush-removal" },
 ];
+
+const insightArticles = BLOG_POSTS.map((p) => ({
+  name: p.cardTitle,
+  href: `/blog/${p.slug}`,
+}));
 
 const serviceAreas = [
   "Niceville", "Destin", "Fort Walton Beach", "Crestview", "Navarre",
@@ -54,7 +60,7 @@ export function PublicFooter() {
 
       {/* Main footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand */}
           <div>
             <Link to="/" className="flex items-center gap-3 mb-4">
@@ -88,6 +94,25 @@ export function PublicFooter() {
                     className="text-sm text-white/70 hover:text-white transition-colors"
                   >
                     {s.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Did You Know — long-form blog articles */}
+          <div>
+            <h3 className="font-semibold text-sm uppercase tracking-wider text-white/50 mb-4">
+              Did You Know
+            </h3>
+            <ul className="space-y-2">
+              {insightArticles.map((a) => (
+                <li key={a.href}>
+                  <Link
+                    to={a.href}
+                    className="text-sm text-white/70 hover:text-white transition-colors"
+                  >
+                    {a.name}
                   </Link>
                 </li>
               ))}
