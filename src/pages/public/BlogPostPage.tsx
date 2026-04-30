@@ -74,9 +74,9 @@ export default function BlogPostPage() {
           <img
             src={post.image}
             alt={post.imageAlt}
-            width={800}
-            height={450}
-            className="w-full max-w-2xl mx-auto aspect-[16/9] object-cover rounded-xl shadow-xl border border-white"
+            width={560}
+            height={315}
+            className="w-full max-w-md mx-auto aspect-[16/9] object-cover rounded-xl shadow-xl border border-white"
           />
           <div className="mt-8 bg-[hsl(82,15%,95%)] border-l-4 border-[hsl(82,30%,40%)] rounded-r-lg p-5 sm:p-6">
             <p className="text-[hsl(82,25%,25%)] text-base sm:text-lg font-medium leading-snug">
