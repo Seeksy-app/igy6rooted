@@ -100,6 +100,25 @@ export function PublicFooter() {
             </ul>
           </div>
 
+          {/* Did You Know — long-form blog articles */}
+          <div>
+            <h3 className="font-semibold text-sm uppercase tracking-wider text-white/50 mb-4">
+              Did You Know
+            </h3>
+            <ul className="space-y-2">
+              {insightArticles.map((a) => (
+                <li key={a.href}>
+                  <Link
+                    to={a.href}
+                    className="text-sm text-white/70 hover:text-white transition-colors"
+                  >
+                    {a.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Service Areas */}
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-wider text-white/50 mb-4">
