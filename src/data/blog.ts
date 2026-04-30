@@ -14,6 +14,7 @@ import skidSteer from "@/assets/services/client/skid-steer.jpg";
 import landClearing from "@/assets/services/client/land-clearing.jpg";
 import brushRemoval from "@/assets/services/client/brush-removal.jpg";
 import debrisRemoval from "@/assets/services/client/debris-removal.jpg";
+import fallenOakStorm from "@/assets/services/client/fallen-oak-storm-damage.png";
 
 export type BlogSection = {
   heading: string;
@@ -281,8 +282,8 @@ export const BLOG_POSTS: BlogPost[] = [
       "Florida is hit by more named tropical storms than any other state. Here's what to do in the first 24 hours when a tree comes down on your property.",
     readMinutes: 6,
     category: "Storm Prep",
-    image: emergencyRemoval,
-    imageAlt: "Emergency tree removal crew responding to storm damage",
+    image: fallenOakStorm,
+    imageAlt: "Large oak tree fallen in a Northwest Florida backyard after a tropical storm",
     intro:
       "According to NOAA's historical hurricane database, Florida has been struck by more named tropical systems than any other U.S. state — by a wide margin. Northwest Florida sits in one of the most active zones in the entire Gulf, and the storms that affect us tend to be wetter and slower-moving than they were 30 years ago. When a tree comes down on your home, garage, fence, or driveway in the middle of the night during a hurricane, what happens in the first 24 hours determines how much it ultimately costs you.",
     sections: [
