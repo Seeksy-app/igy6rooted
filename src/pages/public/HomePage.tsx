@@ -208,8 +208,8 @@ export default function HomePage() {
                       {(service as any).fact}
                     </p>
                   )}
-                  <div className="flex items-center gap-1 mt-3 text-sm font-semibold text-[hsl(82,40%,35%)] opacity-0 group-hover:opacity-100 transition-opacity">
-                    Learn more <ArrowRight className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-1 mt-3 text-sm font-semibold text-[hsl(82,40%,35%)]">
+                    Learn more <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </div>
               </Link>
