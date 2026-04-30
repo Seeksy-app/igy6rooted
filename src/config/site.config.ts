@@ -5,7 +5,7 @@ import emergencyRemoval from "@/assets/services/client/emergency-removal.jpg";
 import landClearing from "@/assets/services/client/land-clearing.jpg";
 import debrisRemoval from "@/assets/services/client/debris-removal.jpg";
 import bucketLiftHouse from "@/assets/services/client/bucket-lift-house.jpg";
-import stumpGrinding3 from "@/assets/services/client/stump-grinding-3.jpg";
+import hazardAssessment from "@/assets/services/client/hazard-assessment.jpg";
 import climberPine from "@/assets/services/client/climber-pine.jpg";
 import bucketLiftTrim from "@/assets/services/client/bucket-lift-trim.jpg";
 import skidSteer from "@/assets/services/client/skid-steer.jpg";
@@ -39,7 +39,7 @@ export const SITE_CONFIG = {
     { name: "Emergency Tree Removal", href: "/blog/florida-named-storms-emergency-response", desc: "24/7 storm damage response.", fact: "Did you know: Florida averages more named storms than any other U.S. state — fast response matters.", image: emergencyRemoval, alt: "Emergency tree removal crew responding to storm-damaged tree on a property" },
     { name: "Climbing & Rigging", href: "/blog/climbing-rigging-dangerous-jobs", desc: "Skilled climbers for tight, high-risk jobs.", fact: "Did you know: tree work is one of the top 10 most dangerous jobs in America — leave the climbing to the pros.", image: climberPine, alt: "IGY6 Rooted climber rigging a tall pine tree for controlled removal in Northwest Florida" },
     { name: "Storm Cleanup", href: "/blog/hurricane-tree-debris-cleanup", desc: "Post-storm tree work and property recovery.", fact: "Did you know: a single hurricane can drop thousands of pounds of tree debris on a Florida lot.", image: bucketLiftHouse, alt: "IGY6 Rooted crew with bucket lift performing post-storm tree cleanup at a Florida home" },
-    { name: "Hazard Tree Assessment", href: "/blog/hazard-tree-assessment-checklist", desc: "Spot risk trees before they fail.", fact: "Did you know: most trees that fall on homes show warning signs months before they let go.", image: stumpGrinding3, alt: "Arborist inspecting a mature tree for structural defects and decay" },
+    { name: "Hazard Tree Assessment", href: "/blog/hazard-tree-assessment-checklist", desc: "Spot risk trees before they fail.", fact: "Did you know: most trees that fall on homes show warning signs months before they let go.", image: hazardAssessment, alt: "Arborist inspecting a mature tree for structural defects and decay" },
     { name: "Land Clearing", href: "/blog/land-clearing-property-value", desc: "Lot prep and brush clearing with skid steer.", fact: "Did you know: professional land clearing can boost a vacant lot's market value by 20–40%.", image: skidSteer, alt: "Green skid steer clearing brush and prepping a residential lot in Niceville, FL" },
     { name: "Lot Clearing", href: "/blog/lot-clearing-new-construction-permits", desc: "Full lot prep — stumps, brush, and debris cleared.", fact: "Did you know: Florida building permits often require a fully cleared lot before foundation work begins.", image: landClearing, alt: "Cleared residential lot ready for construction in Northwest Florida" },
     { name: "Brush Removal", href: "/blog/brush-wildfire-defensible-space", desc: "Clear overgrowth and undergrowth fast.", fact: "Did you know: dense brush within 30 ft of a home is one of the top wildfire risk factors.", image: brushRemoval, alt: "Cleared brush and undergrowth along a Northwest Florida property line" },
