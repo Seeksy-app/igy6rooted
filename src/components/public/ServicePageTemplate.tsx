@@ -111,13 +111,13 @@ export function ServicePageTemplate({
               loading="eager"
               decoding="async"
               fetchPriority="high"
-              className="absolute inset-0 w-full h-full object-cover opacity-20"
+              className="absolute inset-0 w-full h-full object-cover opacity-40"
             />
             <div
               className="absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(to right, hsla(0,0%,100%,0.92), hsla(0,0%,100%,0.78), hsla(0,0%,100%,0.92))',
+                  'linear-gradient(to right, hsla(0,0%,100%,0.72), hsla(0,0%,100%,0.50), hsla(0,0%,100%,0.72))',
               }}
             />
           </>
