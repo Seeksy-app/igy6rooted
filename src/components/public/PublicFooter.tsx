@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { BLOG_POSTS } from "@/data/blog";
 
 const services = [
   { name: "Tree Removal", href: "/services/tree-removal" },
@@ -13,6 +14,11 @@ const services = [
   { name: "Lot Clearing", href: "/services/lot-clearing" },
   { name: "Brush Removal", href: "/services/brush-removal" },
 ];
+
+const insightArticles = BLOG_POSTS.map((p) => ({
+  name: p.cardTitle,
+  href: `/blog/${p.slug}`,
+}));
 
 const serviceAreas = [
   "Niceville", "Destin", "Fort Walton Beach", "Crestview", "Navarre",
