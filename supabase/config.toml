@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.google-reviews]
 verify_jwt = false
+
+[functions.empowerify-publish]
+verify_jwt = false
