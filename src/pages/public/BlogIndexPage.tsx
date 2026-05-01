@@ -1,34 +1,86 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/public/SEOHead";
 import { BLOG_POSTS } from "@/data/blog";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Clock, BookOpen, Search } from "lucide-react";
 
 const ALL = "All" as const;
 
+interface UnifiedPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  image: string;
+  imageAlt: string;
+  category: string;
+  readMinutes: number;
+  source: "static" | "db";
+}
+
 export default function BlogIndexPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>(ALL);
+  const [dbPosts, setDbPosts] = useState<UnifiedPost[]>([]);
+
+  // Fetch DB posts once
+  useEffect(() => {
+    supabase
+      .from("blog_posts")
+      .select("slug, title, excerpt, featured_image, tags, content, published_at")
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .then(({ data }) => {
+        if (!data) return;
+        // Only include posts that don't already exist in static data
+        const staticSlugs = new Set(BLOG_POSTS.map((p) => p.slug));
+        const mapped: UnifiedPost[] = data
+          .filter((d) => !staticSlugs.has(d.slug))
+          .map((d) => ({
+            slug: d.slug,
+            title: d.title,
+            excerpt: d.excerpt || "",
+            image: d.featured_image || "",
+            imageAlt: d.title,
+            category: d.tags?.[0] || "Article",
+            readMinutes: Math.max(1, Math.ceil((d.content?.length || 0) / 1200)),
+            source: "db" as const,
+          }));
+        setDbPosts(mapped);
+      });
+  }, []);
+
+  const staticUnified: UnifiedPost[] = useMemo(
+    () =>
+      BLOG_POSTS.map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        excerpt: p.excerpt,
+        image: p.image,
+        imageAlt: p.imageAlt,
+        category: p.category,
+        readMinutes: p.readMinutes,
+        source: "static" as const,
+      })),
+    []
+  );
+
+  const allPosts = useMemo(() => [...dbPosts, ...staticUnified], [dbPosts, staticUnified]);
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    BLOG_POSTS.forEach((p) => set.add(p.category));
+    allPosts.forEach((p) => set.add(p.category));
     return [ALL, ...Array.from(set).sort()];
-  }, []);
+  }, [allPosts]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return BLOG_POSTS.filter((p) => {
+    return allPosts.filter((p) => {
       if (category !== ALL && p.category !== category) return false;
       if (!q) return true;
-      return (
-        p.title.toLowerCase().includes(q) ||
-        p.excerpt.toLowerCase().includes(q) ||
-        p.fact.toLowerCase().includes(q) ||
-        p.cardTitle.toLowerCase().includes(q)
-      );
+      return p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
     });
-  }, [query, category]);
+  }, [query, category, allPosts]);
 
   return (
     <>
@@ -90,7 +142,7 @@ export default function BlogIndexPage() {
       <section className="bg-[hsl(82,10%,97%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="mb-6 text-sm text-[hsl(82,10%,45%)]">
-            Showing <span className="font-semibold text-[hsl(82,25%,20%)]">{filtered.length}</span> of {BLOG_POSTS.length} articles
+            Showing <span className="font-semibold text-[hsl(82,25%,20%)]">{filtered.length}</span> of {allPosts.length} articles
           </div>
 
           {filtered.length === 0 ? (
@@ -108,15 +160,21 @@ export default function BlogIndexPage() {
                   className="group bg-white rounded-xl overflow-hidden border border-[hsl(82,15%,90%)] hover:border-[hsl(82,30%,50%)] hover:shadow-xl transition-all"
                 >
                   <div className="aspect-[4/3] overflow-hidden bg-[hsl(82,15%,93%)]">
-                    <img
-                      src={post.image}
-                      alt={post.imageAlt}
-                      width={800}
-                      height={600}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                    {post.image ? (
+                      <img
+                        src={post.image}
+                        alt={post.imageAlt}
+                        width={800}
+                        height={600}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[hsl(82,15%,70%)]">
+                        <BookOpen className="h-12 w-12" />
+                      </div>
+                    )}
                   </div>
                   <div className="p-5">
                     <div className="flex items-center gap-3 text-xs font-semibold text-[hsl(82,30%,40%)] uppercase tracking-wider mb-2">
