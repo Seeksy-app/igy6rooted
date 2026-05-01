@@ -268,6 +268,13 @@ export function PublicHeader() {
                   {s.name}
                 </Link>
               ))}
+              <Link
+                to="/blog"
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-3 rounded-lg text-sm font-medium text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,95%)]"
+              >
+                The Rooted Blog
+              </Link>
               <a
                 href="/#reviews"
                 onClick={scrollToReviews}
