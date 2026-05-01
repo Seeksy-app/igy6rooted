@@ -55,6 +55,38 @@ serve(async (req) => {
     }
 
     const payload = JSON.parse(rawBody);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const svc = createClient(supabaseUrl, serviceKey);
+
+    const action = payload.action || "publish";
+
+    // --- DELETE: remove the row entirely ---
+    if (action === "delete") {
+      const { slug } = payload;
+      if (!slug) {
+        return new Response(JSON.stringify({ error: "slug is required for delete" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error } = await svc.from("blog_posts").delete().eq("slug", slug);
+      if (error) {
+        console.error("Delete error:", error);
+        return new Response(JSON.stringify({ error: error.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      console.log(`Deleted blog post: ${slug}`);
+      return new Response(JSON.stringify({ success: true, action: "deleted", slug }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- PUBLISH or DRAFT: upsert with appropriate status ---
     const {
       title,
       slug,
@@ -64,6 +96,7 @@ serve(async (req) => {
       author,
       published_at,
       tags,
+      status,
     } = payload;
 
     if (!title || !slug) {
@@ -73,9 +106,7 @@ serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const svc = createClient(supabaseUrl, serviceKey);
+    const resolvedStatus = status === "draft" ? "draft" : "published";
 
     const { error } = await svc.from("blog_posts").upsert(
       {
@@ -87,7 +118,7 @@ serve(async (req) => {
         author_display: author || null,
         published_at: published_at || new Date().toISOString(),
         tags: Array.isArray(tags) ? tags : [],
-        status: "published",
+        status: resolvedStatus,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "slug" }
@@ -101,7 +132,8 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    console.log(`Upserted blog post: ${slug} (status: ${resolvedStatus})`);
+    return new Response(JSON.stringify({ success: true, action: resolvedStatus, slug }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
