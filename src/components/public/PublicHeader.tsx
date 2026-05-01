@@ -183,6 +183,16 @@ export function PublicHeader() {
                 )}
               </div>
 
+              <Link
+                to="/blog"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  location.pathname.startsWith("/blog")
+                    ? "bg-[hsl(82,25%,28%)] text-white"
+                    : "text-[hsl(82,15%,30%)] hover:bg-[hsl(82,15%,93%)]"
+                }`}
+              >
+                The Rooted Blog
+              </Link>
               <a
                 href="/#reviews"
                 onClick={scrollToReviews}
