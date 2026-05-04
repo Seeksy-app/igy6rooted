@@ -101,7 +101,7 @@ export default function BlogPostPage() {
 
         {/* Did-you-know */}
         <section className="bg-white">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12">
             <div className="bg-[hsl(82,15%,95%)] border-l-4 border-[hsl(82,30%,40%)] rounded-r-lg p-5 sm:p-6">
               <p className="text-[hsl(82,25%,25%)] text-base sm:text-lg font-medium leading-snug">
                 <span className="font-bold">Did you know:</span> {staticPost.fact}
