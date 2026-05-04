@@ -47,6 +47,24 @@ serve(async (req) => {
       });
     }
 
+    // Verify user is org member
+    const userId = claimsData.claims.sub;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const svcCheck = createClient(supabaseUrl, serviceKey);
+    const { data: membership } = await svcCheck
+      .from("team_members")
+      .select("role")
+      .eq("org_id", org_id)
+      .eq("user_id", userId)
+      .single();
+
+    if (!membership) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Fetch business context from the database
     const svc = createClient(supabaseUrl, serviceKey);
 
