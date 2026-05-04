@@ -71,7 +71,7 @@ export default function IntegrationsPage() {
         .from("integration_ad_accounts_safe" as any)
         .select("*")
         .eq("org_id", currentOrg.id);
-      return (data || []) as Array<{
+      return (data || []) as unknown as Array<{
         id: string;
         org_id: string;
         provider: string;
