@@ -76,8 +76,8 @@ export default function SEODashboardPage() {
 
     try {
       const [kwRes, relatedRes] = await Promise.all([
-        semrushApi.keywordOverview(keyword.trim()),
-        semrushApi.relatedKeywords(keyword.trim(), "us", 20),
+        semrushApi.keywordOverview(orgId, keyword.trim()),
+        semrushApi.relatedKeywords(orgId, keyword.trim(), "us", 20),
       ]);
 
       if (kwRes.success && kwRes.data) {
