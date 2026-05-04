@@ -46,8 +46,8 @@ export default function SEODashboardPage() {
 
     try {
       const [overviewRes, organicRes] = await Promise.all([
-        semrushApi.domainOverview(domain.trim()),
-        semrushApi.domainOrganic(domain.trim(), "us", 50),
+        semrushApi.domainOverview(orgId, domain.trim()),
+        semrushApi.domainOrganic(orgId, domain.trim(), "us", 50),
       ]);
 
       if (overviewRes.success && overviewRes.data) {
