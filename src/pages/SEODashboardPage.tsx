@@ -104,6 +104,7 @@ export default function SEODashboardPage() {
 
     try {
       const res = await semrushApi.domainVsDomain(
+        orgId,
         [domain.trim() || "igy6rooted.com", compDomain.trim()],
         "us",
         20
