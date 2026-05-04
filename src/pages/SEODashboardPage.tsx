@@ -15,6 +15,8 @@ type SemrushRow = Record<string, string>;
 
 export default function SEODashboardPage() {
   const { toast } = useToast();
+  const { currentOrg } = useOrg();
+  const orgId = currentOrg?.id || "";
 
   // Domain tab state
   const [domain, setDomain] = useState("igy6rooted.com");
