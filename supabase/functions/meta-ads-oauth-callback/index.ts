@@ -36,10 +36,28 @@ serve(async (req) => {
       });
     }
 
-    // Decode state
+    // Decode and verify HMAC-signed state
     let stateData;
     try {
-      stateData = JSON.parse(atob(state));
+      const stateObj = JSON.parse(atob(state));
+      const { payload, sig } = stateObj;
+      if (!payload || !sig) throw new Error("Missing signature");
+
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", encoder.encode(serviceKey), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+      const sigBytes = new Uint8Array(sig.match(/.{2}/g).map((b: string) => parseInt(b, 16)));
+      const valid = await crypto.subtle.verify("HMAC", key, sigBytes, encoder.encode(payload));
+      if (!valid) throw new Error("Invalid signature");
+
+      stateData = JSON.parse(payload);
+
+      if (!stateData.ts || Date.now() - stateData.ts > 10 * 60 * 1000) {
+        return new Response(null, {
+          status: 302,
+          headers: { Location: `${baseUrl}/integrations?error=state_expired` },
+        });
+      }
     } catch {
       return new Response(null, {
         status: 302,

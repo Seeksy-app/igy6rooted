@@ -35,11 +35,26 @@ serve(async (req) => {
       throw new Error('Missing code or state parameter');
     }
 
-    // Decode state to get org_id and redirect_uri
-    let stateData: { org_id: string; redirect_uri: string };
+    // Decode and verify HMAC-signed state
+    let stateData: { org_id: string; redirect_uri: string; ts: number };
     try {
-      stateData = JSON.parse(atob(state));
-    } catch {
+      const stateObj = JSON.parse(atob(state));
+      const { payload, sig } = stateObj;
+      if (!payload || !sig) throw new Error("Missing signature");
+
+      const serviceKey = SUPABASE_SERVICE_ROLE_KEY!;
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", encoder.encode(serviceKey), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+      const sigBytes = new Uint8Array(sig.match(/.{2}/g).map((b: string) => parseInt(b, 16)));
+      const valid = await crypto.subtle.verify("HMAC", key, sigBytes, encoder.encode(payload));
+      if (!valid) throw new Error("Invalid signature");
+
+      stateData = JSON.parse(payload);
+
+      if (!stateData.ts || Date.now() - stateData.ts > 10 * 60 * 1000) {
+        throw new Error('OAuth state expired');
+      }
+    } catch (e) {
       throw new Error('Invalid state parameter');
     }
 

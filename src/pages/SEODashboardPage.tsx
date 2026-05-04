@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { useOrg } from "@/contexts/OrgContext";
 import { Search, Globe, BarChart3, TrendingUp, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,8 @@ type SemrushRow = Record<string, string>;
 
 export default function SEODashboardPage() {
   const { toast } = useToast();
+  const { currentOrg } = useOrg();
+  const orgId = currentOrg?.id || "";
 
   // Domain tab state
   const [domain, setDomain] = useState("igy6rooted.com");
@@ -43,8 +46,8 @@ export default function SEODashboardPage() {
 
     try {
       const [overviewRes, organicRes] = await Promise.all([
-        semrushApi.domainOverview(domain.trim()),
-        semrushApi.domainOrganic(domain.trim(), "us", 50),
+        semrushApi.domainOverview(orgId, domain.trim()),
+        semrushApi.domainOrganic(orgId, domain.trim(), "us", 50),
       ]);
 
       if (overviewRes.success && overviewRes.data) {
@@ -73,8 +76,8 @@ export default function SEODashboardPage() {
 
     try {
       const [kwRes, relatedRes] = await Promise.all([
-        semrushApi.keywordOverview(keyword.trim()),
-        semrushApi.relatedKeywords(keyword.trim(), "us", 20),
+        semrushApi.keywordOverview(orgId, keyword.trim()),
+        semrushApi.relatedKeywords(orgId, keyword.trim(), "us", 20),
       ]);
 
       if (kwRes.success && kwRes.data) {
@@ -101,6 +104,7 @@ export default function SEODashboardPage() {
 
     try {
       const res = await semrushApi.domainVsDomain(
+        orgId,
         [domain.trim() || "igy6rooted.com", compDomain.trim()],
         "us",
         20

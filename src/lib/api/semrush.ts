@@ -8,10 +8,11 @@ type SemrushResponse<T = Record<string, string>[]> = {
 
 async function callSemrush<T = Record<string, string>[]>(
   action: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
+  orgId: string
 ): Promise<SemrushResponse<T>> {
   const { data, error } = await supabase.functions.invoke("semrush-api", {
-    body: { action, params },
+    body: { action, params, org_id: orgId },
   });
 
   if (error) {
@@ -22,32 +23,32 @@ async function callSemrush<T = Record<string, string>[]>(
 
 export const semrushApi = {
   /** Get domain ranking overview */
-  domainOverview(domain: string, database = "us") {
-    return callSemrush("domain_overview", { domain, database });
+  domainOverview(orgId: string, domain: string, database = "us") {
+    return callSemrush("domain_overview", { domain, database }, orgId);
   },
 
   /** Get organic keywords for a domain */
-  domainOrganic(domain: string, database = "us", limit = 20) {
-    return callSemrush("domain_organic", { domain, database, limit });
+  domainOrganic(orgId: string, domain: string, database = "us", limit = 20) {
+    return callSemrush("domain_organic", { domain, database, limit }, orgId);
   },
 
   /** Get keyword overview (volume, CPC, competition) */
-  keywordOverview(keyword: string, database = "us") {
-    return callSemrush("keyword_overview", { keyword, database });
+  keywordOverview(orgId: string, keyword: string, database = "us") {
+    return callSemrush("keyword_overview", { keyword, database }, orgId);
   },
 
   /** Get related keywords */
-  relatedKeywords(keyword: string, database = "us", limit = 20) {
-    return callSemrush("related_keywords", { keyword, database, limit });
+  relatedKeywords(orgId: string, keyword: string, database = "us", limit = 20) {
+    return callSemrush("related_keywords", { keyword, database, limit }, orgId);
   },
 
   /** Get keyword difficulty score */
-  keywordDifficulty(keyword: string, database = "us") {
-    return callSemrush("keyword_difficulty", { keyword, database });
+  keywordDifficulty(orgId: string, keyword: string, database = "us") {
+    return callSemrush("keyword_difficulty", { keyword, database }, orgId);
   },
 
   /** Compare domains head-to-head */
-  domainVsDomain(domains: string[], database = "us", limit = 20) {
-    return callSemrush("domain_vs_domain", { domains, database, limit });
+  domainVsDomain(orgId: string, domains: string[], database = "us", limit = 20) {
+    return callSemrush("domain_vs_domain", { domains, database, limit }, orgId);
   },
 };

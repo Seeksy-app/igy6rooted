@@ -104,7 +104,13 @@ serve(async (req) => {
       "profile"
     ].join(" ");
 
-    const state = btoa(JSON.stringify({ org_id: orgId, provider: "google_ads" }));
+    // Sign state with HMAC to prevent tampering
+    const statePayload = JSON.stringify({ org_id: orgId, provider: "google_ads", ts: Date.now() });
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", encoder.encode(Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(statePayload));
+    const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
+    const state = btoa(JSON.stringify({ payload: statePayload, sig: sigHex }));
 
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     authUrl.searchParams.set("client_id", clientId);

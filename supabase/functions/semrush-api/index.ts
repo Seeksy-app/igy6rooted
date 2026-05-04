@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -5,6 +7,7 @@ const corsHeaders = {
 };
 
 const SEMRUSH_BASE = "https://api.semrush.com";
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,6 +15,31 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // --- JWT Authentication ---
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const userId = claimsData.claims.sub;
+
     const apiKey = Deno.env.get("SEMRUSH_API_KEY");
     if (!apiKey) {
       return new Response(
@@ -20,12 +48,35 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { action, params } = await req.json();
+    const { action, params, org_id } = await req.json();
 
     if (!action) {
       return new Response(
         JSON.stringify({ success: false, error: "action is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // --- Org membership check ---
+    if (!org_id || !UUID_REGEX.test(org_id)) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Valid org_id is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const serviceSupabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data: membership } = await serviceSupabase
+      .from("team_members")
+      .select("role")
+      .eq("org_id", org_id)
+      .eq("user_id", userId)
+      .single();
+
+    if (!membership) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Forbidden" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

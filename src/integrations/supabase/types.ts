@@ -1702,7 +1702,59 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      integration_ad_accounts_safe: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          connected_at: string | null
+          created_at: string | null
+          id: string | null
+          last_error: string | null
+          org_id: string | null
+          provider: string | null
+          scopes: string[] | null
+          status: string | null
+          token_expires_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          account_name?: string | null
+          connected_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          last_error?: string | null
+          org_id?: string | null
+          provider?: string | null
+          scopes?: string[] | null
+          status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          account_name?: string | null
+          connected_at?: string | null
+          created_at?: string | null
+          id?: string | null
+          last_error?: string | null
+          org_id?: string | null
+          provider?: string | null
+          scopes?: string[] | null
+          status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_ad_accounts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_org_with_admin: { Args: { org_name: string }; Returns: string }
