@@ -8,10 +8,11 @@ type SemrushResponse<T = Record<string, string>[]> = {
 
 async function callSemrush<T = Record<string, string>[]>(
   action: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
+  orgId: string
 ): Promise<SemrushResponse<T>> {
   const { data, error } = await supabase.functions.invoke("semrush-api", {
-    body: { action, params },
+    body: { action, params, org_id: orgId },
   });
 
   if (error) {
