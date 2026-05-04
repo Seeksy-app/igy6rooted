@@ -233,7 +233,7 @@ export default function BlogPostPage() {
 
       {/* Body — render raw HTML from Empowerify */}
       <section className="bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid lg:grid-cols-3 gap-12">
             <article className="lg:col-span-2">
               {/* Featured image in body top-third */}
