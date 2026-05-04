@@ -68,7 +68,7 @@ export default function IntegrationsPage() {
     queryFn: async () => {
       if (!currentOrg) return [];
       const { data } = await supabase
-        .from("integration_ad_accounts")
+        .from("integration_ad_accounts_safe" as any)
         .select("*")
         .eq("org_id", currentOrg.id);
       return data || [];
