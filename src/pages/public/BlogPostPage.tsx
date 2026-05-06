@@ -4,6 +4,7 @@ import { SEOHead } from "@/components/public/SEOHead";
 import { BLOG_BY_SLUG } from "@/data/blog";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ArrowRight, CheckCircle, Clock, Phone } from "lucide-react";
+import { trackEstimateClick, trackPhoneClick } from "@/lib/gtag";
 
 interface DbPost {
   title: string;
@@ -266,12 +267,14 @@ function Sidebar() {
           href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={trackEstimateClick}
           className="flex items-center justify-center gap-2 bg-white text-[hsl(82,25%,25%)] px-5 py-3 rounded-lg font-bold hover:bg-white/90 transition-colors mb-3"
         >
           Get Free Estimate <ArrowRight className="h-4 w-4" />
         </a>
         <a
           href="tel:+15182650275"
+          onClick={trackPhoneClick}
           className="flex items-center justify-center gap-2 border border-white/40 text-white px-5 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
         >
           <Phone className="h-4 w-4" />

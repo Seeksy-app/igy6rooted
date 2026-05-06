@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
+import { trackEstimateClick, trackPhoneClick } from "@/lib/gtag";
 import logo from "@/assets/logo.png";
 
 const services = [
@@ -86,6 +87,7 @@ export function PublicHeader() {
           <span className="hidden sm:block font-medium">Veteran-Owned Tree Service · Niceville, FL</span>
           <a
             href="tel:+15182650275"
+            onClick={trackPhoneClick}
             className="flex items-center gap-2 font-semibold hover:text-white/80 transition-colors"
           >
             <Phone className="h-3.5 w-3.5" />
@@ -218,6 +220,7 @@ export function PublicHeader() {
                 href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={trackEstimateClick}
                 className="hidden sm:inline-flex items-center gap-2 bg-[hsl(82,25%,28%)] hover:bg-[hsl(82,25%,22%)] text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
               >
                 <Phone className="h-4 w-4" />
@@ -291,6 +294,7 @@ export function PublicHeader() {
               </Link>
               <a
                 href="tel:+15182650275"
+                onClick={trackPhoneClick}
                 className="flex items-center justify-center gap-2 bg-[hsl(82,25%,28%)] text-white px-4 py-3 rounded-lg text-sm font-semibold mt-3"
               >
                 <Phone className="h-4 w-4" />

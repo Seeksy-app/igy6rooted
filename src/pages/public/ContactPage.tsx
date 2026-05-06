@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { SITE_CONFIG } from "@/config/site.config";
 import { SEOHead } from "@/components/public/SEOHead";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
+import { trackPhoneClick } from "@/lib/gtag";
 
 export default function ContactPage() {
   useEffect(() => {
@@ -75,6 +76,7 @@ export default function ContactPage() {
               <div className="space-y-6">
                 <a
                   href="tel:+15182650275"
+                  onClick={trackPhoneClick}
                   className="flex items-center gap-4 p-5 rounded-xl bg-[hsl(82,30%,93%)] hover:bg-[hsl(82,30%,88%)] transition-colors"
                 >
                   <div className="w-12 h-12 rounded-xl bg-[hsl(82,30%,40%)] flex items-center justify-center">

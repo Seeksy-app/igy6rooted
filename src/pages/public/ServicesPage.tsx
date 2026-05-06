@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/public/SEOHead";
 import { TreePine, ArrowRight, Phone } from "lucide-react";
+import { trackEstimateClick, trackPhoneClick } from "@/lib/gtag";
 import { SITE_CONFIG } from "@/config/site.config";
 
 const services = SITE_CONFIG.services;
@@ -105,12 +106,14 @@ export default function ServicesPage() {
               href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={trackEstimateClick}
               className="inline-flex items-center justify-center gap-2 bg-[hsl(82,40%,45%)] hover:bg-[hsl(82,40%,38%)] px-6 py-3 rounded-lg font-bold transition-colors"
             >
               Get Free Estimate
             </a>
             <a
               href="tel:+15182650275"
+              onClick={trackPhoneClick}
               className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-lg font-semibold border border-white/20 transition-colors"
             >
               <Phone className="h-4 w-4" />
