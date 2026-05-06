@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Phone, CheckCircle, ArrowLeft, TreePine } from "lucide-react";
+import { trackEstimateClick, trackPhoneClick } from "@/lib/gtag";
 import { SEOHead } from "@/components/public/SEOHead";
 
 interface ServicePageTemplateProps {
@@ -196,12 +197,14 @@ export function ServicePageTemplate({
                   href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={trackEstimateClick}
                   className="flex items-center justify-center gap-2 bg-white text-[hsl(82,25%,25%)] px-6 py-3 rounded-lg font-bold hover:bg-white/90 transition-colors"
                 >
                   Get Free Estimate
                 </a>
                 <a
                   href="tel:+15182650275"
+                  onClick={trackPhoneClick}
                   className="flex items-center justify-center gap-2 mt-3 text-white/90 hover:text-white text-sm font-semibold"
                 >
                   <Phone className="h-4 w-4" />

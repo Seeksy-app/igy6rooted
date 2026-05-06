@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { trackFormSubmit, trackPhoneClick } from "@/lib/gtag";
 import { z } from "zod";
 
 const leadSchema = z.object({
@@ -56,6 +57,7 @@ export default function ReferralLandingPage() {
     }
 
     setSubmitting(true);
+    trackFormSubmit();
     try {
       // We need to find the org for IGY6 Rooted — use the first org or a known one
       // For public submissions, we insert via the edge function or directly with service key

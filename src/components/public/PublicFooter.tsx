@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
+import { trackEstimateClick, trackPhoneClick } from "@/lib/gtag";
 import logo from "@/assets/logo.png";
 import { BLOG_POSTS } from "@/data/blog";
 
@@ -41,6 +42,7 @@ export function PublicFooter() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <a
               href="tel:+15182650275"
+              onClick={trackPhoneClick}
               className="inline-flex items-center gap-2 bg-white text-[hsl(82,25%,25%)] px-8 py-3.5 rounded-lg font-bold text-lg hover:bg-white/90 transition-colors"
             >
               <Phone className="h-5 w-5" />
@@ -50,6 +52,7 @@ export function PublicFooter() {
               href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={trackEstimateClick}
               className="inline-flex items-center gap-2 bg-[hsl(82,25%,18%)] text-white border-2 border-white/20 px-8 py-3.5 rounded-lg font-bold text-lg hover:bg-[hsl(82,25%,14%)] transition-colors"
             >
               Get Free Estimate
@@ -142,6 +145,7 @@ export function PublicFooter() {
               <li>
                 <a
                   href="tel:+15182650275"
+                  onClick={trackPhoneClick}
                   className="flex items-center gap-2.5 text-sm text-white/70 hover:text-white transition-colors"
                 >
                   <Phone className="h-4 w-4 shrink-0" />
