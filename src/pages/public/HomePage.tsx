@@ -142,16 +142,14 @@ export default function HomePage() {
               {SITE_CONFIG.hero.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/free-estimate"
                 onClick={trackEstimateClick}
                 className="inline-flex items-center justify-center gap-2 bg-[hsl(82,40%,45%)] hover:bg-[hsl(82,40%,38%)] text-white px-8 py-4 rounded-lg font-bold text-lg transition-colors"
               >
                 <Phone className="h-5 w-5" />
                 Get Free Estimate
-              </a>
+              </Link>
               <Link
                 to="/services"
                 className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors backdrop-blur-sm border border-white/20"
