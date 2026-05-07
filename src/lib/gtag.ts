@@ -30,6 +30,9 @@ export function trackEstimateClick() {
 /** Track phone call click */
 export function trackPhoneClick() {
   trackConversion(1.0);
+  window.gtag?.("event", "conversion", {
+    send_to: `${AW_ID}/bXj3CMivn6kcEIqu4s8-`,
+  });
 }
 
 /** Track referral / offer form submission */
