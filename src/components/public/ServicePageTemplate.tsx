@@ -193,15 +193,13 @@ export function ServicePageTemplate({
                 <p className="text-white/70 text-sm mb-4">
                   Call us today for a no-obligation assessment.
                 </p>
-                <a
-                  href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to="/free-estimate"
                   onClick={trackEstimateClick}
                   className="flex items-center justify-center gap-2 bg-white text-[hsl(82,25%,25%)] px-6 py-3 rounded-lg font-bold hover:bg-white/90 transition-colors"
                 >
                   Get Free Estimate
-                </a>
+                </Link>
                 <a
                   href="tel:+15182650275"
                   onClick={trackPhoneClick}

@@ -48,15 +48,13 @@ export function PublicFooter() {
               <Phone className="h-5 w-5" />
               (518) 265-0275
             </a>
-            <a
-              href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/free-estimate"
               onClick={trackEstimateClick}
               className="inline-flex items-center gap-2 bg-[hsl(82,25%,18%)] text-white border-2 border-white/20 px-8 py-3.5 rounded-lg font-bold text-lg hover:bg-[hsl(82,25%,14%)] transition-colors"
             >
               Get Free Estimate
-            </a>
+            </Link>
           </div>
         </div>
       </div>

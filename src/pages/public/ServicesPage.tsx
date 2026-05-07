@@ -102,15 +102,13 @@ export default function ServicesPage() {
             <p className="text-white/75 mt-1">Call us — we'll walk your property and give you a free, honest estimate.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <a
-              href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/free-estimate"
               onClick={trackEstimateClick}
               className="inline-flex items-center justify-center gap-2 bg-[hsl(82,40%,45%)] hover:bg-[hsl(82,40%,38%)] px-6 py-3 rounded-lg font-bold transition-colors"
             >
               Get Free Estimate
-            </a>
+            </Link>
             <a
               href="tel:+15182650275"
               onClick={trackPhoneClick}

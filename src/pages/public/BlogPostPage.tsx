@@ -263,15 +263,13 @@ function Sidebar() {
       <div className="bg-[hsl(82,25%,28%)] rounded-xl p-6 text-white sticky top-24">
         <h3 className="font-bold text-lg mb-2">Get a free estimate</h3>
         <p className="text-sm text-white/85 leading-snug mb-5">Let us help you prepare for the next storm — quick, no-pressure quote from a local veteran-owned crew.</p>
-        <a
-          href="https://clienthub.getjobber.com/hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/requests/2162555/new"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/free-estimate"
           onClick={trackEstimateClick}
           className="flex items-center justify-center gap-2 bg-white text-[hsl(82,25%,25%)] px-5 py-3 rounded-lg font-bold hover:bg-white/90 transition-colors mb-3"
         >
           Get Free Estimate <ArrowRight className="h-4 w-4" />
-        </a>
+        </Link>
         <a
           href="tel:+15182650275"
           onClick={trackPhoneClick}
