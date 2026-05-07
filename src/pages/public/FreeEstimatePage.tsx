@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import { SEOHead } from "@/components/public/SEOHead";
 import { Phone, Shield, Clock, MapPin } from "lucide-react";
 import { trackPhoneClick, trackFormSubmit } from "@/lib/gtag";
@@ -10,8 +11,10 @@ const FORM_URL =
 
 export default function FreeEstimatePage() {
 
+  const formRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // Load Jobber embed stylesheet
+    // Preload Jobber embed stylesheet
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href =
@@ -25,15 +28,29 @@ export default function FreeEstimatePage() {
       "https://d3ey4dbjkt2f6s.cloudfront.net/assets/static_link/work_request_embed_snippet.js";
     script.setAttribute("clienthub_id", CLIENTHUB_ID);
     script.setAttribute("form_url", FORM_URL);
+    script.async = true;
     document.body.appendChild(script);
 
-    // Fire conversion tracking when the form submits (Jobber posts a message)
+    // Listen for Jobber iframe messages (step changes + submission)
     const onMessage = (e: MessageEvent) => {
+      if (typeof e.data !== "string") return;
+
+      // Scroll to top of form on step transitions
       if (
-        typeof e.data === "string" &&
+        e.data.includes("work_request_step") ||
+        e.data.includes("resize") ||
         e.data.includes("work_request_submitted")
       ) {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // Fire conversions on submit
+      if (e.data.includes("work_request_submitted")) {
         trackFormSubmit();
+        // Also fire the Free Estimate specific conversion
+        window.gtag?.("event", "conversion", {
+          send_to: "AW-16810284810/D12VCN_9oKkcEIqu4s8-",
+        });
       }
     };
     window.addEventListener("message", onMessage);
@@ -47,6 +64,12 @@ export default function FreeEstimatePage() {
 
   return (
     <>
+      <Helmet>
+        <link rel="dns-prefetch" href="https://d3ey4dbjkt2f6s.cloudfront.net" />
+        <link rel="preconnect" href="https://d3ey4dbjkt2f6s.cloudfront.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://clienthub.getjobber.com" />
+        <link rel="preconnect" href="https://clienthub.getjobber.com" crossOrigin="anonymous" />
+      </Helmet>
       <SEOHead
         title="Free Tree Service Estimate | IGY6 Rooted, Niceville FL"
         description="Request a free estimate from IGY6 Rooted — veteran-owned tree service in Niceville, Destin & Fort Walton Beach, FL. Fast response, no obligation."
@@ -80,7 +103,7 @@ export default function FreeEstimatePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid lg:grid-cols-5 gap-12">
             {/* Jobber Embed — takes 3 cols */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3" ref={formRef}>
               <div
                 id={CLIENTHUB_ID}
                 className="rounded-xl border border-[hsl(82,15%,90%)] p-1 min-h-[550px]"
