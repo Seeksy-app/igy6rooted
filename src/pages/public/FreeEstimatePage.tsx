@@ -9,12 +9,6 @@ const FORM_URL =
   "https://clienthub.getjobber.com/client_hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/work_request/embedded_work_request_form?form_id=4602732";
 
 export default function FreeEstimatePage() {
-  // Fire Free Estimate conversion page snippet on load
-  useEffect(() => {
-    window.gtag?.("event", "conversion", {
-      send_to: "AW-16810284810/D12VCN_9oKkcEIqu4s8-",
-    });
-  }, []);
 
   useEffect(() => {
     // Load Jobber embed stylesheet
