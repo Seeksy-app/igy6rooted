@@ -24,6 +24,7 @@ import ArticlePage from "@/pages/public/ArticlePage";
 import BlogIndexPage from "@/pages/public/BlogIndexPage";
 import BlogPostPage from "@/pages/public/BlogPostPage";
 import ThankYouPage from "@/pages/public/ThankYouPage";
+import FreeEstimatePage from "@/pages/public/FreeEstimatePage";
 import {
   TreeRemovalPage,
   TreeTrimmingPage,
