@@ -10,8 +10,10 @@ const FORM_URL =
 
 export default function FreeEstimatePage() {
 
+  const formRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // Load Jobber embed stylesheet
+    // Preload Jobber embed stylesheet
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href =
@@ -25,15 +27,29 @@ export default function FreeEstimatePage() {
       "https://d3ey4dbjkt2f6s.cloudfront.net/assets/static_link/work_request_embed_snippet.js";
     script.setAttribute("clienthub_id", CLIENTHUB_ID);
     script.setAttribute("form_url", FORM_URL);
+    script.async = true;
     document.body.appendChild(script);
 
-    // Fire conversion tracking when the form submits (Jobber posts a message)
+    // Listen for Jobber iframe messages (step changes + submission)
     const onMessage = (e: MessageEvent) => {
+      if (typeof e.data !== "string") return;
+
+      // Scroll to top of form on step transitions
       if (
-        typeof e.data === "string" &&
+        e.data.includes("work_request_step") ||
+        e.data.includes("resize") ||
         e.data.includes("work_request_submitted")
       ) {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // Fire conversions on submit
+      if (e.data.includes("work_request_submitted")) {
         trackFormSubmit();
+        // Also fire the Free Estimate specific conversion
+        window.gtag?.("event", "conversion", {
+          send_to: "AW-16810284810/D12VCN_9oKkcEIqu4s8-",
+        });
       }
     };
     window.addEventListener("message", onMessage);
