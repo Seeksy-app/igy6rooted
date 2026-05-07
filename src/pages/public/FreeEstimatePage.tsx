@@ -96,7 +96,7 @@ export default function FreeEstimatePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid lg:grid-cols-5 gap-12">
             {/* Jobber Embed — takes 3 cols */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3" ref={formRef}>
               <div
                 id={CLIENTHUB_ID}
                 className="rounded-xl border border-[hsl(82,15%,90%)] p-1 min-h-[550px]"
