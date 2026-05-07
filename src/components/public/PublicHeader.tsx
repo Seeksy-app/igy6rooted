@@ -223,7 +223,7 @@ export function PublicHeader() {
               >
                 <Phone className="h-4 w-4" />
                 Get Free Estimate
-              </a>
+              </Link>
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="lg:hidden p-2 rounded-lg hover:bg-[hsl(82,15%,93%)] transition-colors"
