@@ -191,6 +191,7 @@ function AppRoutes() {
       <Route path="/blog" element={<PublicLayout><BlogIndexPage /></PublicLayout>} />
       <Route path="/blog/:slug" element={<PublicLayout><BlogPostPage /></PublicLayout>} />
       <Route path="/thank-you" element={<PublicLayout><ThankYouPage /></PublicLayout>} />
+      <Route path="/free-estimate" element={<PublicLayout><FreeEstimatePage /></PublicLayout>} />
 
       {/* Auth routes */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
