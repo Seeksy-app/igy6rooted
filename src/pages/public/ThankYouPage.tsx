@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/public/SEOHead";
 import { CheckCircle, Phone, ArrowRight } from "lucide-react";
@@ -7,6 +8,12 @@ import { trackPhoneClick } from "@/lib/gtag";
 const featured = BLOG_POSTS.slice(0, 3);
 
 export default function ThankYouPage() {
+  // Fire Free Estimate conversion on thank-you page load
+  useEffect(() => {
+    window.gtag?.("event", "conversion", {
+      send_to: "AW-16810284810/D12VCN_9oKkcEIqu4s8-",
+    });
+  }, []);
   return (
     <>
       <SEOHead
