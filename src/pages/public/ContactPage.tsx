@@ -16,8 +16,8 @@ export default function ContactPage() {
     // Load Jobber embed script
     const script = document.createElement("script");
     script.src = "https://d3ey4dbjkt2f6s.cloudfront.net/assets/static_link/work_request_embed_snippet.js";
-    script.setAttribute("clienthub_id", "098c4d0e-40ac-4280-b8c9-70e5a93704f7-2162555");
-    script.setAttribute("form_url", "https://clienthub.getjobber.com/client_hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/work_request/embedded_work_request_form?form_id=2162555");
+    script.setAttribute("clienthub_id", "098c4d0e-40ac-4280-b8c9-70e5a93704f7-4602732");
+    script.setAttribute("form_url", "https://clienthub.getjobber.com/client_hubs/098c4d0e-40ac-4280-b8c9-70e5a93704f7/public/work_request/embedded_work_request_form?form_id=4602732");
     document.body.appendChild(script);
 
     return () => {
