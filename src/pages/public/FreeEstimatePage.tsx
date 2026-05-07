@@ -64,6 +64,12 @@ export default function FreeEstimatePage() {
 
   return (
     <>
+      <Helmet>
+        <link rel="dns-prefetch" href="https://d3ey4dbjkt2f6s.cloudfront.net" />
+        <link rel="preconnect" href="https://d3ey4dbjkt2f6s.cloudfront.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://clienthub.getjobber.com" />
+        <link rel="preconnect" href="https://clienthub.getjobber.com" crossOrigin="anonymous" />
+      </Helmet>
       <SEOHead
         title="Free Tree Service Estimate | IGY6 Rooted, Niceville FL"
         description="Request a free estimate from IGY6 Rooted — veteran-owned tree service in Niceville, Destin & Fort Walton Beach, FL. Fast response, no obligation."
