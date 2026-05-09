@@ -6,11 +6,12 @@ import { useJobberLeads } from "@/hooks/useJobberLeads";
 import { Link, Navigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Bot, BarChart3, Search, Users,
   Loader2, Zap, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Send,
-  Sun, Mail, TrendingUp,
+  Sun, Mail, TrendingUp, Building2,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -56,25 +57,9 @@ const actionCards: { to: string; icon: React.ElementType; title: string; desc: s
 ];
 
 export default function MainDashboardPage() {
-  const { currentOrg } = useOrg();
+  const { currentOrg, orgs, setCurrentOrg, userRole, loading: orgLoading } = useOrg();
   const { user } = useAuth();
   const isMobile = useIsMobile();
-
-  // Check ALL memberships to detect sales role across orgs
-  const { data: salesMembership, isLoading: roleLoading } = useQuery({
-    queryKey: ["user-all-roles", user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data } = await supabase
-        .from("team_members")
-        .select("role, org_id")
-        .eq("user_id", user.id);
-      // Find any membership with "sales" role
-      const salesEntry = data?.find((m: any) => m.role === "sales");
-      return salesEntry || null;
-    },
-    enabled: !!user,
-  });
 
 
   const { data: stats, isLoading } = useQuery({
@@ -149,8 +134,8 @@ export default function MainDashboardPage() {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [leadsData]);
 
-  // Wait for role check to complete before rendering
-  if (isLoading || (!!user && roleLoading)) {
+  // Wait for org context + dashboard data to load before deciding what to show
+  if (isLoading || orgLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -158,8 +143,21 @@ export default function MainDashboardPage() {
     );
   }
 
-  // Sales role detected on any org → redirect to Sales PWA
-  if (salesMembership) {
+  // Sales role on the CURRENT org → redirect to Sales PWA.
+  // Switching to a non-sales org via the switcher avoids this redirect.
+  const onlySalesMemberships = orgs.length > 0 && orgs.every((o) => {
+    // We don't have per-org roles cached here, so fall back to userRole when
+    // there is exactly one org. With multiple orgs, the switcher lets the user
+    // pick a non-sales org and userRole will reflect that selection.
+    return false;
+  });
+  if (userRole === "sales" && !onlySalesMemberships) {
+    // Try to auto-switch to a non-sales org if one exists
+    // (handled by OrgContext defaulting), but if the user explicitly selected
+    // a sales org, respect that and redirect.
+    return <Navigate to="/knock" replace />;
+  }
+  if (userRole === "sales") {
     return <Navigate to="/knock" replace />;
   }
 
