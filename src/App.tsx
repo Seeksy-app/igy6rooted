@@ -25,6 +25,8 @@ import BlogIndexPage from "@/pages/public/BlogIndexPage";
 import BlogPostPage from "@/pages/public/BlogPostPage";
 import ThankYouPage from "@/pages/public/ThankYouPage";
 import FreeEstimatePage from "@/pages/public/FreeEstimatePage";
+import PrivacyPolicyPage from "@/pages/public/PrivacyPolicyPage";
+import TermsPage from "@/pages/public/TermsPage";
 import {
   TreeRemovalPage,
   TreeTrimmingPage,
@@ -192,6 +194,8 @@ function AppRoutes() {
       <Route path="/blog/:slug" element={<PublicLayout><BlogPostPage /></PublicLayout>} />
       <Route path="/thank-you" element={<PublicLayout><ThankYouPage /></PublicLayout>} />
       <Route path="/free-estimate" element={<PublicLayout><FreeEstimatePage /></PublicLayout>} />
+      <Route path="/privacy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
+      <Route path="/terms" element={<PublicLayout><TermsPage /></PublicLayout>} />
 
       {/* Auth routes */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
