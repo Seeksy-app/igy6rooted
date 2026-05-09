@@ -144,19 +144,8 @@ export default function MainDashboardPage() {
   }
 
   // Sales role on the CURRENT org → redirect to Sales PWA.
-  // Switching to a non-sales org via the switcher avoids this redirect.
-  const onlySalesMemberships = orgs.length > 0 && orgs.every((o) => {
-    // We don't have per-org roles cached here, so fall back to userRole when
-    // there is exactly one org. With multiple orgs, the switcher lets the user
-    // pick a non-sales org and userRole will reflect that selection.
-    return false;
-  });
-  if (userRole === "sales" && !onlySalesMemberships) {
-    // Try to auto-switch to a non-sales org if one exists
-    // (handled by OrgContext defaulting), but if the user explicitly selected
-    // a sales org, respect that and redirect.
-    return <Navigate to="/knock" replace />;
-  }
+  // The org switcher in the header lets the user pick a non-sales org and stay
+  // on the dashboard. Auto-default in OrgContext also prefers a non-sales org.
   if (userRole === "sales") {
     return <Navigate to="/knock" replace />;
   }
@@ -170,14 +159,37 @@ export default function MainDashboardPage() {
       {/* Leads & Sales Header */}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[hsl(142,30%,25%)] to-[hsl(142,25%,35%)] text-white p-8">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_70%_50%,white,transparent_70%)]" />
-        <div className="relative flex items-center justify-between">
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">
               Welcome back, {firstName}
             </h1>
             <p className="text-white/70">Your leads & sales at a glance</p>
           </div>
-          <WeatherTimeWidget />
+          <div className="flex items-center gap-3">
+            {orgs.length > 1 && (
+              <Select
+                value={currentOrg?.id}
+                onValueChange={(id) => {
+                  const next = orgs.find((o) => o.id === id);
+                  if (next) setCurrentOrg(next);
+                }}
+              >
+                <SelectTrigger className="w-[220px] bg-white/10 border-white/20 text-white hover:bg-white/15">
+                  <Building2 className="h-4 w-4 mr-2 text-white/70" />
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {orgs.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <WeatherTimeWidget />
+          </div>
         </div>
       </div>
 
