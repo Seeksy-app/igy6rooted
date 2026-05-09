@@ -8,17 +8,19 @@ interface Org {
   created_at: string;
 }
 
+type Role = "admin" | "staff" | "viewer" | "member" | "sales";
+
 interface TeamMember {
   id: string;
   org_id: string;
   user_id: string;
-  role: "admin" | "staff" | "viewer";
+  role: Role;
   created_at: string;
 }
 
 interface OrgContextType {
   currentOrg: Org | null;
-  userRole: "admin" | "staff" | "viewer" | null;
+  userRole: Role | null;
   orgs: Org[];
   loading: boolean;
   setCurrentOrg: (org: Org) => void;
@@ -31,7 +33,7 @@ const OrgContext = createContext<OrgContextType | undefined>(undefined);
 export function OrgProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [currentOrg, setCurrentOrg] = useState<Org | null>(null);
-  const [userRole, setUserRole] = useState<"admin" | "staff" | "viewer" | null>(null);
+  const [userRole, setUserRole] = useState<Role | null>(null);
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,14 +75,20 @@ export function OrgProvider({ children }: { children: ReactNode }) {
 
       setOrgs(orgData || []);
 
-      // Set current org if not already set
+      // Set current org if not already set — prefer non-sales orgs so admins
+      // who happen to also be sales on a different org land on the dashboard.
       if (!currentOrg && orgData && orgData.length > 0) {
-        setCurrentOrg(orgData[0]);
-        const membership = memberships.find((m) => m.org_id === orgData[0].id);
-        setUserRole(membership?.role as "admin" | "staff" | "viewer" || null);
+        const nonSales = orgData.find((o) => {
+          const m = memberships.find((mm) => mm.org_id === o.id);
+          return m?.role !== "sales";
+        });
+        const initial = nonSales || orgData[0];
+        setCurrentOrg(initial);
+        const membership = memberships.find((m) => m.org_id === initial.id);
+        setUserRole((membership?.role as Role) || null);
       } else if (currentOrg) {
         const membership = memberships.find((m) => m.org_id === currentOrg.id);
-        setUserRole(membership?.role as "admin" | "staff" | "viewer" || null);
+        setUserRole((membership?.role as Role) || null);
       }
     } catch (error) {
       console.error("Error fetching orgs:", error);
@@ -103,7 +111,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
       .eq("user_id", user?.id || "")
       .single()
       .then(({ data }) => {
-        setUserRole(data?.role as "admin" | "staff" | "viewer" || null);
+        setUserRole((data?.role as Role) || null);
       });
   };
 
