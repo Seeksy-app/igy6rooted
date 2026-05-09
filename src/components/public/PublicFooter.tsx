@@ -181,12 +181,26 @@ export function PublicFooter() {
           <p className="text-xs text-white/40">
             © {new Date().getFullYear()} IGY6 Rooted Stump Grinding & Tree Service. All rights reserved.
           </p>
-          <Link
-            to="/login"
-            className="text-xs text-white/30 hover:text-white/60 transition-colors"
-          >
-            Admin Login
-          </Link>
+          <div className="flex items-center gap-5">
+            <Link
+              to="/privacy"
+              className="text-xs text-white/50 hover:text-white/80 transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              to="/terms"
+              className="text-xs text-white/50 hover:text-white/80 transition-colors"
+            >
+              Terms & Conditions
+            </Link>
+            <Link
+              to="/login"
+              className="text-xs text-white/30 hover:text-white/60 transition-colors"
+            >
+              Admin Login
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
