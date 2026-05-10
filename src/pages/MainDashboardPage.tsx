@@ -59,7 +59,7 @@ const actionCards: { to: string; icon: React.ElementType; title: string; desc: s
 
 export default function MainDashboardPage() {
   const { currentOrg, orgs, setCurrentOrg, userRole, loading: orgLoading } = useOrg();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
 
 
