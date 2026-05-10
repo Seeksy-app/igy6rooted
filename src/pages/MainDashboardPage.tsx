@@ -1,5 +1,6 @@
 import { useOrg } from "@/contexts/OrgContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useJobberLeads } from "@/hooks/useJobberLeads";
@@ -11,7 +12,7 @@ import {
   Bot, BarChart3, Search, Users,
   Loader2, Zap, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Send,
-  Sun, Mail, TrendingUp, Building2,
+  Sun, Mail, TrendingUp, Building2, LogOut,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -58,7 +59,7 @@ const actionCards: { to: string; icon: React.ElementType; title: string; desc: s
 
 export default function MainDashboardPage() {
   const { currentOrg, orgs, setCurrentOrg, userRole, loading: orgLoading } = useOrg();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
 
 
@@ -189,6 +190,15 @@ export default function MainDashboardPage() {
               </Select>
             )}
             <WeatherTimeWidget />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => signOut()}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Log out
+            </Button>
           </div>
         </div>
       </div>
