@@ -523,3 +523,100 @@ function SalesAppSection() {
     </div>
   );
 }
+
+function OAuthCredentialsCard() {
+  const { toast } = useToast();
+  const [data, setData] = useState<{
+    google_ads?: { configured: boolean; client_id: string | null };
+    meta_ads?: { configured: boolean; app_id: string | null };
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("oauth-config-info");
+        if (error) throw error;
+        setData(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const copy = (val: string) => {
+    navigator.clipboard.writeText(val);
+    toast({ title: "Copied", description: "Client ID copied to clipboard." });
+  };
+
+  return (
+    <Card className="border-dashed">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Shield className="h-4 w-4" /> OAuth Client Credentials (Admin)
+        </CardTitle>
+        <CardDescription className="text-xs">
+          The OAuth client IDs your backend uses to start ad-platform connections. Add the redirect URIs below to each provider's console.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+          </div>
+        ) : (
+          <>
+            <CredentialRow
+              label="Google Ads Client ID"
+              value={data?.google_ads?.client_id || null}
+              configured={!!data?.google_ads?.configured}
+              onCopy={copy}
+            />
+            <CredentialRow
+              label="Meta App ID"
+              value={data?.meta_ads?.app_id || null}
+              configured={!!data?.meta_ads?.configured}
+              onCopy={copy}
+            />
+            <div className="text-xs text-muted-foreground pt-2 border-t border-border">
+              <p className="font-medium text-foreground mb-1">Required redirect URIs (current origin):</p>
+              <code className="block bg-muted px-2 py-1 rounded text-[11px] break-all">
+                {window.location.origin}/integrations/google-ads/callback
+              </code>
+              <code className="block bg-muted px-2 py-1 rounded text-[11px] break-all mt-1">
+                {window.location.origin}/integrations/meta-ads/callback
+              </code>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function CredentialRow({ label, value, configured, onCopy }: {
+  label: string;
+  value: string | null;
+  configured: boolean;
+  onCopy: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 p-2 rounded border border-border bg-background">
+      <div className="min-w-0 flex-1">
+        <div className="text-xs font-medium text-muted-foreground">{label}</div>
+        {configured && value ? (
+          <code className="text-xs font-mono break-all">{value}</code>
+        ) : (
+          <span className="text-xs text-destructive">Not configured</span>
+        )}
+      </div>
+      {configured && value && (
+        <Button size="sm" variant="ghost" onClick={() => onCopy(value)} className="shrink-0">
+          <Copy className="h-3.5 w-3.5" />
+        </Button>
+      )}
+    </div>
+  );
+}
