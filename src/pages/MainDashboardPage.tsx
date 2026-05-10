@@ -12,7 +12,7 @@ import {
   Bot, BarChart3, Search, Users,
   Loader2, Zap, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Send,
-  Sun, Mail, TrendingUp, Building2,
+  Sun, Mail, TrendingUp, Building2, LogOut,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
