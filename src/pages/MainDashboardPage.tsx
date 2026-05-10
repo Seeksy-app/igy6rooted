@@ -190,6 +190,15 @@ export default function MainDashboardPage() {
               </Select>
             )}
             <WeatherTimeWidget />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => signOut()}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Log out
+            </Button>
           </div>
         </div>
       </div>
