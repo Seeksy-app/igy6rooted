@@ -210,6 +210,9 @@ export default function IntegrationsPage() {
         <p className="text-xs text-muted-foreground">API keys and OAuth tokens are encrypted at rest and never exposed after saving.</p>
       </div>
 
+      {/* OAuth credentials info (admin only) */}
+      {isAdmin && <OAuthCredentialsCard />}
+
       {/* Categories */}
       {Object.entries(grouped).map(([category, items]) => (
         <div key={category}>
