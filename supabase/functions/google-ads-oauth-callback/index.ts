@@ -22,14 +22,14 @@ serve(async (req) => {
       console.error("OAuth error:", error);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=${encodeURIComponent(error)}` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=${encodeURIComponent(error)}` },
       });
     }
 
     if (!code || !state) {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=missing_params` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=missing_params` },
       });
     }
 
@@ -69,7 +69,7 @@ serve(async (req) => {
     if (!org_id) {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=missing_org_id` },
+        headers: { Location: `${appReturnUrl}?error=missing_org_id` },
       });
     }
 
@@ -80,7 +80,7 @@ serve(async (req) => {
       console.error("Google OAuth credentials not configured");
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=oauth_not_configured` },
+        headers: { Location: `${appReturnUrl}?error=oauth_not_configured` },
       });
     }
 
@@ -103,7 +103,7 @@ serve(async (req) => {
       console.error("Token exchange failed:", tokenData);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=token_exchange_failed` },
+        headers: { Location: `${appReturnUrl}?error=token_exchange_failed` },
       });
     }
 
@@ -151,7 +151,7 @@ serve(async (req) => {
       console.error("Database error:", dbError);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=database_error` },
+        headers: { Location: `${appReturnUrl}?error=database_error` },
       });
     }
 
