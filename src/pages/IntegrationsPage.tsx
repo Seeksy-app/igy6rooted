@@ -163,11 +163,10 @@ export default function IntegrationsPage() {
   const integrations: Integration[] = [
     { id: "jobber", name: "Jobber", description: "Scheduling, jobs & client data", category: "Core", status: jobberConnection?.status === "connected" ? "connected" : jobberConnection ? "pending" : "disconnected", icon: "📋", configPath: "/integrations/jobber", lastSync: jobberConnection?.updated_at },
     { id: "elevenlabs", name: "ElevenLabs", description: "Conversational AI voice agent", category: "AI", status: "connected", icon: "🎙️" },
-    { id: "semrush", name: "Semrush", description: "SEO analytics • Per-client domain tracking", category: "SEO & Analytics", status: "connected", icon: "🔍", configPath: "/seo-onboarding" },
+    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews", category: "Marketing & Analytics", status: "coming_soon", icon: "🏪" },
     { id: "google-ads", name: "Google Ads", description: "Ad performance & ROI tracking", category: "Marketing", status: getAdStatus(googleAdsConnection), icon: "🎯", lastSync: googleAdsConnection?.updated_at },
     { id: "meta-ads", name: "Meta Ads", description: "Facebook & Instagram campaigns", category: "Marketing", status: getAdStatus(metaAdsConnection), icon: "📱", lastSync: metaAdsConnection?.updated_at },
-    { id: "google-analytics", name: "Google Analytics", description: "Website & conversion tracking", category: "Analytics", status: "coming_soon", icon: "📊" },
-    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews", category: "Marketing", status: "coming_soon", icon: "🏪" },
+    { id: "google-analytics", name: "Google Analytics", description: "Website & conversion tracking", category: "Marketing & Analytics", status: "coming_soon", icon: "📊" },
   ];
 
   const connectAction: Record<string, () => void> = {
@@ -176,17 +175,15 @@ export default function IntegrationsPage() {
     "meta-ads": () => startOAuth("meta-ads", "meta-ads-oauth-start"),
   };
 
-  const grouped = integrations.reduce((acc, i) => {
-    (acc[i.category] ??= []).push(i);
-    return acc;
-  }, {} as Record<string, Integration[]>);
+  const connectedIntegrations = integrations.filter((integration) => integration.status === "connected");
+  const marketingAnalyticsIntegrations = integrations.filter((integration) => integration.status !== "connected");
 
   if (loadingJobber || loadingAdAccounts) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -213,24 +210,37 @@ export default function IntegrationsPage() {
       {/* OAuth credentials info (admin only) */}
       {isAdmin && <OAuthCredentialsCard />}
 
-      {/* Categories */}
-      {Object.entries(grouped).map(([category, items]) => (
-        <div key={category}>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">{category}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((integration) => (
-              <IntegrationCard
-                key={integration.id}
-                integration={integration}
-                isAdmin={isAdmin}
-                testing={testing}
-                onConnect={connectAction[integration.id]}
-                onTest={() => testConnection(integration.id)}
-              />
-            ))}
-          </div>
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Connected Integrations</h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {connectedIntegrations.map((integration) => (
+            <IntegrationCard
+              key={integration.id}
+              integration={integration}
+              isAdmin={isAdmin}
+              testing={testing}
+              onConnect={connectAction[integration.id]}
+              onTest={() => testConnection(integration.id)}
+            />
+          ))}
         </div>
-      ))}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Marketing & Analytics</h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {marketingAnalyticsIntegrations.map((integration) => (
+            <IntegrationCard
+              key={integration.id}
+              integration={integration}
+              isAdmin={isAdmin}
+              testing={testing}
+              onConnect={connectAction[integration.id]}
+              onTest={() => testConnection(integration.id)}
+            />
+          ))}
+        </div>
+      </section>
 
       {/* Zapier Integration */}
       <ZapierIntegrationSection orgId={currentOrg?.id} />
