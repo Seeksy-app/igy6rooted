@@ -16,10 +16,7 @@ serve(async (req) => {
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
-    const redirectUri = url.searchParams.get("redirect_uri");
-
-    // Get the base URL for redirects
-    const baseUrl = url.searchParams.get("base_url") || url.origin.replace(/\/functions\/v1.*/, "");
+    const defaultBaseUrl = "https://www.igy6rooted.com";
 
     if (error) {
       console.error("OAuth error:", error);
@@ -57,17 +54,18 @@ serve(async (req) => {
       if (!stateData.ts || Date.now() - stateData.ts > 10 * 60 * 1000) {
         return new Response(null, {
           status: 302,
-          headers: { Location: `${baseUrl}/integrations?error=state_expired` },
+          headers: { Location: `${defaultBaseUrl}/integrations?error=state_expired` },
         });
       }
     } catch {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=invalid_state` },
+          headers: { Location: `${defaultBaseUrl}/integrations?error=invalid_state` },
       });
     }
 
-    const { org_id } = stateData;
+    const { org_id, redirect_uri } = stateData;
+    const appReturnUrl = redirect_uri || `${defaultBaseUrl}/integrations`;
     if (!org_id) {
       return new Response(null, {
         status: 302,
@@ -95,7 +93,7 @@ serve(async (req) => {
         client_secret: clientSecret,
         code,
         grant_type: "authorization_code",
-        redirect_uri: redirectUri || `${baseUrl}/integrations/google-ads/callback`,
+        redirect_uri: `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-ads-oauth-callback`,
       }),
     });
 
@@ -161,7 +159,7 @@ serve(async (req) => {
 
     return new Response(null, {
       status: 302,
-      headers: { Location: `${baseUrl}/integrations?success=google_ads_connected` },
+        headers: { Location: `${appReturnUrl}?success=google_ads_connected` },
     });
   } catch (error) {
     console.error("Error in Google Ads OAuth callback:", error);
