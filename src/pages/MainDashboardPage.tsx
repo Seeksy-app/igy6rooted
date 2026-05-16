@@ -250,11 +250,17 @@ export default function MainDashboardPage() {
 
       {/* Jobber KPI Strip */}
       {jSummary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <KpiCard icon={Users} label="Total Clients" value={jSummary.totalClients} />
           <KpiCard icon={ClipboardList} label="Open Requests" value={jSummary.openRequests} />
           <KpiCard icon={Briefcase} label="Active Jobs" value={jSummary.activeJobs} />
           <KpiCard icon={DollarSign} label="Revenue" value={jSummary.totalRevenue} isCurrency />
+          <KpiCard
+            icon={FileText}
+            label={`Form Subs (30d · ${websiteSubsLast7} last 7d)`}
+            value={websiteSubsTotal}
+            badge="Website"
+          />
         </div>
       )}
 
