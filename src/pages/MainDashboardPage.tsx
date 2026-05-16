@@ -283,6 +283,43 @@ export default function MainDashboardPage() {
         ))}
       </div>
 
+      {/* Website Form Submissions Trend */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" />
+            Website Form Submissions — Last 30 Days
+            <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+              {websiteSubsTotal} total · {websiteSubsLast7} last 7d
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {websiteSubsTotal > 0 ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={websiteTrendData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={4} />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="submissions"
+                  stroke="hsl(142,30%,35%)"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: "hsl(142,30%,35%)" }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-xs text-muted-foreground py-8 text-center">
+              No website form submissions yet — they’ll appear here as visitors submit the Free Estimate form.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
