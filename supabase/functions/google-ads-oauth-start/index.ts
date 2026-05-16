@@ -125,12 +125,11 @@ serve(async (req) => {
 
     console.log(`Starting Google Ads OAuth for org ${orgId}`);
 
-    return new Response(null, {
-      status: 302,
-      headers: {
-        ...corsHeaders,
-        "Location": authUrl.toString(),
-      },
+    // Return the URL as JSON so the browser can navigate directly. Returning
+    // a 302 from a fetch call makes the browser follow Google and fail CORS.
+    return new Response(JSON.stringify({ url: authUrl.toString() }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error starting Google Ads OAuth:", error);
