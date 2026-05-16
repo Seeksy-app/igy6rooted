@@ -60,16 +60,18 @@ serve(async (req) => {
     // Validate redirect_uri against allowlist
     const appUrl = supabaseUrl.replace(/\/functions\/.*/, "");
     const allowedOrigins = [appUrl, "http://localhost:5173", "http://localhost:8080"];
+    const allowedHostSuffixes = [".lovable.app", ".lovable.dev", "igy6rooted.com"];
     const redirectOrigin = new URL(redirectUri).origin;
-    if (!allowedOrigins.some(o => redirectOrigin.startsWith(o))) {
-      // Also allow the published app domain
-      const isLovableApp = redirectOrigin.endsWith(".lovable.app");
-      if (!isLovableApp) {
-        return new Response(JSON.stringify({ error: "Invalid redirect_uri" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    const redirectHost = new URL(redirectUri).hostname;
+    const isAllowed =
+      allowedOrigins.some(o => redirectOrigin.startsWith(o)) ||
+      allowedHostSuffixes.some(s => redirectHost === s || redirectHost.endsWith(s));
+    if (!isAllowed) {
+      console.error("Rejected redirect_uri:", redirectUri);
+      return new Response(JSON.stringify({ error: "Invalid redirect_uri", got: redirectUri }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Verify user is org member
