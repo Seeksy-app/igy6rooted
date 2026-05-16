@@ -21,10 +21,11 @@ interface Integration {
   name: string;
   description: string;
   category: string;
-  status: "connected" | "pending" | "disconnected" | "coming_soon";
+  status: "connected" | "manual" | "pending" | "disconnected" | "coming_soon";
   icon: string;
   configPath?: string;
   lastSync?: string;
+  actionLabel?: string;
 }
 
 export default function IntegrationsPage() {
@@ -33,18 +34,29 @@ export default function IntegrationsPage() {
   const queryClient = useQueryClient();
   const isAdmin = userRole === "admin";
   const [testing, setTesting] = useState<string | null>(null);
+  const [manualConnections, setManualConnections] = useState<Record<string, boolean>>({});
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Handle OAuth callback results
   useEffect(() => {
     const jobberConnected = searchParams.get('jobber_connected');
     const jobberError = searchParams.get('jobber_error');
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
     if (jobberConnected === 'true') {
       toast({ title: "Jobber Connected!", description: "Your Jobber account has been successfully connected." });
       queryClient.invalidateQueries({ queryKey: ["jobber-connection"] });
       setSearchParams({});
     } else if (jobberError) {
       toast({ variant: "destructive", title: "Connection Failed", description: jobberError });
+      setSearchParams({});
+    } else if (success) {
+      const label = success === "google_ads_connected" ? "Google Ads" : success === "meta_ads_connected" ? "Meta Ads" : "Integration";
+      toast({ title: `${label} Connected!`, description: "The account was connected successfully." });
+      queryClient.invalidateQueries({ queryKey: ["ad-accounts"] });
+      setSearchParams({});
+    } else if (error) {
+      toast({ variant: "destructive", title: "Connection Failed", description: error.replace(/_/g, " ") });
       setSearchParams({});
     }
   }, [searchParams, setSearchParams, toast, queryClient]);
@@ -92,7 +104,7 @@ export default function IntegrationsPage() {
   const googleAdsConnection = adAccounts?.find(a => a.provider === "google_ads");
   const metaAdsConnection = adAccounts?.find(a => a.provider === "meta_ads");
 
-  const startOAuth = async (provider: string, path: string) => {
+  const startOAuth = async (provider: string, path: string, redirectPath = "/integrations") => {
     if (!currentOrg) {
       toast({ variant: "destructive", title: "Error", description: "No organization selected." });
       return;
@@ -103,7 +115,7 @@ export default function IntegrationsPage() {
         toast({ variant: "destructive", title: "Error", description: "Please log in first." });
         return;
       }
-      const redirectUri = `${window.location.origin}/integrations`;
+      const redirectUri = `${window.location.origin}${redirectPath}`;
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${path}?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`,
         {
@@ -145,6 +157,13 @@ export default function IntegrationsPage() {
         const { data, error } = await supabase.functions.invoke("elevenlabs-conversation-token");
         if (error || !data?.token) throw new Error("Failed to get token");
         toast({ title: "Connection OK", description: "ElevenLabs API is responding." });
+      } else if (id === "google-business") {
+        const { data, error } = await supabase.functions.invoke("google-reviews");
+        if (error || data?.error) throw new Error(data?.detail || data?.error || error?.message || "Google Business Profile check failed");
+        setManualConnections((current) => ({ ...current, "google-business": true }));
+        toast({ title: "Google Business Profile OK", description: "Reviews and local profile data are responding." });
+      } else if (id === "google-analytics") {
+        toast({ title: "Google Analytics likely connected", description: "The GA4 tracking tag is installed manually on the site." });
       }
     } catch (error) {
       toast({ variant: "destructive", title: "Connection Failed", description: (error as Error).message });
@@ -163,19 +182,21 @@ export default function IntegrationsPage() {
   const integrations: Integration[] = [
     { id: "jobber", name: "Jobber", description: "Scheduling, jobs & client data", category: "Core", status: jobberConnection?.status === "connected" ? "connected" : jobberConnection ? "pending" : "disconnected", icon: "📋", configPath: "/integrations/jobber", lastSync: jobberConnection?.updated_at },
     { id: "elevenlabs", name: "ElevenLabs", description: "Conversational AI voice agent", category: "AI", status: "connected", icon: "🎙️" },
-    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews", category: "Marketing & Analytics", status: "coming_soon", icon: "🏪" },
+    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews via profile data", category: "Marketing & Analytics", status: manualConnections["google-business"] ? "manual" : "disconnected", icon: "🏪", actionLabel: "Check Profile" },
     { id: "google-ads", name: "Google Ads", description: "Ad performance & ROI tracking", category: "Marketing", status: getAdStatus(googleAdsConnection), icon: "🎯", lastSync: googleAdsConnection?.updated_at },
     { id: "meta-ads", name: "Meta Ads", description: "Facebook & Instagram campaigns", category: "Marketing", status: getAdStatus(metaAdsConnection), icon: "📱", lastSync: metaAdsConnection?.updated_at },
-    { id: "google-analytics", name: "Google Analytics", description: "Website & conversion tracking", category: "Marketing & Analytics", status: "coming_soon", icon: "📊" },
+    { id: "google-analytics", name: "Google Analytics", description: "GA4 tag installed manually", category: "Marketing & Analytics", status: "manual", icon: "📊", actionLabel: "Confirm" },
   ];
 
   const connectAction: Record<string, () => void> = {
     "jobber": () => startOAuth("jobber", "jobber-oauth-start"),
-    "google-ads": () => startOAuth("google-ads", "google-ads-oauth-start"),
-    "meta-ads": () => startOAuth("meta-ads", "meta-ads-oauth-start"),
+    "google-ads": () => startOAuth("google-ads", "google-ads-oauth-start", "/integrations/google-ads/callback"),
+    "meta-ads": () => startOAuth("meta-ads", "meta-ads-oauth-start", "/integrations/meta-ads/callback"),
+    "google-business": () => testConnection("google-business"),
+    "google-analytics": () => testConnection("google-analytics"),
   };
 
-  const connectedIntegrations = integrations.filter((integration) => integration.status === "connected");
+  const connectedIntegrations = integrations.filter((integration) => integration.status === "connected" || integration.status === "manual");
   const marketingAnalyticsIntegrations = integrations.filter((integration) => integration.status !== "connected");
 
   if (loadingJobber || loadingAdAccounts) {
@@ -257,6 +278,8 @@ function StatusBadge({ status }: { status: Integration["status"] }) {
   switch (status) {
     case "connected":
       return <Badge className="bg-success/15 text-success border-success/30 text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Connected</Badge>;
+    case "manual":
+      return <Badge className="bg-primary/15 text-primary border-primary/30 text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Likely Connected</Badge>;
     case "pending":
       return <Badge className="bg-warning/15 text-warning border-warning/30 text-xs"><AlertTriangle className="h-3 w-3 mr-1" />Action Needed</Badge>;
     case "disconnected":
@@ -273,7 +296,7 @@ function IntegrationCard({ integration, isAdmin, testing, onConnect, onTest }: {
   onConnect?: () => void;
   onTest: () => void;
 }) {
-  const { id, name, description, status, icon, lastSync, configPath } = integration;
+  const { id, name, description, status, icon, lastSync, configPath, actionLabel } = integration;
 
   return (
     <Card className={`transition-all hover:shadow-md ${status === "connected" ? "border-success/20" : ""}`}>
@@ -296,11 +319,11 @@ function IntegrationCard({ integration, isAdmin, testing, onConnect, onTest }: {
           </div>
         )}
 
-        {isAdmin && status === "connected" && (
+        {isAdmin && (status === "connected" || status === "manual") && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={onTest} disabled={testing === id}>
               {testing === id ? <Loader2 className="h-3 w-3 animate-spin" /> : <TestTube className="h-3 w-3 mr-1" />}
-              Test
+              {actionLabel || "Test"}
             </Button>
             {configPath && (
               <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
