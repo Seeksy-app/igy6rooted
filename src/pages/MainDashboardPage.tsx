@@ -166,7 +166,7 @@ export default function MainDashboardPage() {
       since.setDate(since.getDate() - 29);
       const { data } = await supabase
         .from("page_views")
-        .select("path, utm_source, session_id, created_at")
+        .select("path, utm_source, utm_campaign, session_id, created_at")
         .eq("org_id", currentOrg.id)
         .gte("created_at", since.toISOString())
         .limit(10000);
@@ -175,28 +175,49 @@ export default function MainDashboardPage() {
     enabled: !!currentOrg,
   });
 
-  // Build Services → Free Estimate → Thank You funnel, by source
+  // Funnel grouping: by source, by campaign, or source+campaign combo
+  const [funnelGroupBy, setFunnelGroupBy] = useState<"source" | "campaign" | "both">("source");
+
   const funnelData = useMemo(() => {
     const rows = pageViews || [];
-    // Group sessions by source (utm_source) into 3 buckets we care about
-    const bySource: Record<
+    const groups: Record<
       string,
-      { services: Set<string>; estimate: Set<string>; thankyou: Set<string> }
+      {
+        source: string;
+        campaign: string;
+        services: Set<string>;
+        estimate: Set<string>;
+        thankyou: Set<string>;
+      }
     > = {};
 
-    const bucketFor = (src: string) => {
-      if (!bySource[src]) {
-        bySource[src] = { services: new Set(), estimate: new Set(), thankyou: new Set() };
+    const keyFor = (src: string, camp: string) => {
+      if (funnelGroupBy === "source") return src;
+      if (funnelGroupBy === "campaign") return camp;
+      return `${src} • ${camp}`;
+    };
+
+    const bucketFor = (src: string, camp: string) => {
+      const k = keyFor(src, camp);
+      if (!groups[k]) {
+        groups[k] = {
+          source: src,
+          campaign: camp,
+          services: new Set(),
+          estimate: new Set(),
+          thankyou: new Set(),
+        };
       }
-      return bySource[src];
+      return groups[k];
     };
 
     for (const r of rows as any[]) {
       const sid = r.session_id || `anon-${r.created_at}`;
       const src = (r.utm_source || "direct/organic").toLowerCase();
+      const camp = (r.utm_campaign || "(none)").toLowerCase();
       const path = String(r.path || "");
-      const b = bucketFor(src);
-      const ball = bucketFor("ALL");
+      const b = bucketFor(src, camp);
+      const ball = bucketFor("ALL", "ALL");
       if (path.startsWith("/services")) {
         b.services.add(sid); ball.services.add(sid);
       }
@@ -208,17 +229,18 @@ export default function MainDashboardPage() {
       }
     }
 
-    const sources = Object.entries(bySource)
-      .map(([source, sets]) => ({
-        source,
+    return Object.entries(groups)
+      .map(([key, sets]) => ({
+        key,
+        source: sets.source,
+        campaign: sets.campaign,
         services: sets.services.size,
         estimate: sets.estimate.size,
         thankyou: sets.thankyou.size,
       }))
       .sort((a, b) => (b.services + b.estimate) - (a.services + a.estimate));
+  }, [pageViews, funnelGroupBy]);
 
-    return sources;
-  }, [pageViews]);
 
   const pageViewsTotal = pageViews?.length || 0;
 
@@ -388,12 +410,23 @@ export default function MainDashboardPage() {
       {/* Site Funnel: Services → Free Estimate → Thank You */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2 flex-wrap">
             <Filter className="h-4 w-4 text-primary" />
             Site Funnel — Services → Free Estimate → Submitted (Last 30d)
-            <span className="ml-auto text-[11px] font-normal text-muted-foreground">
-              {pageViewsTotal} page views tracked
-            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-[11px] font-normal text-muted-foreground">
+                {pageViewsTotal} page views
+              </span>
+              <select
+                value={funnelGroupBy}
+                onChange={(e) => setFunnelGroupBy(e.target.value as "source" | "campaign" | "both")}
+                className="text-[11px] font-normal border rounded px-2 py-1 bg-background"
+              >
+                <option value="source">By Source</option>
+                <option value="campaign">By Campaign</option>
+                <option value="both">Source + Campaign</option>
+              </select>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -406,7 +439,8 @@ export default function MainDashboardPage() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-muted-foreground border-b">
-                    <th className="py-2 pr-3">Source (utm_source)</th>
+                    {funnelGroupBy !== "campaign" && <th className="py-2 pr-3">Source</th>}
+                    {funnelGroupBy !== "source" && <th className="py-2 pr-3">Campaign</th>}
                     <th className="py-2 pr-3 text-right">Services</th>
                     <th className="py-2 pr-3 text-right">Free Estimate</th>
                     <th className="py-2 pr-3 text-right">Thank You</th>
@@ -420,8 +454,13 @@ export default function MainDashboardPage() {
                     const estToSub = row.estimate > 0 ? Math.round((row.thankyou / row.estimate) * 100) : 0;
                     const isAll = row.source === "ALL";
                     return (
-                      <tr key={row.source} className={`border-b last:border-0 ${isAll ? "font-semibold bg-muted/40" : ""}`}>
-                        <td className="py-2 pr-3 capitalize">{isAll ? "All sources" : row.source}</td>
+                      <tr key={row.key} className={`border-b last:border-0 ${isAll ? "font-semibold bg-muted/40" : ""}`}>
+                        {funnelGroupBy !== "campaign" && (
+                          <td className="py-2 pr-3 capitalize">{isAll ? "All" : row.source}</td>
+                        )}
+                        {funnelGroupBy !== "source" && (
+                          <td className="py-2 pr-3 capitalize">{isAll ? "All" : row.campaign}</td>
+                        )}
                         <td className="py-2 pr-3 text-right">{row.services}</td>
                         <td className="py-2 pr-3 text-right">{row.estimate}</td>
                         <td className="py-2 pr-3 text-right">{row.thankyou}</td>
@@ -433,7 +472,7 @@ export default function MainDashboardPage() {
                 </tbody>
               </table>
               <p className="text-[11px] text-muted-foreground mt-3">
-                Tag your ad URLs with <code>?utm_source=facebook</code> or <code>?utm_source=google</code> to split out paid traffic from organic.
+                Tag ad URLs with <code>?utm_source=facebook&amp;utm_campaign=services</code> or <code>?utm_source=google&amp;utm_campaign=tree-removal</code> to split out paid traffic by campaign.
               </p>
             </div>
           )}
