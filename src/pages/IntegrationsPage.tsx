@@ -180,19 +180,21 @@ export default function IntegrationsPage() {
   const integrations: Integration[] = [
     { id: "jobber", name: "Jobber", description: "Scheduling, jobs & client data", category: "Core", status: jobberConnection?.status === "connected" ? "connected" : jobberConnection ? "pending" : "disconnected", icon: "📋", configPath: "/integrations/jobber", lastSync: jobberConnection?.updated_at },
     { id: "elevenlabs", name: "ElevenLabs", description: "Conversational AI voice agent", category: "AI", status: "connected", icon: "🎙️" },
-    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews", category: "Marketing & Analytics", status: "coming_soon", icon: "🏪" },
+    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews via profile data", category: "Marketing & Analytics", status: "manual", icon: "🏪", actionLabel: "Check Profile" },
     { id: "google-ads", name: "Google Ads", description: "Ad performance & ROI tracking", category: "Marketing", status: getAdStatus(googleAdsConnection), icon: "🎯", lastSync: googleAdsConnection?.updated_at },
     { id: "meta-ads", name: "Meta Ads", description: "Facebook & Instagram campaigns", category: "Marketing", status: getAdStatus(metaAdsConnection), icon: "📱", lastSync: metaAdsConnection?.updated_at },
-    { id: "google-analytics", name: "Google Analytics", description: "Website & conversion tracking", category: "Marketing & Analytics", status: "coming_soon", icon: "📊" },
+    { id: "google-analytics", name: "Google Analytics", description: "GA4 tag installed manually", category: "Marketing & Analytics", status: "manual", icon: "📊", actionLabel: "Confirm" },
   ];
 
   const connectAction: Record<string, () => void> = {
     "jobber": () => startOAuth("jobber", "jobber-oauth-start"),
-    "google-ads": () => startOAuth("google-ads", "google-ads-oauth-start"),
-    "meta-ads": () => startOAuth("meta-ads", "meta-ads-oauth-start"),
+    "google-ads": () => startOAuth("google-ads", "google-ads-oauth-start", "/integrations/google-ads/callback"),
+    "meta-ads": () => startOAuth("meta-ads", "meta-ads-oauth-start", "/integrations/meta-ads/callback"),
+    "google-business": () => testConnection("google-business"),
+    "google-analytics": () => testConnection("google-analytics"),
   };
 
-  const connectedIntegrations = integrations.filter((integration) => integration.status === "connected");
+  const connectedIntegrations = integrations.filter((integration) => integration.status === "connected" || integration.status === "manual");
   const marketingAnalyticsIntegrations = integrations.filter((integration) => integration.status !== "connected");
 
   if (loadingJobber || loadingAdAccounts) {
