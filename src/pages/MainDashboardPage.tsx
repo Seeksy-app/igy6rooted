@@ -112,6 +112,51 @@ export default function MainDashboardPage() {
     enabled: !!currentOrg,
   });
 
+  // Website form submissions (last 30 days) for trends chart + KPI
+  const { data: websiteSubs } = useQuery({
+    queryKey: ["dashboard-website-subs", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const since = new Date();
+      since.setDate(since.getDate() - 29);
+      const { data } = await supabase
+        .from("marketing_leads")
+        .select("created_at, source")
+        .eq("org_id", currentOrg.id)
+        .eq("channel", "website")
+        .gte("created_at", since.toISOString())
+        .order("created_at", { ascending: true });
+      return data || [];
+    },
+    enabled: !!currentOrg,
+  });
+
+  const websiteTrendData = useMemo(() => {
+    const buckets: Record<string, number> = {};
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      buckets[key] = 0;
+    }
+    (websiteSubs || []).forEach((row: any) => {
+      const key = String(row.created_at).slice(0, 10);
+      if (key in buckets) buckets[key] += 1;
+    });
+    return Object.entries(buckets).map(([date, count]) => ({
+      date: new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      submissions: count,
+    }));
+  }, [websiteSubs]);
+
+  const websiteSubsTotal = websiteSubs?.length || 0;
+  const websiteSubsLast7 = useMemo(() => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    return (websiteSubs || []).filter((r: any) => new Date(r.created_at) >= cutoff).length;
+  }, [websiteSubs]);
+
   const channelChartData = useMemo(() => {
     if (!metricsData?.length) return [];
     const byChannel: Record<string, { leads: number; spend: number; conversions: number }> = {};
