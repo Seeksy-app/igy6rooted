@@ -66,6 +66,7 @@ serve(async (req) => {
 
     const { org_id, redirect_uri } = stateData;
     const appReturnUrl = redirect_uri || `${defaultBaseUrl}/integrations`;
+    const oauthCallbackUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-ads-oauth-callback`;
     if (!org_id) {
       return new Response(null, {
         status: 302,
@@ -93,7 +94,7 @@ serve(async (req) => {
         client_secret: clientSecret,
         code,
         grant_type: "authorization_code",
-        redirect_uri: `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-ads-oauth-callback`,
+        redirect_uri: oauthCallbackUri,
       }),
     });
 
