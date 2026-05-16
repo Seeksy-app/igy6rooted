@@ -12,10 +12,10 @@ import {
   Bot, BarChart3, Search, Users,
   Loader2, Zap, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Send,
-  Sun, Mail, TrendingUp, Building2, LogOut,
+  Sun, Mail, TrendingUp, Building2, LogOut, FileText,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -112,6 +112,51 @@ export default function MainDashboardPage() {
     enabled: !!currentOrg,
   });
 
+  // Website form submissions (last 30 days) for trends chart + KPI
+  const { data: websiteSubs } = useQuery({
+    queryKey: ["dashboard-website-subs", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const since = new Date();
+      since.setDate(since.getDate() - 29);
+      const { data } = await supabase
+        .from("marketing_leads")
+        .select("created_at, source")
+        .eq("org_id", currentOrg.id)
+        .eq("channel", "website")
+        .gte("created_at", since.toISOString())
+        .order("created_at", { ascending: true });
+      return data || [];
+    },
+    enabled: !!currentOrg,
+  });
+
+  const websiteTrendData = useMemo(() => {
+    const buckets: Record<string, number> = {};
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      buckets[key] = 0;
+    }
+    (websiteSubs || []).forEach((row: any) => {
+      const key = String(row.created_at).slice(0, 10);
+      if (key in buckets) buckets[key] += 1;
+    });
+    return Object.entries(buckets).map(([date, count]) => ({
+      date: new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      submissions: count,
+    }));
+  }, [websiteSubs]);
+
+  const websiteSubsTotal = websiteSubs?.length || 0;
+  const websiteSubsLast7 = useMemo(() => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    return (websiteSubs || []).filter((r: any) => new Date(r.created_at) >= cutoff).length;
+  }, [websiteSubs]);
+
   const channelChartData = useMemo(() => {
     if (!metricsData?.length) return [];
     const byChannel: Record<string, { leads: number; spend: number; conversions: number }> = {};
@@ -205,11 +250,17 @@ export default function MainDashboardPage() {
 
       {/* Jobber KPI Strip */}
       {jSummary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <KpiCard icon={Users} label="Total Clients" value={jSummary.totalClients} />
           <KpiCard icon={ClipboardList} label="Open Requests" value={jSummary.openRequests} />
           <KpiCard icon={Briefcase} label="Active Jobs" value={jSummary.activeJobs} />
           <KpiCard icon={DollarSign} label="Revenue" value={jSummary.totalRevenue} isCurrency />
+          <KpiCard
+            icon={FileText}
+            label={`Form Subs (30d · ${websiteSubsLast7} last 7d)`}
+            value={websiteSubsTotal}
+            badge="Website"
+          />
         </div>
       )}
 
@@ -231,6 +282,43 @@ export default function MainDashboardPage() {
           </Link>
         ))}
       </div>
+
+      {/* Website Form Submissions Trend */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <FileText className="h-4 w-4 text-primary" />
+            Website Form Submissions — Last 30 Days
+            <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+              {websiteSubsTotal} total · {websiteSubsLast7} last 7d
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {websiteSubsTotal > 0 ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={websiteTrendData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={4} />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="submissions"
+                  stroke="hsl(142,30%,35%)"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: "hsl(142,30%,35%)" }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-xs text-muted-foreground py-8 text-center">
+              No website form submissions yet — they’ll appear here as visitors submit the Free Estimate form.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -354,7 +442,7 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, isCurrency }: { icon: any; label: string; value: number; isCurrency?: boolean }) {
+function KpiCard({ icon: Icon, label, value, isCurrency, badge = "Jobber" }: { icon: any; label: string; value: number; isCurrency?: boolean; badge?: string }) {
   const display = isCurrency
     ? `$${value.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
     : value.toLocaleString();
@@ -369,7 +457,7 @@ function KpiCard({ icon: Icon, label, value, isCurrency }: { icon: any; label: s
           <p className="text-lg font-bold text-foreground leading-none">{display}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
         </div>
-        <span className="ml-auto text-[9px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">Jobber</span>
+        <span className="ml-auto text-[9px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{badge}</span>
       </CardContent>
     </Card>
   );

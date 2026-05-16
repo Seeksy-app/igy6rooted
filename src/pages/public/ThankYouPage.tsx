@@ -8,10 +8,13 @@ import { trackPhoneClick } from "@/lib/gtag";
 const featured = BLOG_POSTS.slice(0, 3);
 
 export default function ThankYouPage() {
-  // Fire Free Estimate conversion on thank-you page load
+  // Fire Free Estimate conversion + Page view (1) conversion on thank-you page load
   useEffect(() => {
     window.gtag?.("event", "conversion", {
       send_to: "AW-16810284810/D12VCN_9oKkcEIqu4s8-",
+    });
+    window.gtag?.("event", "conversion", {
+      send_to: "AW-16810284810/5DxVCNqo5KocEIqu4s8-",
     });
   }, []);
   return (
