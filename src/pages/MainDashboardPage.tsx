@@ -175,28 +175,49 @@ export default function MainDashboardPage() {
     enabled: !!currentOrg,
   });
 
-  // Build Services → Free Estimate → Thank You funnel, by source
+  // Funnel grouping: by source, by campaign, or source+campaign combo
+  const [funnelGroupBy, setFunnelGroupBy] = useState<"source" | "campaign" | "both">("source");
+
   const funnelData = useMemo(() => {
     const rows = pageViews || [];
-    // Group sessions by source (utm_source) into 3 buckets we care about
-    const bySource: Record<
+    const groups: Record<
       string,
-      { services: Set<string>; estimate: Set<string>; thankyou: Set<string> }
+      {
+        source: string;
+        campaign: string;
+        services: Set<string>;
+        estimate: Set<string>;
+        thankyou: Set<string>;
+      }
     > = {};
 
-    const bucketFor = (src: string) => {
-      if (!bySource[src]) {
-        bySource[src] = { services: new Set(), estimate: new Set(), thankyou: new Set() };
+    const keyFor = (src: string, camp: string) => {
+      if (funnelGroupBy === "source") return src;
+      if (funnelGroupBy === "campaign") return camp;
+      return `${src} • ${camp}`;
+    };
+
+    const bucketFor = (src: string, camp: string) => {
+      const k = keyFor(src, camp);
+      if (!groups[k]) {
+        groups[k] = {
+          source: src,
+          campaign: camp,
+          services: new Set(),
+          estimate: new Set(),
+          thankyou: new Set(),
+        };
       }
-      return bySource[src];
+      return groups[k];
     };
 
     for (const r of rows as any[]) {
       const sid = r.session_id || `anon-${r.created_at}`;
       const src = (r.utm_source || "direct/organic").toLowerCase();
+      const camp = (r.utm_campaign || "(none)").toLowerCase();
       const path = String(r.path || "");
-      const b = bucketFor(src);
-      const ball = bucketFor("ALL");
+      const b = bucketFor(src, camp);
+      const ball = bucketFor("ALL", "ALL");
       if (path.startsWith("/services")) {
         b.services.add(sid); ball.services.add(sid);
       }
@@ -208,17 +229,18 @@ export default function MainDashboardPage() {
       }
     }
 
-    const sources = Object.entries(bySource)
-      .map(([source, sets]) => ({
-        source,
+    return Object.entries(groups)
+      .map(([key, sets]) => ({
+        key,
+        source: sets.source,
+        campaign: sets.campaign,
         services: sets.services.size,
         estimate: sets.estimate.size,
         thankyou: sets.thankyou.size,
       }))
       .sort((a, b) => (b.services + b.estimate) - (a.services + a.estimate));
+  }, [pageViews, funnelGroupBy]);
 
-    return sources;
-  }, [pageViews]);
 
   const pageViewsTotal = pageViews?.length || 0;
 
