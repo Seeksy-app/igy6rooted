@@ -101,7 +101,7 @@ export default function HomePage() {
     <>
       <SEOHead
         title="Tree Service & Stump Grinding in Niceville, FL | IGY6 Rooted"
-        description="Veteran-owned tree service in Niceville, Destin & Fort Walton Beach, FL. Tree removal, stump grinding, trimming, and 24/7 emergency response. Free estimates — (518) 265-0275."
+        description="Veteran-owned tree service in Niceville, Destin & Fort Walton Beach. Removal, stump grinding, trimming, 24/7 emergency. Free estimates."
         path="/"
         image="/og/home.jpg"
       />
