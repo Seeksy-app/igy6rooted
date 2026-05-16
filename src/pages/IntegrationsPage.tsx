@@ -34,6 +34,7 @@ export default function IntegrationsPage() {
   const queryClient = useQueryClient();
   const isAdmin = userRole === "admin";
   const [testing, setTesting] = useState<string | null>(null);
+  const [manualConnections, setManualConnections] = useState<Record<string, boolean>>({});
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Handle OAuth callback results
@@ -159,6 +160,7 @@ export default function IntegrationsPage() {
       } else if (id === "google-business") {
         const { data, error } = await supabase.functions.invoke("google-reviews");
         if (error || data?.error) throw new Error(data?.detail || data?.error || error?.message || "Google Business Profile check failed");
+        setManualConnections((current) => ({ ...current, "google-business": true }));
         toast({ title: "Google Business Profile OK", description: "Reviews and local profile data are responding." });
       } else if (id === "google-analytics") {
         toast({ title: "Google Analytics likely connected", description: "The GA4 tracking tag is installed manually on the site." });
@@ -180,7 +182,7 @@ export default function IntegrationsPage() {
   const integrations: Integration[] = [
     { id: "jobber", name: "Jobber", description: "Scheduling, jobs & client data", category: "Core", status: jobberConnection?.status === "connected" ? "connected" : jobberConnection ? "pending" : "disconnected", icon: "📋", configPath: "/integrations/jobber", lastSync: jobberConnection?.updated_at },
     { id: "elevenlabs", name: "ElevenLabs", description: "Conversational AI voice agent", category: "AI", status: "connected", icon: "🎙️" },
-    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews via profile data", category: "Marketing & Analytics", status: "disconnected", icon: "🏪" },
+    { id: "google-business", name: "Google Business Profile", description: "Local SEO & reviews via profile data", category: "Marketing & Analytics", status: manualConnections["google-business"] ? "manual" : "disconnected", icon: "🏪", actionLabel: "Check Profile" },
     { id: "google-ads", name: "Google Ads", description: "Ad performance & ROI tracking", category: "Marketing", status: getAdStatus(googleAdsConnection), icon: "🎯", lastSync: googleAdsConnection?.updated_at },
     { id: "meta-ads", name: "Meta Ads", description: "Facebook & Instagram campaigns", category: "Marketing", status: getAdStatus(metaAdsConnection), icon: "📱", lastSync: metaAdsConnection?.updated_at },
     { id: "google-analytics", name: "Google Analytics", description: "GA4 tag installed manually", category: "Marketing & Analytics", status: "manual", icon: "📊", actionLabel: "Confirm" },
