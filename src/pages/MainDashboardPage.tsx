@@ -385,6 +385,61 @@ export default function MainDashboardPage() {
         </CardContent>
       </Card>
 
+      {/* Site Funnel: Services → Free Estimate → Thank You */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Filter className="h-4 w-4 text-primary" />
+            Site Funnel — Services → Free Estimate → Submitted (Last 30d)
+            <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+              {pageViewsTotal} page views tracked
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {funnelData.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-8 text-center">
+              No page-view data yet. Visit the public site to start populating the funnel — it logs every page load.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b">
+                    <th className="py-2 pr-3">Source (utm_source)</th>
+                    <th className="py-2 pr-3 text-right">Services</th>
+                    <th className="py-2 pr-3 text-right">Free Estimate</th>
+                    <th className="py-2 pr-3 text-right">Thank You</th>
+                    <th className="py-2 pr-3 text-right">Svc → Est %</th>
+                    <th className="py-2 pr-3 text-right">Est → Subm %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {funnelData.map((row) => {
+                    const svcToEst = row.services > 0 ? Math.round((row.estimate / row.services) * 100) : 0;
+                    const estToSub = row.estimate > 0 ? Math.round((row.thankyou / row.estimate) * 100) : 0;
+                    const isAll = row.source === "ALL";
+                    return (
+                      <tr key={row.source} className={`border-b last:border-0 ${isAll ? "font-semibold bg-muted/40" : ""}`}>
+                        <td className="py-2 pr-3 capitalize">{isAll ? "All sources" : row.source}</td>
+                        <td className="py-2 pr-3 text-right">{row.services}</td>
+                        <td className="py-2 pr-3 text-right">{row.estimate}</td>
+                        <td className="py-2 pr-3 text-right">{row.thankyou}</td>
+                        <td className="py-2 pr-3 text-right">{svcToEst}%</td>
+                        <td className="py-2 pr-3 text-right">{estToSub}%</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Tag your ad URLs with <code>?utm_source=facebook</code> or <code>?utm_source=google</code> to split out paid traffic from organic.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Analytics Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
