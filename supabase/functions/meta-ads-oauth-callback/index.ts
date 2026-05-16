@@ -16,23 +16,20 @@ serve(async (req) => {
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
-    const redirectUri = url.searchParams.get("redirect_uri");
-
-    // Get the base URL for redirects
-    const baseUrl = url.searchParams.get("base_url") || url.origin.replace(/\/functions\/v1.*/, "");
+    const defaultBaseUrl = "https://www.igy6rooted.com";
 
     if (error) {
       console.error("OAuth error:", error);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=${encodeURIComponent(error)}` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=${encodeURIComponent(error)}` },
       });
     }
 
     if (!code || !state) {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=missing_params` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=missing_params` },
       });
     }
 
