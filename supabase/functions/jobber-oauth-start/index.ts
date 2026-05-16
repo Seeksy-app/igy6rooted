@@ -57,8 +57,13 @@ serve(async (req) => {
 
     // Validate redirect_uri
     const allowedOrigins = [supabaseUrl.replace(/\/functions\/.*/, ""), "http://localhost:5173", "http://localhost:8080"];
+    const allowedHostSuffixes = [".lovable.app", ".lovable.dev", "igy6rooted.com"];
     const redirectOrigin = new URL(redirectUri).origin;
-    if (!allowedOrigins.some(o => redirectOrigin.startsWith(o)) && !redirectOrigin.endsWith(".lovable.app")) {
+    const redirectHost = new URL(redirectUri).hostname;
+    const isAllowed =
+      allowedOrigins.some(o => redirectOrigin.startsWith(o)) ||
+      allowedHostSuffixes.some(s => redirectHost === s || redirectHost.endsWith(s));
+    if (!isAllowed) {
       throw new Error('Invalid redirect_uri');
     }
 
