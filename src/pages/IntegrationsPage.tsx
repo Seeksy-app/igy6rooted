@@ -21,10 +21,11 @@ interface Integration {
   name: string;
   description: string;
   category: string;
-  status: "connected" | "pending" | "disconnected" | "coming_soon";
+  status: "connected" | "manual" | "pending" | "disconnected" | "coming_soon";
   icon: string;
   configPath?: string;
   lastSync?: string;
+  actionLabel?: string;
 }
 
 export default function IntegrationsPage() {
@@ -39,12 +40,22 @@ export default function IntegrationsPage() {
   useEffect(() => {
     const jobberConnected = searchParams.get('jobber_connected');
     const jobberError = searchParams.get('jobber_error');
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
     if (jobberConnected === 'true') {
       toast({ title: "Jobber Connected!", description: "Your Jobber account has been successfully connected." });
       queryClient.invalidateQueries({ queryKey: ["jobber-connection"] });
       setSearchParams({});
     } else if (jobberError) {
       toast({ variant: "destructive", title: "Connection Failed", description: jobberError });
+      setSearchParams({});
+    } else if (success) {
+      const label = success === "google_ads_connected" ? "Google Ads" : success === "meta_ads_connected" ? "Meta Ads" : "Integration";
+      toast({ title: `${label} Connected!`, description: "The account was connected successfully." });
+      queryClient.invalidateQueries({ queryKey: ["ad-accounts"] });
+      setSearchParams({});
+    } else if (error) {
+      toast({ variant: "destructive", title: "Connection Failed", description: error.replace(/_/g, " ") });
       setSearchParams({});
     }
   }, [searchParams, setSearchParams, toast, queryClient]);
@@ -92,7 +103,7 @@ export default function IntegrationsPage() {
   const googleAdsConnection = adAccounts?.find(a => a.provider === "google_ads");
   const metaAdsConnection = adAccounts?.find(a => a.provider === "meta_ads");
 
-  const startOAuth = async (provider: string, path: string) => {
+  const startOAuth = async (provider: string, path: string, redirectPath = "/integrations") => {
     if (!currentOrg) {
       toast({ variant: "destructive", title: "Error", description: "No organization selected." });
       return;
@@ -103,7 +114,7 @@ export default function IntegrationsPage() {
         toast({ variant: "destructive", title: "Error", description: "Please log in first." });
         return;
       }
-      const redirectUri = `${window.location.origin}/integrations`;
+      const redirectUri = `${window.location.origin}${redirectPath}`;
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${path}?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`,
         {
@@ -145,6 +156,12 @@ export default function IntegrationsPage() {
         const { data, error } = await supabase.functions.invoke("elevenlabs-conversation-token");
         if (error || !data?.token) throw new Error("Failed to get token");
         toast({ title: "Connection OK", description: "ElevenLabs API is responding." });
+      } else if (id === "google-business") {
+        const { data, error } = await supabase.functions.invoke("google-reviews");
+        if (error || data?.error) throw new Error(data?.detail || data?.error || error?.message || "Google Business Profile check failed");
+        toast({ title: "Google Business Profile OK", description: "Reviews and local profile data are responding." });
+      } else if (id === "google-analytics") {
+        toast({ title: "Google Analytics likely connected", description: "The GA4 tracking tag is installed manually on the site." });
       }
     } catch (error) {
       toast({ variant: "destructive", title: "Connection Failed", description: (error as Error).message });
