@@ -16,23 +16,20 @@ serve(async (req) => {
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const error = url.searchParams.get("error");
-    const redirectUri = url.searchParams.get("redirect_uri");
-
-    // Get the base URL for redirects
-    const baseUrl = url.searchParams.get("base_url") || url.origin.replace(/\/functions\/v1.*/, "");
+    const defaultBaseUrl = "https://www.igy6rooted.com";
 
     if (error) {
       console.error("OAuth error:", error);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=${encodeURIComponent(error)}` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=${encodeURIComponent(error)}` },
       });
     }
 
     if (!code || !state) {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=missing_params` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=missing_params` },
       });
     }
 
@@ -55,21 +52,23 @@ serve(async (req) => {
       if (!stateData.ts || Date.now() - stateData.ts > 10 * 60 * 1000) {
         return new Response(null, {
           status: 302,
-          headers: { Location: `${baseUrl}/integrations?error=state_expired` },
+          headers: { Location: `${defaultBaseUrl}/integrations?error=state_expired` },
         });
       }
     } catch {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=invalid_state` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=invalid_state` },
       });
     }
 
-    const { org_id } = stateData;
+    const { org_id, redirect_uri } = stateData;
+    const appReturnUrl = redirect_uri || `${defaultBaseUrl}/integrations`;
+    const oauthCallbackUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/meta-ads-oauth-callback`;
     if (!org_id) {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=missing_org_id` },
+        headers: { Location: `${appReturnUrl}?error=missing_org_id` },
       });
     }
 
@@ -80,7 +79,7 @@ serve(async (req) => {
       console.error("Meta OAuth credentials not configured");
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=oauth_not_configured` },
+        headers: { Location: `${appReturnUrl}?error=oauth_not_configured` },
       });
     }
 
@@ -89,7 +88,7 @@ serve(async (req) => {
     tokenUrl.searchParams.set("client_id", appId);
     tokenUrl.searchParams.set("client_secret", appSecret);
     tokenUrl.searchParams.set("code", code);
-    tokenUrl.searchParams.set("redirect_uri", redirectUri || `${baseUrl}/integrations/meta-ads/callback`);
+    tokenUrl.searchParams.set("redirect_uri", oauthCallbackUri);
 
     const tokenResponse = await fetch(tokenUrl.toString());
     const tokenData = await tokenResponse.json();
@@ -98,7 +97,7 @@ serve(async (req) => {
       console.error("Token exchange failed:", tokenData);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=token_exchange_failed` },
+        headers: { Location: `${appReturnUrl}?error=token_exchange_failed` },
       });
     }
 
@@ -162,7 +161,7 @@ serve(async (req) => {
       console.error("Database error:", dbError);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=database_error` },
+        headers: { Location: `${appReturnUrl}?error=database_error` },
       });
     }
 
@@ -170,7 +169,7 @@ serve(async (req) => {
 
     return new Response(null, {
       status: 302,
-      headers: { Location: `${baseUrl}/integrations?success=meta_ads_connected` },
+      headers: { Location: `${appReturnUrl}?success=meta_ads_connected` },
     });
   } catch (error) {
     console.error("Error in Meta Ads OAuth callback:", error);

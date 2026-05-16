@@ -107,8 +107,10 @@ serve(async (req) => {
       "pages_show_list"
     ].join(",");
 
-    // Sign state with HMAC to prevent tampering
-    const statePayload = JSON.stringify({ org_id: orgId, provider: "meta_ads", ts: Date.now() });
+    const oauthCallbackUri = `${supabaseUrl}/functions/v1/meta-ads-oauth-callback`;
+
+    // Sign state with HMAC to prevent tampering and keep the app return URL out of the provider redirect URI
+    const statePayload = JSON.stringify({ org_id: orgId, provider: "meta_ads", redirect_uri: redirectUri, ts: Date.now() });
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey("raw", encoder.encode(Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
     const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(statePayload));
@@ -117,7 +119,7 @@ serve(async (req) => {
 
     const authUrl = new URL("https://www.facebook.com/v18.0/dialog/oauth");
     authUrl.searchParams.set("client_id", appId);
-    authUrl.searchParams.set("redirect_uri", redirectUri);
+    authUrl.searchParams.set("redirect_uri", oauthCallbackUri);
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set("scope", scopes);
     authUrl.searchParams.set("state", state);

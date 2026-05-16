@@ -104,7 +104,7 @@ export default function IntegrationsPage() {
   const googleAdsConnection = adAccounts?.find(a => a.provider === "google_ads");
   const metaAdsConnection = adAccounts?.find(a => a.provider === "meta_ads");
 
-  const startOAuth = async (provider: string, path: string, redirectPath = "/integrations") => {
+  const startOAuth = async (path: string) => {
     if (!currentOrg) {
       toast({ variant: "destructive", title: "Error", description: "No organization selected." });
       return;
@@ -115,7 +115,7 @@ export default function IntegrationsPage() {
         toast({ variant: "destructive", title: "Error", description: "Please log in first." });
         return;
       }
-      const redirectUri = `${window.location.origin}${redirectPath}`;
+      const redirectUri = `${window.location.origin}/integrations`;
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${path}?org_id=${currentOrg.id}&redirect_uri=${encodeURIComponent(redirectUri)}`,
         {
@@ -189,9 +189,9 @@ export default function IntegrationsPage() {
   ];
 
   const connectAction: Record<string, () => void> = {
-    "jobber": () => startOAuth("jobber", "jobber-oauth-start"),
-    "google-ads": () => startOAuth("google-ads", "google-ads-oauth-start", "/integrations/google-ads/callback"),
-    "meta-ads": () => startOAuth("meta-ads", "meta-ads-oauth-start", "/integrations/meta-ads/callback"),
+    "jobber": () => startOAuth("jobber-oauth-start"),
+    "google-ads": () => startOAuth("google-ads-oauth-start"),
+    "meta-ads": () => startOAuth("meta-ads-oauth-start"),
     "google-business": () => testConnection("google-business"),
     "google-analytics": () => testConnection("google-analytics"),
   };
@@ -616,12 +616,12 @@ function OAuthCredentialsCard() {
               onCopy={copy}
             />
             <div className="text-xs text-muted-foreground pt-2 border-t border-border">
-              <p className="font-medium text-foreground mb-1">Required redirect URIs (current origin):</p>
+              <p className="font-medium text-foreground mb-1">Required redirect URIs:</p>
               <code className="block bg-muted px-2 py-1 rounded text-[11px] break-all">
-                {window.location.origin}/integrations/google-ads/callback
+                {import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-ads-oauth-callback
               </code>
               <code className="block bg-muted px-2 py-1 rounded text-[11px] break-all mt-1">
-                {window.location.origin}/integrations/meta-ads/callback
+                {import.meta.env.VITE_SUPABASE_URL}/functions/v1/meta-ads-oauth-callback
               </code>
             </div>
           </>
