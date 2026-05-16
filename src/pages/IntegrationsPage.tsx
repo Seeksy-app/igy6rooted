@@ -276,6 +276,8 @@ function StatusBadge({ status }: { status: Integration["status"] }) {
   switch (status) {
     case "connected":
       return <Badge className="bg-success/15 text-success border-success/30 text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Connected</Badge>;
+    case "manual":
+      return <Badge className="bg-primary/15 text-primary border-primary/30 text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Likely Connected</Badge>;
     case "pending":
       return <Badge className="bg-warning/15 text-warning border-warning/30 text-xs"><AlertTriangle className="h-3 w-3 mr-1" />Action Needed</Badge>;
     case "disconnected":
@@ -292,7 +294,7 @@ function IntegrationCard({ integration, isAdmin, testing, onConnect, onTest }: {
   onConnect?: () => void;
   onTest: () => void;
 }) {
-  const { id, name, description, status, icon, lastSync, configPath } = integration;
+  const { id, name, description, status, icon, lastSync, configPath, actionLabel } = integration;
 
   return (
     <Card className={`transition-all hover:shadow-md ${status === "connected" ? "border-success/20" : ""}`}>
@@ -315,11 +317,11 @@ function IntegrationCard({ integration, isAdmin, testing, onConnect, onTest }: {
           </div>
         )}
 
-        {isAdmin && status === "connected" && (
+        {isAdmin && (status === "connected" || status === "manual") && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={onTest} disabled={testing === id}>
               {testing === id ? <Loader2 className="h-3 w-3 animate-spin" /> : <TestTube className="h-3 w-3 mr-1" />}
-              Test
+              {actionLabel || "Test"}
             </Button>
             {configPath && (
               <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
