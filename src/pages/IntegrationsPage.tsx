@@ -210,37 +210,39 @@ export default function IntegrationsPage() {
       {/* OAuth credentials info (admin only) */}
       {isAdmin && <OAuthCredentialsCard />}
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Connected Integrations</h2>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {connectedIntegrations.map((integration) => (
-            <IntegrationCard
-              key={integration.id}
-              integration={integration}
-              isAdmin={isAdmin}
-              testing={testing}
-              onConnect={connectAction[integration.id]}
-              onTest={() => testConnection(integration.id)}
-            />
-          ))}
-        </div>
-      </section>
+      <div className="grid gap-6 lg:grid-cols-5">
+        <section className="space-y-3 lg:col-span-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Connected Integrations</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {connectedIntegrations.map((integration) => (
+              <IntegrationCard
+                key={integration.id}
+                integration={integration}
+                isAdmin={isAdmin}
+                testing={testing}
+                onConnect={connectAction[integration.id]}
+                onTest={() => testConnection(integration.id)}
+              />
+            ))}
+          </div>
+        </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Marketing & Analytics</h2>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {marketingAnalyticsIntegrations.map((integration) => (
-            <IntegrationCard
-              key={integration.id}
-              integration={integration}
-              isAdmin={isAdmin}
-              testing={testing}
-              onConnect={connectAction[integration.id]}
-              onTest={() => testConnection(integration.id)}
-            />
-          ))}
-        </div>
-      </section>
+        <section className="space-y-3 lg:col-span-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Marketing & Analytics</h2>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {marketingAnalyticsIntegrations.map((integration) => (
+              <IntegrationCard
+                key={integration.id}
+                integration={integration}
+                isAdmin={isAdmin}
+                testing={testing}
+                onConnect={connectAction[integration.id]}
+                onTest={() => testConnection(integration.id)}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
 
       {/* Zapier Integration */}
       <ZapierIntegrationSection orgId={currentOrg?.id} />
