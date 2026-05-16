@@ -12,10 +12,10 @@ import {
   Bot, BarChart3, Search, Users,
   Loader2, Zap, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Send,
-  Sun, Mail, TrendingUp, Building2, LogOut,
+  Sun, Mail, TrendingUp, Building2, LogOut, FileText,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
 
 function getGreeting() {
   const h = new Date().getHours();
