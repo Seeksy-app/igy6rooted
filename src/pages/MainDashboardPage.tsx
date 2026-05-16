@@ -12,7 +12,7 @@ import {
   Bot, BarChart3, Search, Users,
   Loader2, Zap, Link2, MapPinned,
   DollarSign, ClipboardList, Briefcase, Send,
-  Sun, Mail, TrendingUp, Building2, LogOut, FileText,
+  Sun, Mail, TrendingUp, Building2, LogOut, FileText, Filter,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
@@ -156,6 +156,71 @@ export default function MainDashboardPage() {
     cutoff.setDate(cutoff.getDate() - 7);
     return (websiteSubs || []).filter((r: any) => new Date(r.created_at) >= cutoff).length;
   }, [websiteSubs]);
+
+  // Page views (last 30 days) for landing-page + funnel analysis
+  const { data: pageViews } = useQuery({
+    queryKey: ["dashboard-page-views", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const since = new Date();
+      since.setDate(since.getDate() - 29);
+      const { data } = await supabase
+        .from("page_views")
+        .select("path, utm_source, session_id, created_at")
+        .eq("org_id", currentOrg.id)
+        .gte("created_at", since.toISOString())
+        .limit(10000);
+      return data || [];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Build Services → Free Estimate → Thank You funnel, by source
+  const funnelData = useMemo(() => {
+    const rows = pageViews || [];
+    // Group sessions by source (utm_source) into 3 buckets we care about
+    const bySource: Record<
+      string,
+      { services: Set<string>; estimate: Set<string>; thankyou: Set<string> }
+    > = {};
+
+    const bucketFor = (src: string) => {
+      if (!bySource[src]) {
+        bySource[src] = { services: new Set(), estimate: new Set(), thankyou: new Set() };
+      }
+      return bySource[src];
+    };
+
+    for (const r of rows as any[]) {
+      const sid = r.session_id || `anon-${r.created_at}`;
+      const src = (r.utm_source || "direct/organic").toLowerCase();
+      const path = String(r.path || "");
+      const b = bucketFor(src);
+      const ball = bucketFor("ALL");
+      if (path.startsWith("/services")) {
+        b.services.add(sid); ball.services.add(sid);
+      }
+      if (path.startsWith("/free-estimate")) {
+        b.estimate.add(sid); ball.estimate.add(sid);
+      }
+      if (path.startsWith("/thank-you")) {
+        b.thankyou.add(sid); ball.thankyou.add(sid);
+      }
+    }
+
+    const sources = Object.entries(bySource)
+      .map(([source, sets]) => ({
+        source,
+        services: sets.services.size,
+        estimate: sets.estimate.size,
+        thankyou: sets.thankyou.size,
+      }))
+      .sort((a, b) => (b.services + b.estimate) - (a.services + a.estimate));
+
+    return sources;
+  }, [pageViews]);
+
+  const pageViewsTotal = pageViews?.length || 0;
 
   const channelChartData = useMemo(() => {
     if (!metricsData?.length) return [];
@@ -316,6 +381,61 @@ export default function MainDashboardPage() {
             <p className="text-xs text-muted-foreground py-8 text-center">
               No website form submissions yet — they’ll appear here as visitors submit the Free Estimate form.
             </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Site Funnel: Services → Free Estimate → Thank You */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Filter className="h-4 w-4 text-primary" />
+            Site Funnel — Services → Free Estimate → Submitted (Last 30d)
+            <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+              {pageViewsTotal} page views tracked
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {funnelData.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-8 text-center">
+              No page-view data yet. Visit the public site to start populating the funnel — it logs every page load.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b">
+                    <th className="py-2 pr-3">Source (utm_source)</th>
+                    <th className="py-2 pr-3 text-right">Services</th>
+                    <th className="py-2 pr-3 text-right">Free Estimate</th>
+                    <th className="py-2 pr-3 text-right">Thank You</th>
+                    <th className="py-2 pr-3 text-right">Svc → Est %</th>
+                    <th className="py-2 pr-3 text-right">Est → Subm %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {funnelData.map((row) => {
+                    const svcToEst = row.services > 0 ? Math.round((row.estimate / row.services) * 100) : 0;
+                    const estToSub = row.estimate > 0 ? Math.round((row.thankyou / row.estimate) * 100) : 0;
+                    const isAll = row.source === "ALL";
+                    return (
+                      <tr key={row.source} className={`border-b last:border-0 ${isAll ? "font-semibold bg-muted/40" : ""}`}>
+                        <td className="py-2 pr-3 capitalize">{isAll ? "All sources" : row.source}</td>
+                        <td className="py-2 pr-3 text-right">{row.services}</td>
+                        <td className="py-2 pr-3 text-right">{row.estimate}</td>
+                        <td className="py-2 pr-3 text-right">{row.thankyou}</td>
+                        <td className="py-2 pr-3 text-right">{svcToEst}%</td>
+                        <td className="py-2 pr-3 text-right">{estToSub}%</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Tag your ad URLs with <code>?utm_source=facebook</code> or <code>?utm_source=google</code> to split out paid traffic from organic.
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -210,7 +210,44 @@ serve(async (req) => {
       );
     }
 
-    // Route handling
+    // Handle public page view logging (anonymous, no auth)
+    if (action === "log_page_view") {
+      const { path: pagePath, referrer, user_agent, session_id, utm_source, utm_medium, utm_campaign } = body;
+
+      if (!pagePath || typeof pagePath !== "string" || pagePath.length > 500) {
+        return new Response(
+          JSON.stringify({ error: "Invalid path" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+
+      const { data: orgs } = await supabase
+        .from("orgs")
+        .select("id, created_at")
+        .order("created_at", { ascending: true })
+        .limit(1);
+      const defaultOrgId = orgs?.[0]?.id;
+      if (!defaultOrgId) {
+        return new Response(JSON.stringify({ status: "ok" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      await supabase.from("page_views").insert({
+        org_id: defaultOrgId,
+        path: pagePath.slice(0, 500),
+        referrer: referrer ? String(referrer).slice(0, 500) : null,
+        user_agent: user_agent ? String(user_agent).slice(0, 500) : null,
+        session_id: session_id ? String(session_id).slice(0, 100) : null,
+        utm_source: utm_source ? String(utm_source).slice(0, 100) : null,
+        utm_medium: utm_medium ? String(utm_medium).slice(0, 100) : null,
+        utm_campaign: utm_campaign ? String(utm_campaign).slice(0, 100) : null,
+      });
+
+      return new Response(JSON.stringify({ status: "ok" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     switch (path) {
       case "/health": {
         // Health check - works even without integration service configured
