@@ -166,7 +166,7 @@ export default function MainDashboardPage() {
       since.setDate(since.getDate() - 29);
       const { data } = await supabase
         .from("page_views")
-        .select("path, utm_source, session_id, created_at")
+        .select("path, utm_source, utm_campaign, session_id, created_at")
         .eq("org_id", currentOrg.id)
         .gte("created_at", since.toISOString())
         .limit(10000);
