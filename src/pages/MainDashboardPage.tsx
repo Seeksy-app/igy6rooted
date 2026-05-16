@@ -242,7 +242,55 @@ export default function MainDashboardPage() {
   }, [pageViews, funnelGroupBy]);
 
 
+  // Top Landing Pages: first path per session + downstream conversion rates
+  const landingPagesData = useMemo(() => {
+    const rows = (pageViews || []) as any[];
+    // Sort ascending by time so first row per session = landing
+    const sorted = [...rows].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    // session -> { landing, hitEstimate, hitThankYou }
+    const sessions: Record<
+      string,
+      { landing: string; estimate: boolean; thankyou: boolean }
+    > = {};
+    for (const r of sorted) {
+      const sid = r.session_id || `anon-${r.created_at}`;
+      const path = String(r.path || "/");
+      if (!sessions[sid]) {
+        sessions[sid] = { landing: path, estimate: false, thankyou: false };
+      }
+      if (path.startsWith("/free-estimate")) sessions[sid].estimate = true;
+      if (path.startsWith("/thank-you")) sessions[sid].thankyou = true;
+    }
+    // Group sessions by landing path
+    const byLanding: Record<
+      string,
+      { visits: number; estimate: number; thankyou: number }
+    > = {};
+    for (const s of Object.values(sessions)) {
+      if (!byLanding[s.landing]) {
+        byLanding[s.landing] = { visits: 0, estimate: 0, thankyou: 0 };
+      }
+      byLanding[s.landing].visits += 1;
+      if (s.estimate) byLanding[s.landing].estimate += 1;
+      if (s.thankyou) byLanding[s.landing].thankyou += 1;
+    }
+    return Object.entries(byLanding)
+      .map(([path, v]) => ({
+        path,
+        visits: v.visits,
+        estimate: v.estimate,
+        thankyou: v.thankyou,
+        estPct: v.visits > 0 ? Math.round((v.estimate / v.visits) * 100) : 0,
+        subPct: v.visits > 0 ? Math.round((v.thankyou / v.visits) * 100) : 0,
+      }))
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 10);
+  }, [pageViews]);
+
   const pageViewsTotal = pageViews?.length || 0;
+
 
   const channelChartData = useMemo(() => {
     if (!metricsData?.length) return [];
