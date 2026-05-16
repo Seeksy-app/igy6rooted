@@ -204,11 +204,14 @@ export default function BlogPostPage() {
     "@type": "Article",
     headline: dbPost.title,
     description: dbPost.excerpt || "",
+    url: `https://igy6rooted.com/blog/${dbPost.slug}`,
+    image: heroImage || undefined,
+    datePublished: dbPost.published_at || undefined,
     author: { "@type": "Organization", name: "IGY6 Rooted" },
     publisher: {
       "@type": "Organization",
       name: "IGY6 Rooted",
-      logo: { "@type": "ImageObject", url: "https://igy6rooted.lovable.app/logo.png" },
+      logo: { "@type": "ImageObject", url: "https://igy6rooted.com/favicon.png" },
     },
   };
 
@@ -219,10 +222,7 @@ export default function BlogPostPage() {
         description={dbPost.excerpt || ""}
         path={`/blog/${dbPost.slug}`}
         type="article"
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        jsonLd={articleSchema}
       />
 
       {/* Hero */}
