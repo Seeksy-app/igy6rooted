@@ -106,8 +106,10 @@ serve(async (req) => {
       "profile"
     ].join(" ");
 
-    // Sign state with HMAC to prevent tampering
-    const statePayload = JSON.stringify({ org_id: orgId, provider: "google_ads", ts: Date.now() });
+    const oauthCallbackUri = `${supabaseUrl}/functions/v1/google-ads-oauth-callback`;
+
+    // Sign state with HMAC to prevent tampering and keep the app return URL out of the provider redirect URI
+    const statePayload = JSON.stringify({ org_id: orgId, provider: "google_ads", redirect_uri: redirectUri, ts: Date.now() });
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey("raw", encoder.encode(Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
     const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(statePayload));
@@ -116,7 +118,7 @@ serve(async (req) => {
 
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     authUrl.searchParams.set("client_id", clientId);
-    authUrl.searchParams.set("redirect_uri", redirectUri);
+    authUrl.searchParams.set("redirect_uri", oauthCallbackUri);
     authUrl.searchParams.set("response_type", "code");
     authUrl.searchParams.set("scope", scopes);
     authUrl.searchParams.set("access_type", "offline");
