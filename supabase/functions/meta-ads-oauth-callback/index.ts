@@ -52,21 +52,23 @@ serve(async (req) => {
       if (!stateData.ts || Date.now() - stateData.ts > 10 * 60 * 1000) {
         return new Response(null, {
           status: 302,
-          headers: { Location: `${baseUrl}/integrations?error=state_expired` },
+          headers: { Location: `${defaultBaseUrl}/integrations?error=state_expired` },
         });
       }
     } catch {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=invalid_state` },
+        headers: { Location: `${defaultBaseUrl}/integrations?error=invalid_state` },
       });
     }
 
-    const { org_id } = stateData;
+    const { org_id, redirect_uri } = stateData;
+    const appReturnUrl = redirect_uri || `${defaultBaseUrl}/integrations`;
+    const oauthCallbackUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/meta-ads-oauth-callback`;
     if (!org_id) {
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=missing_org_id` },
+        headers: { Location: `${appReturnUrl}?error=missing_org_id` },
       });
     }
 
@@ -77,7 +79,7 @@ serve(async (req) => {
       console.error("Meta OAuth credentials not configured");
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=oauth_not_configured` },
+        headers: { Location: `${appReturnUrl}?error=oauth_not_configured` },
       });
     }
 
@@ -86,7 +88,7 @@ serve(async (req) => {
     tokenUrl.searchParams.set("client_id", appId);
     tokenUrl.searchParams.set("client_secret", appSecret);
     tokenUrl.searchParams.set("code", code);
-    tokenUrl.searchParams.set("redirect_uri", redirectUri || `${baseUrl}/integrations/meta-ads/callback`);
+    tokenUrl.searchParams.set("redirect_uri", oauthCallbackUri);
 
     const tokenResponse = await fetch(tokenUrl.toString());
     const tokenData = await tokenResponse.json();
