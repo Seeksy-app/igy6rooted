@@ -157,6 +157,71 @@ export default function MainDashboardPage() {
     return (websiteSubs || []).filter((r: any) => new Date(r.created_at) >= cutoff).length;
   }, [websiteSubs]);
 
+  // Page views (last 30 days) for landing-page + funnel analysis
+  const { data: pageViews } = useQuery({
+    queryKey: ["dashboard-page-views", currentOrg?.id],
+    queryFn: async () => {
+      if (!currentOrg) return [];
+      const since = new Date();
+      since.setDate(since.getDate() - 29);
+      const { data } = await supabase
+        .from("page_views")
+        .select("path, utm_source, session_id, created_at")
+        .eq("org_id", currentOrg.id)
+        .gte("created_at", since.toISOString())
+        .limit(10000);
+      return data || [];
+    },
+    enabled: !!currentOrg,
+  });
+
+  // Build Services → Free Estimate → Thank You funnel, by source
+  const funnelData = useMemo(() => {
+    const rows = pageViews || [];
+    // Group sessions by source (utm_source) into 3 buckets we care about
+    const bySource: Record<
+      string,
+      { services: Set<string>; estimate: Set<string>; thankyou: Set<string> }
+    > = {};
+
+    const bucketFor = (src: string) => {
+      if (!bySource[src]) {
+        bySource[src] = { services: new Set(), estimate: new Set(), thankyou: new Set() };
+      }
+      return bySource[src];
+    };
+
+    for (const r of rows as any[]) {
+      const sid = r.session_id || `anon-${r.created_at}`;
+      const src = (r.utm_source || "direct/organic").toLowerCase();
+      const path = String(r.path || "");
+      const b = bucketFor(src);
+      const ball = bucketFor("ALL");
+      if (path.startsWith("/services")) {
+        b.services.add(sid); ball.services.add(sid);
+      }
+      if (path.startsWith("/free-estimate")) {
+        b.estimate.add(sid); ball.estimate.add(sid);
+      }
+      if (path.startsWith("/thank-you")) {
+        b.thankyou.add(sid); ball.thankyou.add(sid);
+      }
+    }
+
+    const sources = Object.entries(bySource)
+      .map(([source, sets]) => ({
+        source,
+        services: sets.services.size,
+        estimate: sets.estimate.size,
+        thankyou: sets.thankyou.size,
+      }))
+      .sort((a, b) => (b.services + b.estimate) - (a.services + a.estimate));
+
+    return sources;
+  }, [pageViews]);
+
+  const pageViewsTotal = pageViews?.length || 0;
+
   const channelChartData = useMemo(() => {
     if (!metricsData?.length) return [];
     const byChannel: Record<string, { leads: number; spend: number; conversions: number }> = {};
