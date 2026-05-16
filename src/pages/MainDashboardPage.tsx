@@ -242,7 +242,55 @@ export default function MainDashboardPage() {
   }, [pageViews, funnelGroupBy]);
 
 
+  // Top Landing Pages: first path per session + downstream conversion rates
+  const landingPagesData = useMemo(() => {
+    const rows = (pageViews || []) as any[];
+    // Sort ascending by time so first row per session = landing
+    const sorted = [...rows].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    // session -> { landing, hitEstimate, hitThankYou }
+    const sessions: Record<
+      string,
+      { landing: string; estimate: boolean; thankyou: boolean }
+    > = {};
+    for (const r of sorted) {
+      const sid = r.session_id || `anon-${r.created_at}`;
+      const path = String(r.path || "/");
+      if (!sessions[sid]) {
+        sessions[sid] = { landing: path, estimate: false, thankyou: false };
+      }
+      if (path.startsWith("/free-estimate")) sessions[sid].estimate = true;
+      if (path.startsWith("/thank-you")) sessions[sid].thankyou = true;
+    }
+    // Group sessions by landing path
+    const byLanding: Record<
+      string,
+      { visits: number; estimate: number; thankyou: number }
+    > = {};
+    for (const s of Object.values(sessions)) {
+      if (!byLanding[s.landing]) {
+        byLanding[s.landing] = { visits: 0, estimate: 0, thankyou: 0 };
+      }
+      byLanding[s.landing].visits += 1;
+      if (s.estimate) byLanding[s.landing].estimate += 1;
+      if (s.thankyou) byLanding[s.landing].thankyou += 1;
+    }
+    return Object.entries(byLanding)
+      .map(([path, v]) => ({
+        path,
+        visits: v.visits,
+        estimate: v.estimate,
+        thankyou: v.thankyou,
+        estPct: v.visits > 0 ? Math.round((v.estimate / v.visits) * 100) : 0,
+        subPct: v.visits > 0 ? Math.round((v.thankyou / v.visits) * 100) : 0,
+      }))
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 10);
+  }, [pageViews]);
+
   const pageViewsTotal = pageViews?.length || 0;
+
 
   const channelChartData = useMemo(() => {
     if (!metricsData?.length) return [];
@@ -473,6 +521,58 @@ export default function MainDashboardPage() {
               </table>
               <p className="text-[11px] text-muted-foreground mt-3">
                 Tag ad URLs with <code>?utm_source=facebook&amp;utm_campaign=services</code> or <code>?utm_source=google&amp;utm_campaign=tree-removal</code> to split out paid traffic by campaign.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Landing Pages */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Filter className="h-4 w-4 text-primary" />
+            Top Landing Pages (Last 30d)
+            <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+              First page of each session • top 10
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {landingPagesData.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-8 text-center">
+              No landing page data yet. Visit the public site to start populating this list.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b">
+                    <th className="py-2 pr-3">Landing Page</th>
+                    <th className="py-2 pr-3 text-right">Sessions</th>
+                    <th className="py-2 pr-3 text-right">→ Estimate</th>
+                    <th className="py-2 pr-3 text-right">→ Submitted</th>
+                    <th className="py-2 pr-3 text-right">Est %</th>
+                    <th className="py-2 pr-3 text-right">Sub %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {landingPagesData.map((row) => (
+                    <tr key={row.path} className="border-b last:border-0">
+                      <td className="py-2 pr-3 font-mono text-[11px] truncate max-w-[260px]" title={row.path}>
+                        {row.path}
+                      </td>
+                      <td className="py-2 pr-3 text-right">{row.visits}</td>
+                      <td className="py-2 pr-3 text-right">{row.estimate}</td>
+                      <td className="py-2 pr-3 text-right">{row.thankyou}</td>
+                      <td className="py-2 pr-3 text-right">{row.estPct}%</td>
+                      <td className="py-2 pr-3 text-right">{row.subPct}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Conversion = % of sessions that landed on this page and later hit /free-estimate (Est) or /thank-you (Sub).
               </p>
             </div>
           )}
