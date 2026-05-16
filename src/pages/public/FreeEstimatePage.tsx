@@ -51,6 +51,31 @@ export default function FreeEstimatePage() {
         window.gtag?.("event", "conversion", {
           send_to: "AW-16810284810/D12VCN_9oKkcEIqu4s8-",
         });
+        // GA4-style event (also picked up if a GA4 tag is added later)
+        window.gtag?.("event", "form_submit", {
+          form_name: "free_estimate",
+          page_path: "/free-estimate",
+        });
+        // Persist to our database for an independent count
+        try {
+          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+          fetch(`${supabaseUrl}/functions/v1/integration-proxy`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({
+              action: "submit_website_lead",
+              source: "free_estimate_form",
+              page: "/free-estimate",
+              referrer: document.referrer || null,
+              user_agent: navigator.userAgent,
+            }),
+          }).catch((err) => console.warn("lead log failed", err));
+        } catch (err) {
+          console.warn("lead log error", err);
+        }
       }
     };
     window.addEventListener("message", onMessage);
