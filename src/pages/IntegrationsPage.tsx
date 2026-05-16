@@ -104,7 +104,7 @@ export default function IntegrationsPage() {
   const googleAdsConnection = adAccounts?.find(a => a.provider === "google_ads");
   const metaAdsConnection = adAccounts?.find(a => a.provider === "meta_ads");
 
-  const startOAuth = async (provider: string, path: string, redirectPath = "/integrations") => {
+  const startOAuth = async (path: string) => {
     if (!currentOrg) {
       toast({ variant: "destructive", title: "Error", description: "No organization selected." });
       return;
@@ -189,9 +189,9 @@ export default function IntegrationsPage() {
   ];
 
   const connectAction: Record<string, () => void> = {
-    "jobber": () => startOAuth("jobber", "jobber-oauth-start"),
-    "google-ads": () => startOAuth("google-ads", "google-ads-oauth-start"),
-    "meta-ads": () => startOAuth("meta-ads", "meta-ads-oauth-start"),
+    "jobber": () => startOAuth("jobber-oauth-start"),
+    "google-ads": () => startOAuth("google-ads-oauth-start"),
+    "meta-ads": () => startOAuth("meta-ads-oauth-start"),
     "google-business": () => testConnection("google-business"),
     "google-analytics": () => testConnection("google-analytics"),
   };
