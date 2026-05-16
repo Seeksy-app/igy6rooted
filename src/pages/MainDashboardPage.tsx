@@ -405,7 +405,7 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, isCurrency }: { icon: any; label: string; value: number; isCurrency?: boolean }) {
+function KpiCard({ icon: Icon, label, value, isCurrency, badge = "Jobber" }: { icon: any; label: string; value: number; isCurrency?: boolean; badge?: string }) {
   const display = isCurrency
     ? `$${value.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
     : value.toLocaleString();
@@ -420,7 +420,7 @@ function KpiCard({ icon: Icon, label, value, isCurrency }: { icon: any; label: s
           <p className="text-lg font-bold text-foreground leading-none">{display}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
         </div>
-        <span className="ml-auto text-[9px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">Jobber</span>
+        <span className="ml-auto text-[9px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{badge}</span>
       </CardContent>
     </Card>
   );
