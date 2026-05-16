@@ -61,13 +61,29 @@ export default function BlogPostPage() {
       "@type": "Article",
       headline: staticPost.title,
       description: staticPost.excerpt,
+      url: `https://igy6rooted.com/blog/${staticPost.slug}`,
+      image: staticPost.image,
       author: { "@type": "Organization", name: "IGY6 Rooted" },
       publisher: {
         "@type": "Organization",
         name: "IGY6 Rooted",
-        logo: { "@type": "ImageObject", url: "https://igy6rooted.lovable.app/logo.png" },
+        logo: { "@type": "ImageObject", url: "https://igy6rooted.com/favicon.png" },
       },
     };
+
+    const faqSchema = staticPost.faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: staticPost.faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }
+      : null;
+
+    const jsonLd = faqSchema ? [articleSchema, faqSchema] : articleSchema;
 
     return (
       <>
@@ -76,10 +92,7 @@ export default function BlogPostPage() {
           description={staticPost.excerpt}
           path={`/blog/${staticPost.slug}`}
           type="article"
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+          jsonLd={jsonLd}
         />
 
         {/* Hero */}
