@@ -8,8 +8,8 @@ export default function AboutPage() {
   return (
     <>
       <SEOHead
-        title="About Craig Orner | Veteran-Owned Tree Service in Niceville, FL"
-        description="Meet Craig Orner, USAF Reservist and founder of IGY6 Rooted. Veteran-owned tree service serving Niceville, Destin, and Fort Walton Beach with military precision since 2024."
+        title="About Craig Orner | IGY6 Rooted Tree Service, FL"
+        description="Meet Craig Orner, USAF Reservist and founder of IGY6 Rooted — veteran-owned tree service in Niceville, Destin & Fort Walton Beach, FL."
         path="/about"
         image="/og/about.jpg"
         jsonLd={{

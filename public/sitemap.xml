@@ -4,6 +4,7 @@
   <url><loc>https://igy6rooted.com/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://igy6rooted.com/services</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://igy6rooted.com/contact</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igy6rooted.com/free-estimate</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://igy6rooted.com/services/tree-removal</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://igy6rooted.com/services/tree-trimming</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://igy6rooted.com/services/tree-pruning</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -16,4 +17,17 @@
   <url><loc>https://igy6rooted.com/services/brush-removal</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://igy6rooted.com/services/lawn-care</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://igy6rooted.com/services/property-maintenance</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igy6rooted.com/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://igy6rooted.com/blog/fallen-trees-insurance-claims</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/stumps-attract-termites</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/trimming-extends-tree-lifespan</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/pruning-prevents-tree-failures</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/florida-named-storms-emergency-response</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/climbing-rigging-dangerous-jobs</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/hurricane-tree-debris-cleanup</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/hazard-tree-assessment-checklist</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/land-clearing-property-value</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/lot-clearing-new-construction-permits</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/brush-wildfire-defensible-space</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igy6rooted.com/blog/yard-debris-pest-habitat</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>

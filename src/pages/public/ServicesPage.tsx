@@ -11,7 +11,7 @@ export default function ServicesPage() {
     <>
       <SEOHead
         title="Tree Services in Niceville & Destin, FL | IGY6 Rooted"
-        description="Full-service tree care in Northwest Florida: removal, trimming, pruning, stump grinding, 24/7 emergency response, land & lot clearing. Free estimates — (518) 265-0275."
+        description="Full-service tree care in NW Florida: removal, trimming, pruning, stump grinding, 24/7 emergency, land & lot clearing. Free estimates."
         path="/services"
         image="/og/services.jpg"
         jsonLd={{

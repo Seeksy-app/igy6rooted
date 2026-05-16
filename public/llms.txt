@@ -1,0 +1,33 @@
+# IGY6 Rooted
+
+> Veteran-owned tree service in Niceville, Destin, and Fort Walton Beach, FL. Tree removal, stump grinding, trimming, pruning, 24/7 emergency response, land and lot clearing.
+
+IGY6 Rooted is a USAF-veteran-owned tree service company serving Northwest Florida. We provide free written estimates, are fully insured, and respond 24/7 to storm and emergency calls.
+
+## Pages
+
+- [Home](/): Overview of services, service area, and free-estimate CTA.
+- [About](/about): Founder Craig Orner (USAF Reservist) and the IGY6 Rooted story.
+- [Services](/services): Full catalog of tree, stump, and land services.
+- [Contact](/contact): Phone, email, hours, and embedded request form.
+- [Free Estimate](/free-estimate): Online request form for a free written estimate.
+- [Blog](/blog): Articles on tree care, storm prep, and Florida-specific guidance.
+
+## Services
+
+- [Tree Removal](/services/tree-removal)
+- [Tree Trimming](/services/tree-trimming)
+- [Tree Pruning](/services/tree-pruning)
+- [Stump Grinding](/services/stump-grinding)
+- [Emergency Tree Removal](/services/emergency-tree-removal)
+- [Debris Removal](/services/debris-removal)
+- [Land Clearing](/services/land-clearing)
+- [Lot Clearing](/services/lot-clearing)
+- [Brush Removal](/services/brush-removal)
+- [Lawn Care](/services/lawn-care)
+- [Property Maintenance](/services/property-maintenance)
+
+## Optional
+
+- [Privacy Policy](/privacy)
+- [Terms](/terms)

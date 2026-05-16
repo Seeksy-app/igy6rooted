@@ -29,7 +29,7 @@ export default function ContactPage() {
   return (
     <>
       <SEOHead
-        title="Contact IGY6 Rooted | Free Tree Service Estimate, Niceville FL"
+        title="Contact IGY6 Rooted | Free Tree Estimate, Niceville FL"
         description={`Contact IGY6 Rooted for a free tree service estimate in Northwest Florida. Call ${SITE_CONFIG.business.phone}. Open 7 days a week, 7am–9pm. Emergency services available.`}
         path="/contact"
         image="/og/contact.jpg"

@@ -65,6 +65,42 @@ export default function ArticlePage() {
   const content = page.page_content as PageContent;
   const publishedUrl = "https://igy6rooted.lovable.app";
 
+  const isServicePath = (page.route_path || "").startsWith("/services/");
+  const articleJsonLd = isServicePath
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        name: page.h1_override || page.page_name,
+        description: page.meta_description || "",
+        url: `https://igy6rooted.com${page.route_path}`,
+        provider: {
+          "@type": "LocalBusiness",
+          name: "IGY6 Rooted",
+          telephone: "+1-518-265-0275",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Niceville",
+            addressRegion: "FL",
+            postalCode: "32578",
+            addressCountry: "US",
+          },
+        },
+        areaServed: ["Niceville, FL", "Destin, FL", "Fort Walton Beach, FL"],
+      }
+    : {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: page.h1_override || page.page_name,
+        description: page.meta_description || "",
+        url: `https://igy6rooted.com${page.route_path}`,
+        author: { "@type": "Organization", name: "IGY6 Rooted" },
+        publisher: {
+          "@type": "Organization",
+          name: "IGY6 Rooted",
+          logo: { "@type": "ImageObject", url: "https://igy6rooted.com/favicon.png" },
+        },
+      };
+
   return (
     <>
       <SEOHead
@@ -79,6 +115,7 @@ export default function ArticlePage() {
         ogDescription={page.og_description || undefined}
         type="article"
         robots={page.robots || "index,follow"}
+        jsonLd={articleJsonLd}
       />
 
       {/* Hero */}
