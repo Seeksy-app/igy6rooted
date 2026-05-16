@@ -164,6 +164,52 @@ serve(async (req) => {
       );
     }
 
+    // Handle public website form submission (Free Estimate form on igy6rooted.com)
+    if (action === "submit_website_lead") {
+      const { source, page, user_agent, referrer } = body;
+
+      // Find the default org
+      const { data: orgs } = await supabase
+        .from("orgs")
+        .select("id, created_at")
+        .order("created_at", { ascending: true })
+        .limit(1);
+      const defaultOrgId = orgs?.[0]?.id;
+
+      if (!defaultOrgId) {
+        return new Response(
+          JSON.stringify({ error: "No organization configured" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+
+      const { error: insertError } = await supabase.from("marketing_leads").insert({
+        org_id: defaultOrgId,
+        channel: "website",
+        source: source || "free_estimate_form",
+        status: "new",
+        lead_score: 80,
+        notes: [
+          page ? `Page: ${page}` : null,
+          referrer ? `Referrer: ${referrer}` : null,
+          user_agent ? `UA: ${String(user_agent).slice(0, 200)}` : null,
+        ].filter(Boolean).join("\n"),
+      });
+
+      if (insertError) {
+        console.error("Failed to insert website lead:", insertError);
+        return new Response(
+          JSON.stringify({ error: "Failed to save lead" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ status: "ok" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Route handling
     switch (path) {
       case "/health": {
