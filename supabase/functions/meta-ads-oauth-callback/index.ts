@@ -97,7 +97,7 @@ serve(async (req) => {
       console.error("Token exchange failed:", tokenData);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=token_exchange_failed` },
+        headers: { Location: `${appReturnUrl}?error=token_exchange_failed` },
       });
     }
 
@@ -161,7 +161,7 @@ serve(async (req) => {
       console.error("Database error:", dbError);
       return new Response(null, {
         status: 302,
-        headers: { Location: `${baseUrl}/integrations?error=database_error` },
+        headers: { Location: `${appReturnUrl}?error=database_error` },
       });
     }
 
@@ -169,7 +169,7 @@ serve(async (req) => {
 
     return new Response(null, {
       status: 302,
-      headers: { Location: `${baseUrl}/integrations?success=meta_ads_connected` },
+      headers: { Location: `${appReturnUrl}?success=meta_ads_connected` },
     });
   } catch (error) {
     console.error("Error in Meta Ads OAuth callback:", error);
