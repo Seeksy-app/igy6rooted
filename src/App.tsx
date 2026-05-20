@@ -66,6 +66,7 @@ import SEODashboardPage from "@/pages/SEODashboardPage";
 import SEOOnboardingPage from "@/pages/SEOOnboardingPage";
 import LLMPresencePage from "@/pages/LLMPresencePage";
 import NotFound from "@/pages/NotFound";
+import CraigReportPage from "@/pages/CraigReportPage";
 
 // Admin pages
 import JobberIntegrationPage from "@/pages/admin/JobberIntegrationPage";
@@ -196,6 +197,7 @@ function AppRoutes() {
       <Route path="/free-estimate" element={<PublicLayout><FreeEstimatePage /></PublicLayout>} />
       <Route path="/privacy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
       <Route path="/terms" element={<PublicLayout><TermsPage /></PublicLayout>} />
+      <Route path="/craig-report" element={<CraigReportPage />} />
 
       {/* Auth routes */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
