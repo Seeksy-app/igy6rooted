@@ -197,6 +197,7 @@ function AppRoutes() {
       <Route path="/free-estimate" element={<PublicLayout><FreeEstimatePage /></PublicLayout>} />
       <Route path="/privacy" element={<PublicLayout><PrivacyPolicyPage /></PublicLayout>} />
       <Route path="/terms" element={<PublicLayout><TermsPage /></PublicLayout>} />
+      <Route path="/craig-report" element={<CraigReportPage />} />
 
       {/* Auth routes */}
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
