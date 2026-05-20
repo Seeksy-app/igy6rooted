@@ -66,6 +66,7 @@ import SEODashboardPage from "@/pages/SEODashboardPage";
 import SEOOnboardingPage from "@/pages/SEOOnboardingPage";
 import LLMPresencePage from "@/pages/LLMPresencePage";
 import NotFound from "@/pages/NotFound";
+import CraigReportPage from "@/pages/CraigReportPage";
 
 // Admin pages
 import JobberIntegrationPage from "@/pages/admin/JobberIntegrationPage";
