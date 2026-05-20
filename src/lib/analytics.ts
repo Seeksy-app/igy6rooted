@@ -58,6 +58,9 @@ export async function trackPageView(path: string) {
     page_title: document.title,
   });
 
+  // Meta Pixel — fire on SPA route changes
+  window.fbq?.("track", "PageView");
+
   // DB — fire-and-forget; we don't block on failures
   try {
     const utms = getUtms();
