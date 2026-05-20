@@ -16,6 +16,8 @@ export default function ThankYouPage() {
     window.gtag?.("event", "conversion", {
       send_to: "AW-16810284810/5DxVCNqo5KocEIqu4s8-",
     });
+    // Meta Pixel — Lead conversion
+    (window as unknown as { fbq?: (...a: unknown[]) => void }).fbq?.("track", "Lead");
   }, []);
   return (
     <>
