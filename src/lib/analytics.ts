@@ -12,6 +12,7 @@ declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
     dataLayer?: unknown[];
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
@@ -56,6 +57,9 @@ export async function trackPageView(path: string) {
     page_location: window.location.href,
     page_title: document.title,
   });
+
+  // Meta Pixel — fire on SPA route changes
+  window.fbq?.("track", "PageView");
 
   // DB — fire-and-forget; we don't block on failures
   try {
